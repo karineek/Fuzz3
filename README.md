@@ -7,3 +7,8 @@ EntFuzz is a fuzzer extension that utilises entropy on input/output of a SUT to 
 - Open location code: https://github.com/google/open-location-code
 - 
   
+
+## Evaluation at Scale
+
+We will use FuzzBench:
+- https://google.github.io/fuzzbench/
