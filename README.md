@@ -19,7 +19,8 @@ We will use FuzzBench:
 - Karine add more targets and seeds.
 - Karine add more projects.
 - Phil is doing the link up with the sliding window. 
+- Janine is modifying one_step to separate the mutator, executor and entropy calculation functions
 
 ## Emails
 * Phil: p.mcminn@sheffield.ac.uk
-* 
+* Janine: janine.obiri.25@ucl.ac.uk
