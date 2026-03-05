@@ -14,7 +14,7 @@ while true; do
   echo "Testing: $RANDOM_FILE"
 
   # 4. Run your test
-  python3 test.py <TODO-inputs> <TODO-outputs>
+  python3 one_step.py <TODO-inputs> <TODO-outputs>
 
   # 5. Check results
   if True; then
