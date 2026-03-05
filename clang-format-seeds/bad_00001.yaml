@@ -1,0 +1,4 @@
+---
+BasedOnStyle: LLVM
+IndentWidth: : 4  # ERROR: Double colon is invalid YAML
+InvalidKey: True   # ERROR: If this key doesn't exist in your version
