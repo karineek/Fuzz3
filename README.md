@@ -12,3 +12,10 @@ EntFuzz is a fuzzer extension that utilises entropy on input/output of a SUT to 
 
 We will use FuzzBench:
 - https://google.github.io/fuzzbench/
+
+
+## TODO
+
+- Karine add more targets and seeds.
+- Karine add more projects.
+- 
