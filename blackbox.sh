@@ -1,7 +1,7 @@
 while true; do
   # 1. Get a list of all APKs in the seeds folder into an array
   shopt -s nullglob
-  FILES=(seeds/*.apk)
+  FILES=(seeds/*)
   
   # 2. Check if the folder is empty
   if [ ${#FILES[@]} -eq 0 ]; then
