@@ -6,12 +6,17 @@ EntFuzz is a fuzzer extension that uses entropy on input/output of a SUT to guid
 
 - Google OLC Open location code (Plus codes): https://github.com/google/open-location-code
 
-  if prior work with OLC tried resolution 1,2,3,4..15
+  previously with OLC I tried resolution 1,2,3,4..15
   and 2000 samples drawn from GB post codes open_postcode_geo.csv.gz
   
 - Uber's H3 A Hexagonal Hierarchical Geospatial Indexing System: https://github.com/uber/h3
+  
+- The data directory has the locations (lat,long) from 
+   https://www.getthedata.com/downloads/open_postcode_geo.csv.zip
+  (3 august 2022)
+  
+  Perhaps to break OLC or H3 we will need to test edge cases, eg North or South Pole, invalid regions, numbers bigger/smaller than 360, positionns very close to valid places, linear interpolation between valid places.
 
--n
 
 ## Evaluation at Scale
 
