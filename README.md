@@ -5,8 +5,13 @@ EntFuzz is a fuzzer extension that uses entropy on input/output of a SUT to guid
 ## Demo Repositories
 
 - Google OLC Open location code (Plus codes): https://github.com/google/open-location-code
-- Uber's H3 A Hexagonal Hierarchical Geospatial Indexing System: https://github.com/uber/h3
+
+  if prior work with OLC tried resolution 1,2,3,4..15
+  and 2000 samples drawn from GB post codes open_postcode_geo.csv.gz
   
+- Uber's H3 A Hexagonal Hierarchical Geospatial Indexing System: https://github.com/uber/h3
+
+-n
 
 ## Evaluation at Scale
 
