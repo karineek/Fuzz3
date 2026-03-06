@@ -1,6 +1,6 @@
 # EntFuzz
 
-EntFuzz is a fuzzer extension that utilises entropy on input/output of a SUT to guide exploration.
+EntFuzz is a fuzzer extension that uses entropy on input/output of a SUT to guide exploration.
 
 ## Demo Repositories
 
@@ -20,7 +20,8 @@ We will use FuzzBench:
 - Karine add more projects.
 - Phil is doing the link up with the sliding window. 
 - Janine is modifying one_step to separate the mutator, executor and entropy calculation functions
-- everyone new name: HFuzz name used at ICSE last year (2025) https://conf.researchr.org/details/icse-2025/sbft-2025-papers/13/HFuzz-Havoc-Mode-Guided-Fuzzing
+- Everyone new name: HFuzz name used at ICSE last year (2025) https://conf.researchr.org/details/icse-2025/sbft-2025-papers/13/HFuzz-Havoc-Mode-Guided-Fuzzing
+- What about Fuzz3 ????
 
 ## Emails
 * Phil: p.mcminn@sheffield.ac.uk
