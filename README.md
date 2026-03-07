@@ -1,4 +1,4 @@
-# EntFuzz
+# HxFuzz
 
 EntFuzz is a fuzzer extension that uses entropy on input/output of a SUT to guide exploration.
 
@@ -8,6 +8,8 @@ EntFuzz is a fuzzer extension that uses entropy on input/output of a SUT to guid
 
   previously with OLC I tried resolution 1,2,3,4..15
   and 2000 samples drawn from GB post codes open_postcode_geo.csv.gz
+
+
   
 - Uber's H3 A Hexagonal Hierarchical Geospatial Indexing System: https://github.com/uber/h3
   
@@ -17,6 +19,7 @@ EntFuzz is a fuzzer extension that uses entropy on input/output of a SUT to guid
   
   Perhaps to break OLC or H3 we will need to test edge cases, eg North or South Pole, invalid regions, numbers bigger/smaller than 360, positionns very close to valid places, linear interpolation between valid places.
 
+Code: https://github.com/google/open-location-code 
 
 ## Evaluation at Scale
 
