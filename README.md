@@ -41,5 +41,5 @@ We will use FuzzBench:
 * Janine: janine.obiri.25@ucl.ac.uk
 * j.petke@ucl.ac.uk,
 * karine.even_mendoza@kcl.ac.uk,
-* "dif": Thanatad Songpetchmongkol <thanatad.songpetchmongkol.22@ucl.ac.uk>,
+* <strike> "dif": Thanatad Songpetchmongkol <thanatad.songpetchmongkol.22@ucl.ac.uk>,</strike>
 * w.langdon@cs.ucl.ac.uk
