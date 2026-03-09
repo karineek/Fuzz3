@@ -7,6 +7,7 @@ First, install the prerequisites:
 ```
 sudo apt update
 sudo apt install -y cmake make gcc libtool
+sudo apt install -y clang-format cmake-curses-gui lcov doxygen
 ```
 
 To install it:
@@ -51,4 +52,24 @@ Install the project...
 -- Installing: /usr/local/lib/cmake/h3/h3Targets-release.cmake
 ```
 
+Then you can install it via:
+```
+sudo make install
+```
+
 ## Executing the Code:
+
+Example in the original GitHub of H3:
+```
+user@node0:~/h3/build$ ./bin/latLngToCell --resolution 10 --latitude 40.689167 --longitude -74.044444 ;  ./bin/cellToBoundary --index 8a2a1072b59ffff
+8a2a1072b59ffff
+8a2a1072b59ffff
+{
+   40.690058601 -74.044151762
+   40.689907695 -74.045061792
+   40.689270936 -74.045341418
+   40.688785091 -74.044711031
+   40.688935993 -74.043801021
+   40.689572744 -74.043521377
+}
+```
