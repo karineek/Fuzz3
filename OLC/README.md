@@ -1,4 +1,4 @@
-# Fuzzing OLC
+# Fuzzing OLC (Java)
 
 **1.** Get the code:
 ```
