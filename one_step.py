@@ -2,8 +2,13 @@ from openlocationcode import openlocationcode
 import random
 from collections import Counter
 import math
+import sys
 
-n = 1024 * 1024
+try:
+    n = int(sys.argv[1])
+except ValueError:
+    sys.exit("Usage: python one_step.py [NUM_ITERATIONS]")
+
 func = openlocationcode.encode
 outputs = []
 inputs = []
