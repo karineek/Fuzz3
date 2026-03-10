@@ -1,4 +1,4 @@
-# HxFuzz
+# Fuzz3
 
 EntFuzz is a fuzzer extension that uses entropy on input/output of a SUT to guide exploration.
 
