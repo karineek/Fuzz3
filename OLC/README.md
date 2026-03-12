@@ -26,6 +26,7 @@ mkdir olc-test
 cd olc-test
 npm init -y
 npm install open-location-code
+npm i open-location-code
 ```
 
 **4.** Test it:
