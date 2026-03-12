@@ -1,0 +1,149 @@
+#!/usr/bin/env python3
+
+from pathlib import Path
+import argparse
+import random
+import shutil
+import subprocess
+import sys
+import tempfile
+import time
+
+# We need to add all import needed for the fuzzing
+import Fuzz3.executors
+import Fuzz3.mutators
+import Fuzz3.observers
+import Fuzz3.oracles
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("-i", "--input-dir", required=True)
+    parser.add_argument("-o", "--output-dir", required=True)
+    parser.add_argument("-c", "--crash-dir", required=True)
+
+    parser.add_argument("--executor", required=True)
+    parser.add_argument("--executor-args", default="")
+
+    parser.add_argument(
+        "-m",
+        "--mutators",
+        nargs="+",
+        default=[],
+        help="List of enabled mutator methods",
+    )
+
+    parser.add_argument(
+        "--observers",
+        nargs="+",
+        default=[],
+        help="List of enabled observer methods",
+    )
+
+    parser.add_argument(
+        "--oracles",
+        nargs="+",
+        default=[],
+        help="List of enabled oracles methods",
+    )
+
+
+    return parser.parse_args()
+
+# Call:  python3 blackbox.py   -i clang-format-seeds   -o out   -c crashes   --executor "clang_format_executor"   --executor-args="--dry-run"
+#  python3 blackbox.py   -i clang-format-seeds   -o out   -c crashes   --executor "clang_format_executor"   --executor-args "--dry-run --Werror"  --mutators bit_flip delete_line duplicate_line
+# Main of the blackbox fuzzer
+def main() -> int:
+    print(">> (Fuzz3) Parsing input arguments")
+    args = parse_args()
+
+    print(">> (Fuzz3) Start")
+    input_dir = Path(args.input_dir)
+    output_dir = Path(args.output_dir)
+    crash_dir = Path(args.crash_dir)
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    crash_dir.mkdir(parents=True, exist_ok=True)
+
+    # Phase 1: collect and validate seeds once
+    print(">> (Fuzz3) Copy good seeds into output folder")
+    files = [p for p in input_dir.glob("*") if p.is_file()]
+    if not files:
+        print(f"No Seeds found in {input_dir}/ folder. Exiting.")
+        return 1
+
+    # An file in input dir that passed the executor with 
+    # return 0, into output folder and else into crash folder
+    is_valid = False
+
+    # Find our executor in the gloabl space name
+    func_name = args.executor  		# This is the string "greet"
+    arguments = args.executor_args  	# This is the string "Alice"
+    func_to_run = getattr(Fuzz3.executors, func_name, None)
+
+    if not func_to_run:
+        print(f"No executor found {func_to_run} for {func_name}")
+        return 1
+
+    executor=func_to_run # Now we can start using our target wrapper to fuzz the SUT
+    for seed in files:
+        if executor(arguments, seed) == 0:
+           shutil.copy2(seed, output_dir / seed.name)
+           is_valid = True
+        else:
+           shutil.copy2(seed, crash_dir / seed.name)
+
+    if not is_valid:
+        print("No valid non-crashing seeds found. Exiting.")
+        return 1
+
+    # Build mutators list
+    mutators=[getattr(Fuzz3.mutators,n,None) for n in args.mutators if getattr(Fuzz3.mutators,n,None)]
+    observers=[getattr(Fuzz3.mutators,n,None) for n in args.observers if getattr(Fuzz3.observers,n,None)]
+    oracles=[getattr(Fuzz3.mutators,n,None) for n in args.oracles if getattr(Fuzz3.oracles,n,None)]
+
+    if not mutators:
+       print(f"No mutators list found from {args.mutators}")
+       return 1
+
+    # Phase 2: fuzz loop
+    print(">> (Fuzz3) Start Fuzzing")
+    while True:
+        files = [p for p in output_dir.glob("*") if p.is_file()]
+        seed = random.choice(files)
+        print(f">> (Fuzz3) Fuzzing seed: {seed}")
+
+        # Mutate
+        mutator = random.choice(mutators)
+        result = mutator(seed)
+        print(result)
+
+        #################### ORACLE 1+2 ####################
+        ## CRASH+HANGS ORACLES ##
+        # Execute the mutated file
+        tmp = tempfile.NamedTemporaryFile(delete=False)
+        if isinstance(result,str): 
+            Path(tmp.name).write_text(result)
+        else:
+            Path(tmp.name).write_bytes(result)
+
+        tmp_path = Path(tmp.name)
+        name = f"fuzz3_{int(time.time_ns())}"
+
+        if executor(arguments, tmp_path) == 0:
+            print(f">> (Fuzz3) Writing to output dir {name}")
+            shutil.copy2(tmp_path, output_dir / name)
+        else:
+            print(f">> (Fuzz3) Writing to crash dir {name}")
+            shutil.copy2(tmp_path, crash_dir / name)
+        tmp_path.unlink(missing_ok=True)
+        #################### END ORACLE 1+2 ####################
+
+        # Running Oracle - 3third oracle using data from Observers
+
+        exit(0)
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+
+
