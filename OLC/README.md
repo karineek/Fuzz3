@@ -1,4 +1,4 @@
-# Fuzzing OLC (Java)
+# Fuzzing OLC (JavaScript)
 
 **1.** Get the code:
 ```
@@ -11,6 +11,7 @@ cd open-location-code/
 sudo apt update
 sudo apt install -y nodejs npm
 node -v
+npm -v
 ```
 
   You should get something like this:
@@ -28,7 +29,7 @@ npm install open-location-code
 **4.** Test it:
 ```
 cat > test-pluscode.js <<'EOF'
-const OpenLocationCode = require('open-location-code').OpenLocationCode;
+const OpenLocationCode = require('./js/src/openlocationcode.js').OpenLocationCode;
 const olc = new OpenLocationCode();
 
 const full = olc.encode(51.5074, -0.1278);
