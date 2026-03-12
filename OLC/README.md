@@ -1,4 +1,4 @@
-# Fuzzing OLC (Java)
+# Fuzzing OLC (JavaScript)
 
 **1.** Get the code:
 ```
@@ -11,18 +11,22 @@ cd open-location-code/
 sudo apt update
 sudo apt install -y nodejs npm
 node -v
+npm -v
 ```
 
   You should get something like this:
   ```
-  v12.22.9
-  8.5.1
+  v10.19.0
+  6.14.4
   ```
 
 **3.** Build and install it:
 ```
-npm install
+mkdir olc-test
+cd olc-test
+npm init -y
 npm install open-location-code
+npm i open-location-code
 ```
 
 **4.** Test it:
@@ -52,4 +56,11 @@ Output should indeed be two numbers:
 user@node0:~/open-location-code$ node test-pluscode.js
 Plus code: 9C3XGV4C+XV
 Decoded center: 51.507437499999995 -0.12781249999999034
+```
+
+5. Blackbox fuzzing only
+
+Just run:
+```
+pip install openlocationcode
 ```
