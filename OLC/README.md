@@ -16,20 +16,22 @@ npm -v
 
   You should get something like this:
   ```
-  v12.22.9
-  8.5.1
+  v10.19.0
+  6.14.4
   ```
 
 **3.** Build and install it:
 ```
-npm install
+mkdir olc-test
+cd olc-test
+npm init -y
 npm install open-location-code
 ```
 
 **4.** Test it:
 ```
 cat > test-pluscode.js <<'EOF'
-const OpenLocationCode = require('./js/src/openlocationcode.js').OpenLocationCode;
+const OpenLocationCode = require('open-location-code').OpenLocationCode;
 const olc = new OpenLocationCode();
 
 const full = olc.encode(51.5074, -0.1278);
