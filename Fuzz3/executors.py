@@ -1,17 +1,76 @@
 from pathlib import Path
 import subprocess
 import shlex
+import sys
 
-def dummy_executor(arguments :str, seed: Path) -> int:
+## Dummy target
+def dummy_executor(arguments :str, seed: Path, timeout: float) -> tuple[int, str, str]:
     print(f"Running on {seed} with args {arguments}")
-    return 0
+    return 0, "TEST", "TEST"
 
-def clang_format_executor(arguments, seed: Path) -> int:
+## Target Clang-format
+def clang_format_executor(arguments, seed: Path, timeout: float) -> tuple[int, str, str]:
     arg_parsed = shlex.split(arguments)
     cmd = ["clang-format", *arg_parsed, str(seed)]
-    result = subprocess.run(
-        cmd,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+    try:
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+        return result.returncode, result.stdout.strip(), result.stderr.strip()
+
+    except subprocess.TimeoutExpired as e:
+            return 124, (e.stdout or "").strip(), (e.stderr or "timeout").strip()
+
+## Target OLC
+def olc_encode_executor(arguments :str, seed: Path, timeout: float) -> tuple[int, str, str]:
+    try:
+        s = seed.read_text().strip()
+        a, b = s.replace(",", " ").split()[:2]
+        lat = float(a)
+        lng = float(b)
+    except Exception as e:
+        return 1, "", str(e)
+
+    code = (
+        "from openlocationcode import openlocationcode as olc;"
+        f"print(olc.encode({lat},{lng}))"
     )
-    return result.returncode
+
+    try:
+        r = subprocess.run(
+            [sys.executable, "-c", code],
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+        return r.returncode, r.stdout, r.stderr
+    except subprocess.TimeoutExpired as e:
+        return 124, e.stdout or "", e.stderr or "timeout"
+
+
+# Target decode olc
+def olc_decode_executor(arguments :str, seed: Path, timeout: float) -> tuple[int, str, str]:
+    try:
+        code_in = seed.read_text().strip()
+    except Exception as e:
+        return 1, "", str(e)
+
+    code = (
+        "from openlocationcode import openlocationcode as olc;"
+        f'a=olc.decode("{code_in}");'
+        "print(a.latitudeCenter,a.longitudeCenter)"
+    )
+
+    try:
+        r = subprocess.run(
+            [sys.executable, "-c", code],
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+        return r.returncode, r.stdout, r.stderr
+    except subprocess.TimeoutExpired as e:
+        return 124, e.stdout or "", e.stderr or "timeout"

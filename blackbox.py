@@ -21,6 +21,8 @@ def parse_args():
     parser.add_argument("-i", "--input-dir", required=True)
     parser.add_argument("-o", "--output-dir", required=True)
     parser.add_argument("-c", "--crash-dir", required=True)
+    parser.add_argument("-t", "--timeout", type=float, default=50)
+    parser.add_argument("-n", "--iterations", type=int, default=50) 
 
     parser.add_argument("--executor", required=True)
     parser.add_argument("--executor-args", default="")
@@ -87,7 +89,7 @@ def main() -> int:
 
     executor=func_to_run # Now we can start using our target wrapper to fuzz the SUT
     for seed in files:
-        if executor(arguments, seed) == 0:
+        if executor(arguments, seed, args.timeout)[0] == 0:
            shutil.copy2(seed, output_dir / seed.name)
            is_valid = True
         else:
@@ -108,7 +110,7 @@ def main() -> int:
 
     # Phase 2: fuzz loop
     print(">> (Fuzz3) Start Fuzzing")
-    while True:
+    for _ in range(args.iterations):
         files = [p for p in output_dir.glob("*") if p.is_file()]
         seed = random.choice(files)
         print(f">> (Fuzz3) Fuzzing seed: {seed}")
@@ -116,13 +118,12 @@ def main() -> int:
         # Mutate
         mutator = random.choice(mutators)
         result = mutator(seed)
-        print(result)
 
         #################### ORACLE 1+2 ####################
         ## CRASH+HANGS ORACLES ##
         # Execute the mutated file
         tmp = tempfile.NamedTemporaryFile(delete=False)
-        if isinstance(result,str): 
+        if isinstance(result,str):
             Path(tmp.name).write_text(result)
         else:
             Path(tmp.name).write_bytes(result)
@@ -130,7 +131,8 @@ def main() -> int:
         tmp_path = Path(tmp.name)
         name = f"fuzz3_{int(time.time_ns())}"
 
-        if executor(arguments, tmp_path) == 0:
+        _rc, _out, _err = executor(arguments, tmp_path, args.timeout)
+        if _rc == 0:
             print(f">> (Fuzz3) Writing to output dir {name}")
             shutil.copy2(tmp_path, output_dir / name)
         else:
@@ -140,8 +142,8 @@ def main() -> int:
         #################### END ORACLE 1+2 ####################
 
         # Running Oracle - 3third oracle using data from Observers
+        # Here we will use _out and _err
 
-        exit(0)
 
 if __name__ == "__main__":
     raise SystemExit(main())
