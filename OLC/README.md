@@ -57,3 +57,10 @@ user@node0:~/open-location-code$ node test-pluscode.js
 Plus code: 9C3XGV4C+XV
 Decoded center: 51.507437499999995 -0.12781249999999034
 ```
+
+5. Blackbox fuzzing only
+
+Just run:
+```
+pip install openlocationcode
+```
