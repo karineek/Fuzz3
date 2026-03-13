@@ -217,6 +217,7 @@ def main() -> int:
 
         # Cleaning
         tmp_path.unlink(missing_ok=True)
+        print(" ")
 
 if __name__ == "__main__":
     raise SystemExit(main())
