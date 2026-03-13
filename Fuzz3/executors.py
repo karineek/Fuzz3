@@ -35,7 +35,7 @@ def olc_encode_executor(arguments :str, seed: Path, timeout: float) -> tuple[str
         lat = float(a)
         lng = float(b)
     except Exception as e:
-        return 1, "", str(e)
+        return "", 1, "", str(e)
 
     code = (
         "from openlocationcode import openlocationcode as olc;"
@@ -59,7 +59,7 @@ def olc_decode_executor(arguments :str, seed: Path, timeout: float) -> tuple[str
     try:
         code_in = seed.read_text().strip()
     except Exception as e:
-        return 1, "", str(e)
+        return "", 1, "", str(e)
 
     code = (
         "from openlocationcode import openlocationcode as olc;"
