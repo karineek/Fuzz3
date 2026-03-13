@@ -203,6 +203,10 @@ def main() -> int:
         # Running Oracle - 3third oracle using data from Observers
         # Here we will use _out and _err
 
+        # Observers
+        for obs in observers:
+            _map, _name = obs((_rc, _out, _err))    
+
 
 if __name__ == "__main__":
     raise SystemExit(main())
