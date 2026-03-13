@@ -1,7 +1,7 @@
 from pathlib import Path
 import random
 
-def olc_encode_generator(seedsno: int, outputfolder: Path) -> int:
+def olc_encoder_generator(seedsno: int, outputfolder: Path) -> int:
     outputfolder.mkdir(parents=True, exist_ok=True)
 
     total = 0
