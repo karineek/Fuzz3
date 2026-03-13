@@ -38,4 +38,4 @@ def entropy_oracle(seed, results_map: dict[str, tuple[str, str]]):
 
     entropy = sum(entropy_prob)
     entropy_input = sum(entropy_prob_inputs)
-    return -entropy_input, -entropy, len(distribution)
+    return -entropy_input, -entropy, len(distribution, n)
