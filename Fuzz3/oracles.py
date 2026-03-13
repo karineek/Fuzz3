@@ -10,6 +10,9 @@ def entropy_oracle(seed, results_map: dict[str, tuple[str, str]]):
     data = results_map["entropy_observer"]
     inputs = data[0]
     outputs = data[1]
+    n = len(inputs)
+    if (n !=  len(outputs)):
+        return 0,0,0 
 
     # Then the code as is!
     distribution = Counter(outputs)
