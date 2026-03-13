@@ -81,7 +81,7 @@ def main() -> int:
 
 
     
-    if (args.replay)
+    if (args.replay):
         # REPLAY
 
         # Find our executor in the gloabl space name
