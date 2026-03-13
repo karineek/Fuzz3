@@ -133,11 +133,11 @@ def main() -> int:
         print(f"No Seeds found in {input_dir}/ folder. Exiting.")
         return 1
 
-    # An file in input dir that passed the executor with 
-    # return 0, into output folder and else into crash folder
+    # A file in the input dir that passed the executor with 
+    # return 0, into the output folder and else into the crash folder
     is_valid = False
 
-    # Find our executor in the gloabl space name
+    # Find our executor in the global space name
     func_name = args.executor  		# This is the string "greet"
     arguments = args.executor_args  	# This is the string "Alice"
     func_to_run = getattr(Fuzz3.executors, func_name, None)
@@ -146,9 +146,20 @@ def main() -> int:
         print(f"No executor found {func_to_run} for {func_name}")
         return 1
 
+
+    # Build lists of fuzzing components
+    mutators=[getattr(Fuzz3.mutators,n,None) for n in args.mutators if getattr(Fuzz3.mutators,n,None)]
+    observers=[getattr(Fuzz3.observers,n,None) for n in args.observers if getattr(Fuzz3.observers,n,None)]
+    oracles=[getattr(Fuzz3.oracles,n,None) for n in args.oracles if getattr(Fuzz3.oracles,n,None)]   
     executor=func_to_run # Now we can start using our target wrapper to fuzz the SUT
+    
     for seed in files:
-        if executor(arguments, seed, args.timeout)[1] == 0:
+        _input, _rc, _out, _err = executor(arguments, seed, args.timeout)
+        for observer in observers:
+            _map_in, _map_out = observer(_input, (_rc, _out, _err)) 
+            results_map[observer.__name__] = (_map_in, _map_out)
+            
+        if _rc == 0:
            shutil.copy2(seed, output_dir / seed.name)
            is_valid = True
         else:
@@ -158,10 +169,7 @@ def main() -> int:
         print("No valid non-crashing seeds found. Exiting.")
         return 1
 
-    # Build mutators list
-    mutators=[getattr(Fuzz3.mutators,n,None) for n in args.mutators if getattr(Fuzz3.mutators,n,None)]
-    observers=[getattr(Fuzz3.observers,n,None) for n in args.observers if getattr(Fuzz3.observers,n,None)]
-    oracles=[getattr(Fuzz3.oracles,n,None) for n in args.oracles if getattr(Fuzz3.oracles,n,None)]
+
 
     if not mutators:
        print(f"No mutators list found from {args.mutators}")
