@@ -3,6 +3,8 @@ import subprocess
 import shlex
 import sys
 
+# List here all the SUTs
+
 ## Dummy target
 def dummy_executor(arguments :str, seed: Path, timeout: float) -> tuple[int, str, str]:
     print(f"Running on {seed} with args {arguments}")
