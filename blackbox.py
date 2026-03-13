@@ -9,7 +9,7 @@ import sys
 import tempfile
 import time
 
-# We need to add all import needed for the fuzzing
+# We need to add all imports needed for the fuzzing
 import Fuzz3.executors
 import Fuzz3.mutators
 import Fuzz3.observers
@@ -148,7 +148,7 @@ def main() -> int:
 
     executor=func_to_run # Now we can start using our target wrapper to fuzz the SUT
     for seed in files:
-        if executor(arguments, seed, args.timeout)[0] == 0:
+        if executor(arguments, seed, args.timeout)[1] == 0:
            shutil.copy2(seed, output_dir / seed.name)
            is_valid = True
         else:
@@ -191,7 +191,7 @@ def main() -> int:
         tmp_path = Path(tmp.name)
         name = f"fuzz3_{int(time.time_ns())}"
 
-        _rc, _out, _err = executor(arguments, tmp_path, args.timeout)
+        _input, _rc, _out, _err = executor(arguments, tmp_path, args.timeout)
         #################### END ORACLE 1+2 ####################
 
         # Running Oracle - third oracle using data from Observers
@@ -199,7 +199,7 @@ def main() -> int:
 
         # Observers
         for observer in observers:
-            _map = observer((_rc, _out, _err)) 
+            _map = observer(_input, (_rc, _out, _err)) 
             results_map[observer.__name__] = _map
 
         # Oracles
