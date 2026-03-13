@@ -1,5 +1,6 @@
 from pathlib import Path
 from collections import Counter
+import math
 
 def DummayOracle(seed, results_map: dict[str, list[str]]):
     for func_name, outputs in results_map.items():
