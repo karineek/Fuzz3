@@ -1,14 +1,16 @@
 from pathlib import Path
 
-def DummayOracle(results_map: dict[str, list[str]]):
+def DummayOracle(seed, results_map: dict[str, list[str]]):
     for func_name, outputs in results_map.items():
         print(f"Results for {func_name}: {outputs}")
     return 0
 
-def entropy_oracle(sample: tuple[int, str, str]) -> list[str]: 
+def entropy_oracle(seed, maps: dict[str, list[str]]):
+
 distribution = Counter(outputs)
 probabilities = []
 entropy_prob = []
+
 distribution_inputs = Counter(inputs)
 probabilities_inputs = []
 entropy_prob_inputs = []
