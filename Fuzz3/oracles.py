@@ -5,6 +5,7 @@ def DummayOracle(results_map: dict[str, list[str]]):
         print(f"Results for {func_name}: {outputs}")
     return 0
 
+def entropy_oracle(sample: tuple[int, str, str]) -> list[str]: 
 distribution = Counter(outputs)
 probabilities = []
 entropy_prob = []
