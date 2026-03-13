@@ -9,7 +9,7 @@ def olc_encoder_observer(sample: tuple[int, str, str]) -> list[str]:
     # We just keep the valid answer, or if empty, the error!
     sample_data = sample[1] if sample[1] else sample[2]
     olc_encoder_observer.outputs.append(sample_data)
-    return olc_encoder_observer.outputs, "olc_encoder_observer"
+    return olc_encoder_observer.outputs
 
 
 
