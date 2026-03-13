@@ -160,8 +160,8 @@ def main() -> int:
 
     # Build mutators list
     mutators=[getattr(Fuzz3.mutators,n,None) for n in args.mutators if getattr(Fuzz3.mutators,n,None)]
-    observers=[getattr(Fuzz3.mutators,n,None) for n in args.observers if getattr(Fuzz3.observers,n,None)]
-    oracles=[getattr(Fuzz3.mutators,n,None) for n in args.oracles if getattr(Fuzz3.oracles,n,None)]
+    observers=[getattr(Fuzz3.observers,n,None) for n in args.observers if getattr(Fuzz3.observers,n,None)]
+    oracles=[getattr(Fuzz3.oracles,n,None) for n in args.oracles if getattr(Fuzz3.oracles,n,None)]
 
     if not mutators:
        print(f"No mutators list found from {args.mutators}")
