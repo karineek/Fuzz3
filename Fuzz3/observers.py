@@ -1,7 +1,7 @@
 from pathlib import Path
 
 # Simple observer, just record the results for the third oracle
-def olc_encoder_observer(input: str, sample: tuple[int, str, str]) -> list[str]: 
+def entropy_observer(input: str, sample: tuple[int, str, str]) -> list[str]: 
     # Use the function name itself to store the attribute
     if not hasattr(olc_encoder_observer, "outputs"): 
         olc_encoder_observer.inputs = []
