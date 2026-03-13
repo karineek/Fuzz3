@@ -24,7 +24,7 @@ def parse_args():
     parser.add_argument("-c", "--crash-dir", required=True)
   
     # Post fuzzing - replay all seeds in input, output and crash folders
-    parser.add_argument("-r", "--replay", type=float, default=False) 
+    parser.add_argument("-r", "--replay", type=float, default=0) 
     
     # Main functinality: Fuzzing
     parser.add_argument("-t", "--timeout", type=float, default=50)
