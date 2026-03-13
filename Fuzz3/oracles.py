@@ -8,6 +8,7 @@ def DummayOracle(seed, results_map: dict[str, list[str]]):
 def entropy_oracle(seed, results_map: dict[str, tuple[str, str]]):
     data = results_map["shosos"]
     for func_name, outputs in results_map.items():
+        if func_name in []
         print(f"Results for {func_name}: {outputs}")
         
 distribution = Counter(outputs)
