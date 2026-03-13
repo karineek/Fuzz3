@@ -14,7 +14,7 @@ import Fuzz3.executors
 import Fuzz3.mutators
 import Fuzz3.observers
 import Fuzz3.oracles
-import Fuzz3.generator
+import Fuzz3.generators
 
 def parse_args():
     parser = argparse.ArgumentParser()
