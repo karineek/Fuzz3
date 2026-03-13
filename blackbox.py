@@ -168,6 +168,7 @@ def main() -> int:
        return 1
 
     # Phase 2: fuzz loop
+    results_map = {} # Here we store all observations, including coverage information (if we have a coverage oracle)
     print(">> (Fuzz3) Start Fuzzing")
     for _ in range(args.iterations):
         files = [p for p in output_dir.glob("*") if p.is_file()]
@@ -200,13 +201,18 @@ def main() -> int:
         tmp_path.unlink(missing_ok=True)
         #################### END ORACLE 1+2 ####################
 
-        # Running Oracle - 3third oracle using data from Observers
+        # Running Oracle - third oracle using data from Observers
         # Here we will use _out and _err
 
         # Observers
         for observer in observers:
-            _map, observer.__name__  = observer((_rc, _out, _err)) 
+            _map = observer((_rc, _out, _err)) 
+            results_map[observer.__name__] = _map
 
+        # Oracles
+        for oracle in oracles:
+            result = oracle(seed, results_map)
+            print(result) # Not sure yet what to do with it
 
 if __name__ == "__main__":
     raise SystemExit(main())
