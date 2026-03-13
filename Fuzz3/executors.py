@@ -6,12 +6,13 @@ import sys
 # List here all the SUTs
 
 ## Dummy target
-def dummy_executor(arguments :str, seed: Path, timeout: float) -> tuple[int, str, str]:
+def dummy_executor(arguments :str, seed: Path, timeout: float) -> tuple[str, int, str, str]:
     print(f"Running on {seed} with args {arguments}")
-    return 0, "TEST", "TEST"
+    return "TEST", 0, "TEST", "TEST"
 
 ## Target Clang-format
-def clang_format_executor(arguments, seed: Path, timeout: float) -> tuple[int, str, str]:
+def clang_format_executor(arguments, seed: Path, timeout: float) -> tuple[str, int, str, str]:
+    code_in = seed.read_text().strip()
     arg_parsed = shlex.split(arguments)
     cmd = ["clang-format", *arg_parsed, str(seed)]
     try:
@@ -21,13 +22,13 @@ def clang_format_executor(arguments, seed: Path, timeout: float) -> tuple[int, s
             text=True,
             timeout=timeout,
         )
-        return result.returncode, result.stdout.strip(), result.stderr.strip()
+        return code_in, result.returncode, result.stdout.strip(), result.stderr.strip()
 
     except subprocess.TimeoutExpired as e:
-            return 124, (e.stdout or "").strip(), (e.stderr or "timeout").strip()
+            return code_in, 124, (e.stdout or "").strip(), (e.stderr or "timeout").strip()
 
 ## Target OLC
-def olc_encode_executor(arguments :str, seed: Path, timeout: float) -> tuple[int, str, str]:
+def olc_encode_executor(arguments :str, seed: Path, timeout: float) -> tuple[str, int, str, str]:
     try:
         s = seed.read_text().strip()
         a, b = s.replace(",", " ").split()[:2]
@@ -48,13 +49,13 @@ def olc_encode_executor(arguments :str, seed: Path, timeout: float) -> tuple[int
             text=True,
             timeout=timeout,
         )
-        return r.returncode, r.stdout, r.stderr
+        return s, r.returncode, r.stdout, r.stderr
     except subprocess.TimeoutExpired as e:
-        return 124, e.stdout or "", e.stderr or "timeout"
+        return s, 124, e.stdout or "", e.stderr or "timeout"
 
 
 # Target decode olc
-def olc_decode_executor(arguments :str, seed: Path, timeout: float) -> tuple[int, str, str]:
+def olc_decode_executor(arguments :str, seed: Path, timeout: float) -> tuple[str, int, str, str]:
     try:
         code_in = seed.read_text().strip()
     except Exception as e:
@@ -73,6 +74,6 @@ def olc_decode_executor(arguments :str, seed: Path, timeout: float) -> tuple[int
             text=True,
             timeout=timeout,
         )
-        return r.returncode, r.stdout, r.stderr
+        return code_in, r.returncode, r.stdout, r.stderr
     except subprocess.TimeoutExpired as e:
-        return 124, e.stdout or "", e.stderr or "timeout"
+        return code_in, 124, e.stdout or "", e.stderr or "timeout"
