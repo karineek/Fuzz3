@@ -12,7 +12,11 @@ def dummy_executor(arguments :str, seed: Path, timeout: float) -> tuple[str, int
 
 ## Target Clang-format
 def clang_format_executor(arguments, seed: Path, timeout: float) -> tuple[str, int, str, str]:
-    code_in = seed.read_text().strip()
+    try:
+        code_in = seed.read_text(encoding="utf-8").strip()
+    except UnicodeDecodeError as e:
+        return "", 125, "", f"input decode error: {e}"
+
     arg_parsed = shlex.split(arguments)
     cmd = ["clang-format", *arg_parsed, str(seed)]
     try:
