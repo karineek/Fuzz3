@@ -74,6 +74,9 @@ def main() -> int:
     output_dir = Path(args.output_dir)
     crash_dir = Path(args.crash_dir)
 
+    shutil.rmtree(output_dir, ignore_errors=True) 
+    shutil.rmtree(crash_dir, ignore_errors=True)
+
     output_dir.mkdir(parents=True, exist_ok=True)
     crash_dir.mkdir(parents=True, exist_ok=True)
 
