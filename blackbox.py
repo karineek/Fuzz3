@@ -114,6 +114,7 @@ def main() -> int:
 
     
     # FUZZING:
+    results_map = {} # Here we store all observations, including coverage information (if we have a coverage oracle)
     shutil.rmtree(output_dir, ignore_errors=True) 
     shutil.rmtree(crash_dir, ignore_errors=True)
 
@@ -146,7 +147,6 @@ def main() -> int:
         print(f"No executor found {func_to_run} for {func_name}")
         return 1
 
-
     # Build lists of fuzzing components
     mutators=[getattr(Fuzz3.mutators,n,None) for n in args.mutators if getattr(Fuzz3.mutators,n,None)]
     observers=[getattr(Fuzz3.observers,n,None) for n in args.observers if getattr(Fuzz3.observers,n,None)]
@@ -176,7 +176,6 @@ def main() -> int:
        return 1
 
     # Phase 2: fuzz loop
-    results_map = {} # Here we store all observations, including coverage information (if we have a coverage oracle)
     print(">> (Fuzz3) Start Fuzzing")
     for _ in range(args.iterations):
         files = [p for p in output_dir.glob("*") if p.is_file()]
