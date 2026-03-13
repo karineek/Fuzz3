@@ -1,20 +1,19 @@
 from pathlib import Path
-import subprocess
-import shlex
-import sys
+import random
 
-def olc_encode_executor(seedsno :int, outputfolder: Path, timeout: float) -> int:
+def olc_encode_generator(seedsno: int, outputfolder: Path, timeout: float) -> int:
+    outputfolder.mkdir(parents=True, exist_ok=True)
+
+    start = time.time()
     total = 0
-    
-    # in a loop generate seeds
-    for i in range(n):
-        # check timeout
 
-        # generate
+    for i in range(seedsno):
         lat = random.randint(-90, 90)
         long = random.randint(-180, 180)
-        inputs.append((lat, long))
-        outputs.append(func(lat, long))
-        # if ok ++ to total
+
+        seed_path = outputfolder / f"fuzz3_olc_{i}.seed"
+        seed_path.write_text(f"{lat},{long}\n")
+
+        total += 1
 
     return total
