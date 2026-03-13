@@ -22,6 +22,11 @@ def parse_args():
     parser.add_argument("-i", "--input-dir", required=True)
     parser.add_argument("-o", "--output-dir", required=True)
     parser.add_argument("-c", "--crash-dir", required=True)
+  
+    # Post fuzzing - replay all seeds in input, output and crash folders
+    parser.add_argument("-r", "--replay", type=float, default=False) 
+    
+    # Main functinality: Fuzzing
     parser.add_argument("-t", "--timeout", type=float, default=50)
     parser.add_argument("-n", "--iterations", type=int, default=50) 
 
@@ -74,6 +79,41 @@ def main() -> int:
     output_dir = Path(args.output_dir)
     crash_dir = Path(args.crash_dir)
 
+
+    
+    if (args.replay)
+        # REPLAY
+
+        # Find our executor in the gloabl space name
+        func_name = args.executor  		# This is the string "greet"
+        arguments = args.executor_args  	# This is the string "Alice"
+        func_to_run = getattr(Fuzz3.executors, func_name, None)
+
+        executor=func_to_run # Now we can start using our target wrapper to fuzz the SUT
+
+        files = [p for p in input_dir.glob("*") if p.is_file()]
+        if files:
+            for seed in files:
+                print(f">> (Fuzz3, Reply) {seed}")
+                print(executor(arguments, seed, args.timeout))
+
+        files = [p for p in output_dir.glob("*") if p.is_file()]
+        if files:
+            for seed in files:
+                print(f">> (Fuzz3, Reply) {seed}")
+                print(executor(arguments, seed, args.timeout))
+
+        files = [p for p in crash_dir.glob("*") if p.is_file()]
+        if files:
+            for seed in files:
+                print(f">> (Fuzz3, Reply) {seed}")
+                print(executor(arguments, seed, args.timeout))
+            
+        return 0
+
+
+    
+    # FUZZING:
     shutil.rmtree(output_dir, ignore_errors=True) 
     shutil.rmtree(crash_dir, ignore_errors=True)
 
