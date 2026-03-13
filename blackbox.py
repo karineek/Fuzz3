@@ -204,8 +204,8 @@ def main() -> int:
         # Here we will use _out and _err
 
         # Observers
-        for obs in observers:
-            _map, _name = obs((_rc, _out, _err))    
+        for observer in observers:
+            _map, observer.__name__  = observer((_rc, _out, _err)) 
 
 
 if __name__ == "__main__":
