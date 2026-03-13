@@ -199,8 +199,8 @@ def main() -> int:
 
         # Observers
         for observer in observers:
-            _map = observer(_input, (_rc, _out, _err)) 
-            results_map[observer.__name__] = _map
+            _map_in, _map_out = observer(_input, (_rc, _out, _err)) 
+            results_map[observer.__name__] = (_map_in, _map_out)
 
         # Oracles
         for oracle in oracles:
