@@ -192,13 +192,6 @@ def main() -> int:
         name = f"fuzz3_{int(time.time_ns())}"
 
         _rc, _out, _err = executor(arguments, tmp_path, args.timeout)
-        if _rc == 0:
-            print(f">> (Fuzz3) Writing to output dir {name}")
-            shutil.copy2(tmp_path, output_dir / name)
-        else:
-            print(f">> (Fuzz3) Writing to crash dir {name}")
-            shutil.copy2(tmp_path, crash_dir / name)
-        tmp_path.unlink(missing_ok=True)
         #################### END ORACLE 1+2 ####################
 
         # Running Oracle - third oracle using data from Observers
@@ -211,10 +204,19 @@ def main() -> int:
 
         # Oracles
         for oracle in oracles:
-            result = oracle(seed, results_map)
+            result = oracle(tmp_path, results_map)
             print(result) # Not sure yet what to do with it
+
+        # Now check where the seed needs to go
+        if _rc == 0:
+            print(f">> (Fuzz3) Writing to output dir {name}")
+            shutil.copy2(tmp_path, output_dir / name)
+        else:
+            print(f">> (Fuzz3) Writing to crash dir {name}")
+            shutil.copy2(tmp_path, crash_dir / name)
+
+        # Cleaning
+        tmp_path.unlink(missing_ok=True)
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
-
