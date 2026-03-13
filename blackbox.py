@@ -35,6 +35,7 @@ def parse_args():
         default=[],
         help="List of enabled generators methods",
     )
+    parser.add_argument("-sn", "--seedsno", type=int, default=200)
     
     parser.add_argument(
         "-m",
@@ -78,7 +79,10 @@ def main() -> int:
 
     # Phase 1: collect and validate seeds once
     if args.generators:
-        print(">> (Fuzz3) Generate seeds into output folder")
+        generators=[getattr(Fuzz3.generators,n,None) for n in args.generators if getattr(Fuzz3.generators,n,None)]
+        for g in generators:
+            total=g(args.seedsno, input_dir)
+            print(f">> (Fuzz3) Generate {total} seeds into output folder")
     
     print(">> (Fuzz3) Copy good seeds into output folder")
     files = [p for p in input_dir.glob("*") if p.is_file()]
