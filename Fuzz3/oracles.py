@@ -5,8 +5,11 @@ def DummayOracle(seed, results_map: dict[str, list[str]]):
         print(f"Results for {func_name}: {outputs}")
     return 0
 
-def entropy_oracle(seed, maps: dict[str, list[str]]):
-
+def entropy_oracle(seed, results_map: dict[str, tuple[str, str]]):
+    data = results_map["shosos"]
+    for func_name, outputs in results_map.items():
+        print(f"Results for {func_name}: {outputs}")
+        
 distribution = Counter(outputs)
 probabilities = []
 entropy_prob = []
