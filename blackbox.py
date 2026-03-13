@@ -14,6 +14,7 @@ import Fuzz3.executors
 import Fuzz3.mutators
 import Fuzz3.observers
 import Fuzz3.oracles
+import Fuzz3.generator
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -27,6 +28,14 @@ def parse_args():
     parser.add_argument("--executor", required=True)
     parser.add_argument("--executor-args", default="")
 
+    parser.add_argument(
+        "-g",
+        "--generators",
+        nargs="+",
+        default=[],
+        help="List of enabled generators methods",
+    )
+    
     parser.add_argument(
         "-m",
         "--mutators",
@@ -68,6 +77,9 @@ def main() -> int:
     crash_dir.mkdir(parents=True, exist_ok=True)
 
     # Phase 1: collect and validate seeds once
+    if args.generators:
+        print(">> (Fuzz3) Generate seeds into output folder")
+    
     print(">> (Fuzz3) Copy good seeds into output folder")
     files = [p for p in input_dir.glob("*") if p.is_file()]
     if not files:
