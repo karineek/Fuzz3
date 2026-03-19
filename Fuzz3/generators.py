@@ -23,6 +23,9 @@ def olc_encoder_generator_legal(seedsno: int, outputfolder: Path) -> int:
 
 
 def olc_encoder_generator_illegal(seedsno: int, outputfolder: Path) -> int:
+    outputfolder.mkdir(parents=True, exist_ok=True)
+    
+    total = 0
     for i in range(seedsno):
         lat = random.randint(-1024, 1024)
         long = random.randint(-1024, 1024)
