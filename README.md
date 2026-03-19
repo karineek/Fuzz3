@@ -44,6 +44,53 @@ python3 blackbox.py   -i OLC/seeds_encoder/   -o out_olc   -c crashes_olc   --ex
 python3 blackbox.py   -i OLC/seeds_decoder/   -o out_olc_d   -c crashes_olc_d   --executor "olc_decode_executor"  --mutators bit_flip --generators olc_decode_generator --observers entropy_observer --oracles entropy_oracle
    ```
 
+Possible output:
+```
+>> (Fuzz3) Fuzzing seed: out_olc/fuzz3_olc_162.seed
+(7.302306551868582, 7.5820459851906, 207, 242)
+>> (Fuzz3) Writing to crash dir fuzz3_1773937800538520095
+ 
+>> (Fuzz3) Fuzzing seed: out_olc/fuzz3_olc_155.seed
+(7.310793088510061, 7.589381330748454, 208, 243)
+>> (Fuzz3) Writing to output dir fuzz3_1773937800541461205
+ 
+>> (Fuzz3) Fuzzing seed: out_olc/fuzz3_olc_167.seed
+(7.319234395479836, 7.596680882627089, 209, 244)
+>> (Fuzz3) Writing to output dir fuzz3_1773937800578597227
+ 
+>> (Fuzz3) Fuzzing seed: out_olc/fuzz3_olc_0.seed
+(7.301617181361808, 7.603944979801258, 210, 245)
+>> (Fuzz3) Writing to crash dir fuzz3_1773937800605264933
+ 
+>> (Fuzz3) Fuzzing seed: out_olc/fuzz3_olc_34.seed
+(7.283977919973422, 7.611173956541192, 211, 246)
+>> (Fuzz3) Writing to crash dir fuzz3_1773937800608207135
+ 
+>> (Fuzz3) Fuzzing seed: out_olc/fuzz3_olc_1.seed
+(7.266322673127904, 7.61836814249836, 212, 247)
+>> (Fuzz3) Writing to crash dir fuzz3_1773937800611328752
+ 
+>> (Fuzz3) Fuzzing seed: out_olc/fuzz3_olc_112.seed
+(7.248657049892898, 7.625527862788801, 213, 248)
+>> (Fuzz3) Writing to crash dir fuzz3_1773937800614272558
+ 
+>> (Fuzz3) Fuzzing seed: out_olc/fuzz3_olc_103.seed
+(7.249264034066028, 7.6246213095607445, 213, 249)
+>> (Fuzz3) Writing to output dir fuzz3_1773937800617236001
+ 
+>> (Fuzz3) Fuzzing seed: out_olc/fuzz3_olc_144.seed
+(7.231684662289803, 7.631745184644791, 214, 250)
+>> (Fuzz3) Writing to crash dir fuzz3_1773937800651496053
+ 
+>> (Fuzz3) Fuzzing seed: out_olc/fuzz3_olc_74.seed
+(7.240368631269197, 7.630867159511216, 214, 251)
+>> (Fuzz3) Writing to output dir fuzz3_1773937800654448745
+ 
+>> (Fuzz3) Fuzzing seed: out_olc/fuzz3_olc_176.seed
+(7.249006488606776, 7.637955419514501, 215, 252)
+>> (Fuzz3) Writing to output dir fuzz3_1773937800690675614
+```
+
    Replay all seeds:
    ```
 python3 blackbox.py   -i OLC/seeds_encoder/   -o out_olc   -c crashes_olc   --executor olc_encode_executor  --mutators bit_flip --generators olc_encoder_generator_legal olc_encoder_generator_illegal --observers entropy_observer --oracles entropy_oracle --replay 1
