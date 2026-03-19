@@ -21,6 +21,46 @@ EntFuzz is a fuzzer extension that uses entropy on input/output of a SUT to guid
 
 Code: https://github.com/google/open-location-code 
 
+## Evaluation
+
+**1. Clang-fuzzer:**
+   
+   Run it with:
+   ```
+python3 blackbox.py   -i clang-format-seeds   -o out   -c crashes   --executor "clang_format_executor"   --executor-args "--dry-run --Werror"  --mutators bit_flip delete_line duplicate_line --observers entropy_observer --oracles entropy_oracle --iterations 400
+   ```
+
+   Replay all seeds:
+   ```
+python3 blackbox.py   -i clang-format-seeds   -o out   -c crashes   --executor "clang_format_executor"   --executor-args "--dry-run --Werror"  --mutators bit_flip delete_line duplicate_line --observers entropy_observer --oracles entropy_oracle --iterations 400 --replay 1
+   ```
+   
+**2. OLC**
+   
+   Run it with:
+   ```
+python3 blackbox.py   -i OLC/seeds_encoder/   -o out_olc   -c crashes_olc   --executor olc_encode_executor  --mutators bit_flip --generators olc_encode_generator --observers entropy_observer --oracles entropy_oracle
+   ```
+
+   Replay all seeds:
+   ```
+python3 blackbox.py   -i OLC/seeds_encoder/   -o out_olc   -c crashes_olc   --executor olc_encode_executor  --mutators bit_flip --generators olc_encode_generator --observers entropy_observer --oracles entropy_oracle --replay 1
+
+   ```
+   
+   
+**3. H3**
+
+   Run it with:
+   ```
+   ```
+
+   Replay all seeds:
+   ```
+   ```
+
+   
+
 ## Evaluation at Scale
 
 We will use FuzzBench:
