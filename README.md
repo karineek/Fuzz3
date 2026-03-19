@@ -56,10 +56,16 @@ python3 blackbox.py   -i OLC/seeds_decoder/   -o out_olc_d   -c crashes_olc_d   
 
    Run it with:
    ```
+python3 blackbox.py   -i h3/seeds_encoder/   -o out_h3   -c crashes_h3   --executor h3_encode_executor  --mutators bit_flip --generators h3_encode_generator --observers entropy_observer --oracles entropy_oracle
+
+python3 blackbox.py   -i h3/seeds_decoder/   -o out_h3_d   -c crashes_h3_d   --executor "h3_decode_executor"  --mutators bit_flip --generators h3_decode_generator --observers entropy_observer --oracles entropy_oracle
    ```
 
    Replay all seeds:
    ```
+python3 blackbox.py   -i h3/seeds_encoder/   -o out_h3   -c crashes_h3   --executor h3_encode_executor  --mutators bit_flip --generators h3_encode_generator --observers entropy_observer --oracles entropy_oracle --replay 1
+
+python3 blackbox.py   -i h3/seeds_decoder/   -o out_h3_d   -c crashes_h3_d   --executor "h3_decode_executor"  --mutators bit_flip --generators h3_decode_generator --observers entropy_observer --oracles entropy_oracle -r 1
    ```
 
    
