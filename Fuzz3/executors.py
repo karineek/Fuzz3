@@ -10,7 +10,18 @@ def dummy_executor(arguments :str, seed: Path, timeout: float) -> tuple[str, int
     print(f"Running on {seed} with args {arguments}")
     return "TEST", 0, "TEST", "TEST"
 
-## Target Clang-format
+
+
+
+
+
+
+
+
+############################ Target: Clang Format #############################
+# Install via the LLVM project, or via apt install
+# See the readme of Fuzz3 regarding how to install it
+##############################################################################
 def clang_format_executor(arguments, seed: Path, timeout: float) -> tuple[str, int, str, str]:
     try:
         code_in = seed.read_text(encoding="utf-8").strip()
@@ -30,7 +41,17 @@ def clang_format_executor(arguments, seed: Path, timeout: float) -> tuple[str, i
 
     except subprocess.TimeoutExpired as e:
             return code_in, 124, (e.stdout or "").strip(), (e.stderr or "timeout").strip()
+        
 
+
+
+
+
+
+################################ Target: OLC #################################
+# Source code from https://github.com/uber/h3.
+# See the readme of Fuzz3 regarding how to install it
+##############################################################################
 ## Target OLC
 def olc_encode_executor(arguments :str, seed: Path, timeout: float) -> tuple[str, int, str, str]:
     try:
@@ -82,6 +103,15 @@ def olc_decode_executor(arguments :str, seed: Path, timeout: float) -> tuple[str
     except subprocess.TimeoutExpired as e:
         return code_in, 124, e.stdout or "", e.stderr or "timeout"
 
+
+
+
+
+
+################################# Target: H3 #################################
+# Source code from https://github.com/uber/h3.
+# See the readme of Fuzz3 regarding how to install it
+##############################################################################
 def h3_encode_executor(arguments: str, seed: Path, timeout: float) -> tuple[str, int, str, str]:
     try:
         s = seed.read_text().strip()
@@ -107,7 +137,6 @@ def h3_encode_executor(arguments: str, seed: Path, timeout: float) -> tuple[str,
         return s, r.returncode, r.stdout, r.stderr
     except subprocess.TimeoutExpired as e:
         return s, 124, e.stdout or "", e.stderr or "timeout"
-
 
 def h3_decode_executor(arguments: str, seed: Path, timeout: float) -> tuple[str, int, str, str]:
     try:
