@@ -37,9 +37,23 @@ def olc_encoder_generator_illegal(seedsno: int, outputfolder: Path) -> int:
 
     return total
 
+def _helper_gen_olc_code() -> str:
+    alphabet = "23456789CFGHJMPQRVWX"
+    length = random.randint(2, 15)
+
+    return "".join(random.choice(alphabet) for _ in range(length))
 
 def olc_decoder_generator(seedsno: int, outputfolder: Path) -> tuple[int, int]:
-    pass
+    outputfolder.mkdir(parents=True, exist_ok=True)
+
+    total = 0
+    for i in range(seedsno):
+        ret = _helper_gen_olc_code() 
+        seed_path = outputfolder / f"fuzz3_olc_{i}.seed"
+        seed_path.write_text(f"{ret}\n")
+        total += 1
+
+    return total
 
 
 ################################# Target: H3 #################################
