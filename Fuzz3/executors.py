@@ -49,7 +49,7 @@ def clang_format_executor(arguments, seed: Path, timeout: float) -> tuple[str, i
 
 
 ################################ Target: OLC #################################
-# Source code from https://github.com/uber/h3.
+# Source code from https://github.com/google/open-location-code.
 # See the readme of Fuzz3 regarding how to install it
 ##############################################################################
 ## Target OLC
