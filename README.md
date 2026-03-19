@@ -40,12 +40,15 @@ python3 blackbox.py   -i clang-format-seeds   -o out   -c crashes   --executor "
    Run it with:
    ```
 python3 blackbox.py   -i OLC/seeds_encoder/   -o out_olc   -c crashes_olc   --executor olc_encode_executor  --mutators bit_flip --generators olc_encode_generator --observers entropy_observer --oracles entropy_oracle
+
+python3 blackbox.py   -i OLC/seeds_decoder/   -o out_olc_d   -c crashes_olc_d   --executor "olc_decode_executor"  --mutators bit_flip --generators olc_decode_generator --observers entropy_observer --oracles entropy_oracle
    ```
 
    Replay all seeds:
    ```
 python3 blackbox.py   -i OLC/seeds_encoder/   -o out_olc   -c crashes_olc   --executor olc_encode_executor  --mutators bit_flip --generators olc_encode_generator --observers entropy_observer --oracles entropy_oracle --replay 1
 
+python3 blackbox.py   -i OLC/seeds_decoder/   -o out_olc_d   -c crashes_olc_d   --executor "olc_decode_executor"  --mutators bit_flip --generators olc_decode_generator --observers entropy_observer --oracles entropy_oracle -r 1
    ```
    
    
