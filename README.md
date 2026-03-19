@@ -97,6 +97,44 @@ python3 blackbox.py   -i OLC/seeds_encoder/   -o out_olc   -c crashes_olc   --ex
 
 python3 blackbox.py   -i OLC/seeds_decoder/   -o out_olc_d   -c crashes_olc_d   --executor "olc_decode_executor"  --mutators bit_flip --generators olc_decode_generator --observers entropy_observer --oracles entropy_oracle -r 1
    ```
+
+Possible output:
+```
+>> (Fuzz3, Reply) crashes_olc/fuzz3_1773937800272130400
+('', 1, '', "'utf-8' codec can't decode byte 0xb6 in position 0: invalid start byte")
+>> (Fuzz3, Reply) crashes_olc/fuzz3_1773937800344085087
+('', 1, '', 'not enough values to unpack (expected 2, got 1)')
+>> (Fuzz3, Reply) crashes_olc/fuzz3_1773937800538520095
+('', 1, '', "could not convert string to float: '/374'")
+>> (Fuzz3, Reply) crashes_olc/fuzz3_1773937800283388869
+('', 1, '', "could not convert string to float: '-12*'")
+>> (Fuzz3, Reply) crashes_olc/fuzz3_1773937800286245704
+('', 1, '', "could not convert string to float: '104J'")
+>> (Fuzz3, Reply) crashes_olc/fuzz3_1773937800335576250
+('', 1, '', "could not convert string to float: '1t4'")
+>> (Fuzz3, Reply) crashes_olc/fuzz3_1773937800166236828
+('', 1, '', "'utf-8' codec can't decode byte 0xb7 in position 5: invalid start byte")
+>> (Fuzz3, Reply) crashes_olc/fuzz3_1773937800160602449
+('', 1, '', 'not enough values to unpack (expected 2, got 1)')
+>> (Fuzz3, Reply) crashes_olc/fuzz3_1773937800605264933
+('', 1, '', "could not convert string to float: '7;1'")
+>> (Fuzz3, Reply) crashes_olc/fuzz3_1773937800338415351
+('', 1, '', 'not enough values to unpack (expected 2, got 1)')
+>> (Fuzz3, Reply) crashes_olc/fuzz3_1773937800422869621
+('', 1, '', 'not enough values to unpack (expected 2, got 1)')
+>> (Fuzz3, Reply) crashes_olc/fuzz3_1773937800349775981
+('', 1, '', "could not convert string to float: '>'")
+>> (Fuzz3, Reply) crashes_olc/fuzz3_1773937800346927784
+('', 1, '', "could not convert string to float: '60&'")
+>> (Fuzz3, Reply) crashes_olc/fuzz3_1773937800355499498
+('', 1, '', "could not convert string to float: '/841'")
+>> (Fuzz3, Reply) crashes_olc/fuzz3_1773937800459078505
+('', 1, '', "could not convert string to float: '7v6'")
+>> (Fuzz3, Reply) crashes_olc/fuzz3_1773937800118451681
+('', 1, '', "could not convert string to float: '-75\\x14'")
+>> (Fuzz3, Reply) crashes_olc/fuzz3_1773937800352570739
+('', 1, '', 'not enough values to unpack (expected 2, got 1)')
+```
    
    
 **3. H3**
