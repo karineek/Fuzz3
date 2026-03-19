@@ -1,6 +1,10 @@
 from pathlib import Path
 import random
 
+################################ Target: OLC #################################
+# Source code from https://github.com/google/open-location-code.
+# See the readme of Fuzz3 regarding how to install it
+##############################################################################
 
 def olc_encoder_generator_legal(seedsno: int, outputfolder: Path) -> int:
     outputfolder.mkdir(parents=True, exist_ok=True)
@@ -32,4 +36,13 @@ def olc_encoder_generator_illegal(seedsno: int, outputfolder: Path) -> int:
 
 
 def olc_decoder_generator(seedsno: int, outputfolder: Path) -> tuple[int, int]:
+    pass
+
+
+################################# Target: H3 #################################
+# Source code from https://github.com/uber/h3.
+# See the readme of Fuzz3 regarding how to install it
+##############################################################################
+
+def h3_decoder_generator(seedsno: int, outputfolder: Path) -> tuple[int, int]:
     pass
