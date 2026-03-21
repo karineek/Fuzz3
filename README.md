@@ -177,8 +177,7 @@ We will use FuzzBench:
 - Karine add more projects.
 - Phil is doing the link up with the sliding window. 
 - Janine is modifying one_step to separate the mutator, executor and entropy calculation functions
-- Everyone new name: HFuzz name used at ICSE last year (2025) https://conf.researchr.org/details/icse-2025/sbft-2025-papers/13/HFuzz-Havoc-Mode-Guided-Fuzzing
-- What about Fuzz3 ????
+- ok lets call it fuzz3 (since HFuzz name used at ICSE last year (2025) https://conf.researchr.org/details/icse-2025/sbft-2025-papers/13/HFuzz-Havoc-Mode-Guided-Fuzzing )
 
 ## Emails
 * Phil: p.mcminn@sheffield.ac.uk
