@@ -23,6 +23,22 @@ Code: https://github.com/google/open-location-code
 
 ## Evaluation
 
+**0. flaky_triangle:**
+   
+   more to add but
+   Run it with:
+```
+python3 blackbox.py	\
+  -i tri/seeds_encoder/	\
+  -o out_tri	\
+  -c crashes_tri	\
+  --executor triangle_executor	\
+  --mutators add_one sub_one equilateral isosceles	\
+  --observers entropy_observer	\
+  --oracles entropy_oracle	\
+  --iterations 1000
+```
+
 **1. Clang-fuzzer:**
    
    Run it with:
