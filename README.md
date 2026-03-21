@@ -35,6 +35,16 @@ python3 blackbox.py   -i clang-format-seeds   -o out   -c crashes   --executor "
 python3 blackbox.py   -i clang-format-seeds   -o out   -c crashes   --executor "clang_format_executor"   --executor-args "--dry-run --Werror"  --mutators bit_flip delete_line duplicate_line --observers entropy_observer --oracles entropy_oracle --iterations 400 --replay 1
    ```
    
+**1.1 missing clang-format**
+
+If you get an error similar to 
+```
+File "...subprocess.py", in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: 'clang-format'
+```
+ensure clang-format is installed.
+
 **2. OLC**
    
    Run it with:
