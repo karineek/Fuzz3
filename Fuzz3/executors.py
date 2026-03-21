@@ -1,3 +1,4 @@
+#WBL 21 March 2026 Add triangle_executor
 from pathlib import Path
 import subprocess
 import shlex
@@ -10,18 +11,33 @@ def dummy_executor(arguments :str, seed: Path, timeout: float) -> tuple[str, int
     print(f"Running on {seed} with args {arguments}")
     return "TEST", 0, "TEST", "TEST"
 
+## Target flaky_triangle (ok to use for triangle too) based on olc_encode_executor
+def triangle_executor(arguments :str, seed: Path, timeout: float) -> tuple[str, int, str, str]:
+    try:
+        s = seed.read_text().strip()
+        a, b, c = s.replace(",", " ").split()
+        #a, b = s.replace(",", " ").split()[:2]
+        #lat = float(a)
+        #lng = float(b)
+    except Exception as e:
+        return "", 1, "", str(e)
+
+    cmd = ["flaky_triangle", a,b,c]
+
+    #print(f"subprocess.run({cmd},True,True,timeout={timeout},)")
+    try:
+        r = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+        return s, r.returncode, r.stdout, r.stderr
+    except subprocess.TimeoutExpired as e:
+        return s, 124, e.stdout or "", e.stderr or "timeout"
 
 
-
-
-
-
-
-
-############################ Target: Clang Format #############################
-# Install via the LLVM project, or via apt install
-# See the readme of Fuzz3 regarding how to install it
-##############################################################################
+## Target Clang-format
 def clang_format_executor(arguments, seed: Path, timeout: float) -> tuple[str, int, str, str]:
     try:
         code_in = seed.read_text(encoding="utf-8").strip()
@@ -41,17 +57,7 @@ def clang_format_executor(arguments, seed: Path, timeout: float) -> tuple[str, i
 
     except subprocess.TimeoutExpired as e:
             return code_in, 124, (e.stdout or "").strip(), (e.stderr or "timeout").strip()
-        
 
-
-
-
-
-
-################################ Target: OLC #################################
-# Source code from https://github.com/google/open-location-code.
-# See the readme of Fuzz3 regarding how to install it
-##############################################################################
 ## Target OLC
 def olc_encode_executor(arguments :str, seed: Path, timeout: float) -> tuple[str, int, str, str]:
     try:
@@ -102,61 +108,3 @@ def olc_decode_executor(arguments :str, seed: Path, timeout: float) -> tuple[str
         return code_in, r.returncode, r.stdout, r.stderr
     except subprocess.TimeoutExpired as e:
         return code_in, 124, e.stdout or "", e.stderr or "timeout"
-
-
-
-
-
-
-################################# Target: H3 #################################
-# Source code from https://github.com/uber/h3.
-# See the readme of Fuzz3 regarding how to install it
-##############################################################################
-def h3_encode_executor(arguments: str, seed: Path, timeout: float) -> tuple[str, int, str, str]:
-    try:
-        s = seed.read_text().strip()
-        parts = s.replace(",", " ").split()
-        lat = float(parts[0])
-        lng = float(parts[1])
-        res = int(arguments) if arguments else 10
-    except Exception as e:
-        return "", 1, "", str(e)
-
-    code = (
-        "import h3;"
-        f"print(h3.latlng_to_cell({lat},{lng},{res}))"
-    )
-
-    try:
-        r = subprocess.run(
-            [sys.executable, "-c", code],
-            capture_output=True,
-            text=True,
-            timeout=timeout,
-        )
-        return s, r.returncode, r.stdout, r.stderr
-    except subprocess.TimeoutExpired as e:
-        return s, 124, e.stdout or "", e.stderr or "timeout"
-
-def h3_decode_executor(arguments: str, seed: Path, timeout: float) -> tuple[str, int, str, str]:
-    try:
-        h3_index = seed.read_text().strip()
-    except Exception as e:
-        return "", 1, "", str(e)
-
-    code = (
-        "import h3;"
-        f"b=h3.cell_to_boundary('{h3_index}');"
-        "print('\\n'.join(f'{lat} {lng}' for lat,lng in b))"
-    )
-
-    try:
-        r = subprocess.run(
-            [sys.executable, "-c", code],
-            capture_output=True,
-            text=True,
-            timeout=timeout,
-        )
-        return h3_index, r.returncode, r.stdout, r.stderr
-    except subprocess.TimeoutExpired as e:
-        return h3_index, 124, e.stdout or "", e.stderr or "timeout"
