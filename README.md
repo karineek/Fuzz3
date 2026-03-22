@@ -25,8 +25,9 @@ Code: https://github.com/google/open-location-code
 
 **0. flaky_triangle:**
    
-   more to add but
-   Run it with:
+   Run it
+   (note all files in ```out_tri``` and ```crashes_tri``` will be deleted) 
+   with:
 ```
 python3 blackbox.py	\
   -i tri/seeds_encoder/	\
@@ -38,6 +39,7 @@ python3 blackbox.py	\
   --oracles entropy_oracle	\
   --iterations 1000
 ```
+Can add ```--replay 1``` and blackbox.py will re-run all the input, output and crash seeds. 
 
 **1. Clang-fuzzer:**
    
