@@ -228,7 +228,7 @@ def main() -> int:
                         elif _en > _prev_en:
                             name = name + "_intersting"   
                             
-                result_entropy_prev = result
+                result_entropy_prev = results
 
         # Now check where the seed needs to go
         if _rc == 0:
