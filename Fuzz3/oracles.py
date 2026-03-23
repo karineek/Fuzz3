@@ -10,7 +10,14 @@ def DummyOracle(seed, results_map: dict[str, list[str]]):
 
 
 def entropy_oracle(seed, results_map: dict[str, tuple[str, str]]):
-    data = results_map["entropy_observer"]
+    # Check which observer we used.
+    if "entropy_observer" in results_map:
+        data = results_map["entropy_observer"]
+    elif "entropy_sliding_window_observer" in results_map:
+        data = results_map["entropy_sliding_window_observer"]
+    else:
+        raise ValueError("No entropy observer data found")
+
     inputs = data[0]
     outputs = data[1]
     n = len(inputs)
