@@ -35,7 +35,6 @@ def entropy_sliding_window_observer(input: str, sample: tuple[int, str, str]) ->
     # We just keep the valid answer, or if empty, the error!
     sample_data = sample[1] if sample[1] else sample[2]
     entropy_sliding_window_observer.outputs.append(sample_data)    
-    entropy_sliding_window_observer.outputs.append(sample_data)
 
     print(f">> (FUZZ3, Observer) data size is {len(entropy_sliding_window_observer.outputs)}")
     return entropy_sliding_window_observer.inputs, entropy_sliding_window_observer.outputs
