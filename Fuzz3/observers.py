@@ -21,6 +21,8 @@ WINDOW_SIZE = int(os.environ.get("ENTROPY_WINDOW_SIZE", "1024"))
 def entropy_sliding_window_observer(input: str, sample: tuple[int, str, str]) -> list[str]:
     if WINDOW_SIZE < 2:
         raise ValueError("Window size must be at least 2")
+    else:
+        printf(f">> (FUZZ3:Observer) Window size is {WINDOW_SIZE})
         
     # Use the function name itself to store the attribute
     if not hasattr(entropy_sliding_window_observer, "inputs"):
