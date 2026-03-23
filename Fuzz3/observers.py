@@ -37,7 +37,7 @@ def entropy_sliding_window_observer(input: str, sample: tuple[int, str, str]) ->
     entropy_sliding_window_observer.outputs.append(sample_data)    
     entropy_sliding_window_observer.outputs.append(sample_data)
 
-    print(f">> (FUZZ3, Observer) data size is {entropy_sliding_window_observer.outputs.size}")
+    print(f">> (FUZZ3, Observer) data size is {len(entropy_sliding_window_observer.outputs)}")
     return entropy_sliding_window_observer.inputs, entropy_sliding_window_observer.outputs
 
 
