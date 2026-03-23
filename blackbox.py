@@ -84,7 +84,7 @@ def main() -> int:
     if (args.replay):
         # REPLAY
 
-        # Find our executor in the gloabl space name
+        # Find our executor in the global space name
         func_name = args.executor  		# This is the string "greet"
         arguments = args.executor_args  	# This is the string "Alice"
         func_to_run = getattr(Fuzz3.executors, func_name, None)
@@ -178,7 +178,11 @@ def main() -> int:
     print(">> (Fuzz3) Start Fuzzing")
     for _ in range(args.iterations):
         files = [p for p in output_dir.glob("*") if p.is_file()]
-        seed = random.choice(files)
+        #seed = random.choice(files)
+        # Now we have a proper search
+        weights = [2.0 if "interesting" in f else 1.0 for f in files]
+        seed = random.choices(files, weights=weights, k=1)[0]
+
         print(f">> (Fuzz3) Fuzzing seed: {seed}")
 
         # Mutate
@@ -220,13 +224,13 @@ def main() -> int:
                     _prev_ein, _prev_eout, _prev_edist, _prev_en = result_entropy_prev
                     if _en == _prev_en: # only if stable
                         if _eout == 0:
-                            name = name + "_intersting"   
+                            name = name + "_interesting"   
                         elif _ein > _prev_ein:
-                            name = name + "_intersting"   
+                            name = name + "_interesting"   
                         elif _eout > _prev_eout:
-                            name = name + "_intersting"
+                            name = name + "_interesting"
                         elif _en > _prev_en:
-                            name = name + "_intersting"   
+                            name = name + "_interesting"   
                             
                 result_entropy_prev = results
 
