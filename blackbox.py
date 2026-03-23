@@ -169,8 +169,6 @@ def main() -> int:
         print("No valid non-crashing seeds found. Exiting.")
         return 1
 
-
-
     if not mutators:
        print(f"No mutators list found from {args.mutators}")
        return 1
@@ -185,6 +183,8 @@ def main() -> int:
         # Mutate
         mutator = random.choice(mutators)
         result = mutator(seed)
+        if result is None:
+            continue # Mutation failed
 
         #################### ORACLE 1+2 ####################
         ## CRASH+HANGS ORACLES ##
