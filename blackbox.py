@@ -212,8 +212,8 @@ def main() -> int:
 
         # Oracles
         for oracle in oracles:
-            result = oracle(tmp_path, results_map)
-            print(result) # Not sure yet what to do with it
+            results = oracle(tmp_path, results_map)
+            print(results) # Not sure yet what to do with it
             if (oracle.__name__ == "entropy_oracle"):
                 if result_entropy_prev is not None:
                     _ein, _eout, _edist, _en = results
