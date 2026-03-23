@@ -180,7 +180,7 @@ def main() -> int:
         files = [p for p in output_dir.glob("*") if p.is_file()]
         #seed = random.choice(files)
         # Now we have a proper search
-        weights = [2.0 if "interesting" in f else 1.0 for f in files]
+        weights = [2.0 if "interesting" in f.name else 1.0 for f in files]
         seed = random.choices(files, weights=weights, k=1)[0]
 
         print(f">> (Fuzz3) Fuzzing seed: {seed}")
