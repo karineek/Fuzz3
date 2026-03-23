@@ -174,6 +174,7 @@ def main() -> int:
        return 1
 
     # Phase 2: fuzz loop
+    result_entropy_prev = None
     print(">> (Fuzz3) Start Fuzzing")
     for _ in range(args.iterations):
         files = [p for p in output_dir.glob("*") if p.is_file()]
@@ -213,6 +214,21 @@ def main() -> int:
         for oracle in oracles:
             result = oracle(tmp_path, results_map)
             print(result) # Not sure yet what to do with it
+            if (oracle.__name__ == "entropy_oracle"):
+                if result_entropy_prev is not None:
+                    _ein, _eout, _edist, _en = results
+                    _prev_ein, _prev_eout, _prev_edist, _prev_en = result_entropy_prev
+                    if _en == _prev_en: # only if stable
+                        if _eout == 0:
+                            name = name + "_intersting"   
+                        elif _ein > _prev_ein:
+                            name = name + "_intersting"   
+                        elif _eout > _prev_eout:
+                            name = name + "_intersting"
+                        elif _en > _prev_en:
+                            name = name + "_intersting"   
+                            
+                result_entropy_prev = result
 
         # Now check where the seed needs to go
         if _rc == 0:
