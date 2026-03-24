@@ -8,6 +8,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import os
 
 # We need to add all imports needed for the fuzzing
 import Fuzz3.executors
