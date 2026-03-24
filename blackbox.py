@@ -81,7 +81,7 @@ def main() -> int:
     input_dir = Path(args.input_dir)
     output_dir = Path(args.output_dir)
     crash_dir = Path(args.crash_dir)
-
+    output_dir_end = Path(args.output_dir).with_name(Path(args.output_dir).name + "_end") # TO keep the queue not huge!
 
     
     if (args.replay):
@@ -181,6 +181,19 @@ def main() -> int:
     deads = 0
     print(">> (Fuzz3) Start Fuzzing")
     for _ in range(args.iterations):
+        # Clean a bit if deads is high!
+        if deads > 2*MAX_CAPACITY:
+            # move 10% of files from output_dir to output_dir_end
+            files = [f for f in output_dir.iterdir() if f.is_file()]
+            n_to_move = max(1, math.ceil(0.1 * len(files)))  # at least 1 file
+            selected = random.sample(files, n_to_move)
+            for f in selected:
+                dest = output_dir_end / f.name
+                shutil.move(str(f), str(dest))
+            deads = 0
+        ## END reducing the queue
+
+        # After reducing the queue, continue with the next iteration of fuzzing
         files = [p for p in output_dir.glob("*") if p.is_file()]
         
         # Now we have a proper search
