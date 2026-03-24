@@ -16,6 +16,8 @@ import Fuzz3.observers
 import Fuzz3.oracles
 import Fuzz3.generators
 
+EPSILON = int(os.environ.get("EPSILON_SIZE", "0.05"))
+
 def parse_args():
     parser = argparse.ArgumentParser()
 
@@ -223,7 +225,7 @@ def main() -> int:
                     _ein, _eout, _edist, _en = results
                     _prev_ein, _prev_eout, _prev_edist, _prev_en = result_entropy_prev
                     if _en == _prev_en: # only if stable
-                        if _eout == 0:
+                        if _eout == 0 || _eout < EPSILON:
                             name = name + "_interesting"   
                         elif _ein > _prev_ein:
                             name = name + "_interesting"   
