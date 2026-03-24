@@ -41,6 +41,39 @@ def duplicate_line(seed: Path) -> str | None:
     lines.insert(i, lines[i])
     return "\n".join(lines)
 
+def crazy_indentation(seed: Path) -> str | None:
+    data = seed.read_text(errors="ignore")
+    if not data:
+        return None
+    s = list(data)
+    n = len(s)
+
+    # how many mutations to apply
+    num_mutations = max(1, int(n * random.uniform(0.005, 0.03)))
+    # What we can mutate here:
+    whitespace = [" ", "\t", "\n", "\r\n"]
+    punct = list("{}()[];")
+
+    # Mutate
+    for _ in range(num_mutations):
+        if not s:
+            break
+        op = random.random()
+        i = random.randrange(len(s))
+
+        if op < 0.5:
+            ws = random.choice(whitespace)
+            s[i:i] = list(ws)
+
+        elif op < 0.7:
+            if s[i].isspace():
+                del s[i]
+
+        elif op < 0.9:
+            s.insert(i, random.choice(punct))
+
+    return "".join(s)
+
 def none(seed: Path) -> bytes | None:
     data = seed.read_bytes()
     if not data:
@@ -50,7 +83,7 @@ def none(seed: Path) -> bytes | None:
     return bytes(b)
 
 
-#randomly increase one side of seed by 1
+#randomly increase one side of the seed by 1
 def add_one(seed: Path) -> str | None:
     data = seed.read_text(errors="ignore")
     if not data:
