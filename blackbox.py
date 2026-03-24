@@ -17,6 +17,7 @@ import Fuzz3.oracles
 import Fuzz3.generators
 
 EPSILON = int(os.environ.get("EPSILON_SIZE", "0.05"))
+MAX_CAPACITY = math.log2(WINDOW_SIZE)
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -141,8 +142,8 @@ def main() -> int:
     is_valid = False
 
     # Find our executor in the global space name
-    func_name = args.executor  		# This is the string "greet"
-    arguments = args.executor_args  	# This is the string "Alice"
+    func_name = args.executor  		# This is a string
+    arguments = args.executor_args  # This is a string
     func_to_run = getattr(Fuzz3.executors, func_name, None)
 
     if not func_to_run:
@@ -177,12 +178,16 @@ def main() -> int:
 
     # Phase 2: fuzz loop
     result_entropy_prev = None
+    deads = 0
     print(">> (Fuzz3) Start Fuzzing")
     for _ in range(args.iterations):
         files = [p for p in output_dir.glob("*") if p.is_file()]
-        #seed = random.choice(files)
+        
         # Now we have a proper search
-        weights = [2.0 if "interesting" in f.name else 1.0 for f in files]
+        weights = [ 2.0 if "interesting" in f.name
+               else 0.1 if "deadend" in f.name
+               else 1.0
+               for f in files]
         seed = random.choices(files, weights=weights, k=1)[0]
 
         print(f">> (Fuzz3) Fuzzing seed: {seed}")
@@ -225,14 +230,24 @@ def main() -> int:
                     _ein, _eout, _edist, _en = results
                     _prev_ein, _prev_eout, _prev_edist, _prev_en = result_entropy_prev
                     if _en == _prev_en: # only if stable
-                        if _eout == 0 || _eout < EPSILON:
-                            name = name + "_interesting"   
+                        if (_ein - _eout) > (MAX_CAPACITY - 10*EPSILON):
+                            name = name + "_deadend"
+                            deads = deads + 1
+                        elif _ein < EPSILON and _eout < EPSILON:
+                            name = name + "_deadend" 
+                            deads = deads + 1
+                        elif _eout == 0 or _eout < EPSILON:
+                            name = name + "_interesting"  
+                            deads = 0
                         elif _ein > _prev_ein:
                             name = name + "_interesting"   
+                            deads = 0
                         elif _eout > _prev_eout:
                             name = name + "_interesting"
+                            deads = 0
                         elif _en > _prev_en:
-                            name = name + "_interesting"   
+                            name = name + "_interesting" 
+                            deads = 0
                             
                 result_entropy_prev = results
 
