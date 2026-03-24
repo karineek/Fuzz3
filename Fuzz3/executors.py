@@ -1,4 +1,4 @@
-#WBL 22 March 2026 merge triangle_executor
+# WBL 22 March 2026 merge triangle_executor
 from pathlib import Path
 import subprocess
 import shlex
@@ -6,25 +6,54 @@ import sys
 
 # List here all the SUTs
 
+
 ## Dummy target
-def dummy_executor(arguments :str, seed: Path, timeout: float) -> tuple[str, int, str, str]:
+def dummy_executor(
+    arguments: str, seed: Path, timeout: float
+) -> tuple[str, int, str, str]:
     print(f"Running on {seed} with args {arguments}")
     return "TEST", 0, "TEST", "TEST"
 
+
+def httpcore_executor(
+    arguments: str, seed: Path, timeout: float
+) -> tuple[str, int, str, str]:
+    try:
+        s = seed.read_text().strip()
+        url = str(s.replace(",", " ").split()[2])
+    except Exception as e:
+        return e
+
+    code = "import httpcore;" f'print(httpcore.request("GET", "{url}")).status;'
+
+    try:
+        r = subprocess.run(
+            [sys.executable, "-c", code],
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+        return s, r.returncode, r.stdout, r.stderr
+    except subprocess.TimeoutExpired as e:
+        return s, 124, e.stdout or "", e.stderr or "timeout"
+
+
 ## Target flaky_triangle (ok to use for triangle too) based on olc_encode_executor
-def triangle_executor(arguments :str, seed: Path, timeout: float) -> tuple[str, int, str, str]:
+def triangle_executor(
+    arguments: str, seed: Path, timeout: float
+) -> tuple[str, int, str, str]:
     try:
         s = seed.read_text().strip()
         a, b, c = s.replace(",", " ").split()
-        #a, b = s.replace(",", " ").split()[:2]
-        #lat = float(a)
-        #lng = float(b)
+        # a, b = s.replace(",", " ").split()[:2]
+        # lat = float(a)
+        # lng = float(b)
     except Exception as e:
         return "", 1, "", str(e)
 
-    cmd = ["flaky_triangle", a,b,c]
+    cmd = ["flaky_triangle", a, b, c]
 
-    #print(f"subprocess.run({cmd},True,True,timeout={timeout},)")
+    # print(f"subprocess.run({cmd},True,True,timeout={timeout},)")
     try:
         r = subprocess.run(
             cmd,
@@ -37,15 +66,13 @@ def triangle_executor(arguments :str, seed: Path, timeout: float) -> tuple[str, 
         return s, 124, e.stdout or "", e.stderr or "timeout"
 
 
-
-
-
-
 ############################ Target: Clang Format #############################
 # Install via the LLVM project, or via apt install
 # See the readme of Fuzz3 regarding how to install it
 ##############################################################################
-def clang_format_executor(arguments, seed: Path, timeout: float) -> tuple[str, int, str, str]:
+def clang_format_executor(
+    arguments, seed: Path, timeout: float
+) -> tuple[str, int, str, str]:
     try:
         code_in = seed.read_text(encoding="utf-8").strip()
     except UnicodeDecodeError as e:
@@ -63,13 +90,7 @@ def clang_format_executor(arguments, seed: Path, timeout: float) -> tuple[str, i
         return code_in, result.returncode, result.stdout.strip(), result.stderr.strip()
 
     except subprocess.TimeoutExpired as e:
-            return code_in, 124, (e.stdout or "").strip(), (e.stderr or "timeout").strip()
-
-        
-
-
-
-
+        return code_in, 124, (e.stdout or "").strip(), (e.stderr or "timeout").strip()
 
 
 ################################ Target: OLC #################################
@@ -77,7 +98,9 @@ def clang_format_executor(arguments, seed: Path, timeout: float) -> tuple[str, i
 # See the readme of Fuzz3 regarding how to install it
 ##############################################################################
 ## Target OLC
-def olc_encode_executor(arguments :str, seed: Path, timeout: float) -> tuple[str, int, str, str]:
+def olc_encode_executor(
+    arguments: str, seed: Path, timeout: float
+) -> tuple[str, int, str, str]:
     try:
         s = seed.read_text().strip()
         a, b = s.replace(",", " ").split()[:2]
@@ -104,7 +127,9 @@ def olc_encode_executor(arguments :str, seed: Path, timeout: float) -> tuple[str
 
 
 # Target decode olc
-def olc_decode_executor(arguments :str, seed: Path, timeout: float) -> tuple[str, int, str, str]:
+def olc_decode_executor(
+    arguments: str, seed: Path, timeout: float
+) -> tuple[str, int, str, str]:
     try:
         code_in = seed.read_text().strip()
     except Exception as e:
@@ -128,15 +153,13 @@ def olc_decode_executor(arguments :str, seed: Path, timeout: float) -> tuple[str
         return code_in, 124, e.stdout or "", e.stderr or "timeout"
 
 
-
-
-
-
 ################################# Target: H3 #################################
 # Source code from https://github.com/uber/h3.
 # See the readme of Fuzz3 regarding how to install it
 ##############################################################################
-def h3_encode_executor(arguments: str, seed: Path, timeout: float) -> tuple[str, int, str, str]:
+def h3_encode_executor(
+    arguments: str, seed: Path, timeout: float
+) -> tuple[str, int, str, str]:
     try:
         s = seed.read_text().strip()
         parts = s.replace(",", " ").split()
@@ -146,10 +169,7 @@ def h3_encode_executor(arguments: str, seed: Path, timeout: float) -> tuple[str,
     except Exception as e:
         return "", 1, "", str(e)
 
-    code = (
-        "import h3;"
-        f"print(h3.latlng_to_cell({lat},{lng},{res}))"
-    )
+    code = "import h3;" f"print(h3.latlng_to_cell({lat},{lng},{res}))"
 
     try:
         r = subprocess.run(
@@ -162,7 +182,10 @@ def h3_encode_executor(arguments: str, seed: Path, timeout: float) -> tuple[str,
     except subprocess.TimeoutExpired as e:
         return s, 124, e.stdout or "", e.stderr or "timeout"
 
-def h3_decode_executor(arguments: str, seed: Path, timeout: float) -> tuple[str, int, str, str]:
+
+def h3_decode_executor(
+    arguments: str, seed: Path, timeout: float
+) -> tuple[str, int, str, str]:
     try:
         h3_index = seed.read_text().strip()
     except Exception as e:
