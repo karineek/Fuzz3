@@ -320,8 +320,8 @@ def main() -> int:
                 try:
                     idx = recent_active.index(seed.name)
                     recent_active[idx] = new_name.name
-               except ValueError:
-               # seed.name is not in recent_active; no need to update
+                except ValueError:
+                # seed.name is not in recent_active; no need to update
                     pass
 
         # Cleaning
