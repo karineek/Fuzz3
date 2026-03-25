@@ -47,6 +47,7 @@ Can add ```--replay 1``` and blackbox.py will re-run all the input, output and c
    ```
 python3 blackbox.py   -i clang-format-seeds   -o out   -c crashes   --executor "clang_format_executor"   --executor-args "--dry-run --Werror"  --mutators bit_flip delete_line duplicate_line --observers entropy_observer --oracles entropy_oracle --iterations 400
    ```
+Other flags to try:  --verbose, --sort-includes 
 
    Replay all seeds:
    ```
@@ -187,6 +188,8 @@ python3 blackbox.py   -i h3/seeds_decoder/   -o out_h3_d   -c crashes_h3_d   --e
 
 We will use FuzzBench:
 - https://google.github.io/fuzzbench/
+
+- Reported bug (confirmed): https://github.com/llvm/llvm-project/issues/188500
 
 
 ## Replay Seeds
