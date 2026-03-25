@@ -8,6 +8,9 @@ import subprocess
 import sys
 import tempfile
 import time
+import os
+import math
+
 
 # We need to add all imports needed for the fuzzing
 import Fuzz3.executors
@@ -16,7 +19,8 @@ import Fuzz3.observers
 import Fuzz3.oracles
 import Fuzz3.generators
 
-EPSILON = int(os.environ.get("EPSILON_SIZE", "0.05"))
+WINDOW_SIZE = int(os.environ.get("ENTROPY_WINDOW_SIZE", "1024"))
+EPSILON = float(os.environ.get("EPSILON_SIZE", "0.05"))
 MAX_CAPACITY = math.log2(WINDOW_SIZE)
 
 def parse_args():
