@@ -223,7 +223,7 @@ def main() -> int:
             deads = 0
 
             # Bring back cold seeds
-            for f in [f for f in files if "coldlist" in f.name]:
+            for f in [f for f in files if "_coldlist" in f.name]:
                 if (f.name not in recent_active):
                     new_name = f.with_name(f.name.replace("_coldlist", ""))
                     f.rename(new_name)
@@ -240,7 +240,7 @@ def main() -> int:
                else 1.0
                for f in files]
         seed = random.choices(files, weights=weights, k=1)[0]
-        recent_active.append(seed)
+        recent_active.append(seed.name)
 
         print(f">> (Fuzz3) Fuzzing seed: {seed}")
 
@@ -310,9 +310,12 @@ def main() -> int:
         else:
             print(f">> (Fuzz3) Writing to crash dir {name}")
             shutil.copy2(tmp_path, crash_dir / name)
-            print(f">> (Fuzz3) Moving parent to output dir cold list {seed}")
-            new_name = seed.with_name(seed.name + "_coldlist")
-            seed.rename(new_name)
+
+            # If crashed and not in cold list, add parent
+            if "_coldlist" not in seed.name:
+                print(f">> (Fuzz3) Moving parent to output dir cold list {seed}")
+                new_name = seed.with_name(seed.name + "_coldlist")
+                seed.rename(new_name)
 
         # Cleaning
         tmp_path.unlink(missing_ok=True)
