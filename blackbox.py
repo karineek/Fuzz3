@@ -297,9 +297,9 @@ def main() -> int:
                         elif _eout > _prev_eout:
                             name = name + "_interesting"
                             deads = 0
-                        #elif _en > _prev_en:
-                        #    name = name + "_interesting" 
-                        #    deads = 0
+                        elif _en > _prev_en:
+                            name = name + "_interesting" 
+                            deads = 0
                             
                 result_entropy_prev = results
 
