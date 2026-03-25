@@ -20,7 +20,7 @@ import Fuzz3.oracles
 import Fuzz3.generators
 
 WINDOW_SIZE = int(os.environ.get("ENTROPY_WINDOW_SIZE", "1024"))
-EPSILON = float(os.environ.get("EPSILON_SIZE", "0.05"))
+EPSILON = float(os.environ.get("EPSILON_SIZE", "0.1"))
 MAX_CAPACITY = math.log2(WINDOW_SIZE)
 
 def parse_args():
