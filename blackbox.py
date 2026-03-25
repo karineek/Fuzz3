@@ -23,7 +23,7 @@ import Fuzz3.oracles
 import Fuzz3.generators
 
 WINDOW_SIZE = int(os.environ.get("ENTROPY_WINDOW_SIZE", "1024"))
-EPSILON = float(os.environ.get("EPSILON_SIZE", "0.1"))
+EPSILON = float(os.environ.get("EPSILON_SIZE", "0.05"))
 MAX_CAPACITY = math.log2(WINDOW_SIZE)
 
 def parse_args():
@@ -103,8 +103,8 @@ def main() -> int:
         # REPLAY
 
         # Find our executor in the global space name
-        func_name = args.executor  		# This is the string "greet"
-        arguments = args.executor_args  	# This is the string "Alice"
+        func_name = args.executor  		# This is a string
+        arguments = args.executor_args  # This is a string
         func_to_run = getattr(Fuzz3.executors, func_name, None)
 
         executor=func_to_run # Now we can start using our target wrapper to fuzz the SUT
@@ -169,9 +169,8 @@ def main() -> int:
     func_name = args.executor  		# This is a string
     arguments = args.executor_args  # This is a string
     func_to_run = getattr(Fuzz3.executors, func_name, None)
-
     if not func_to_run:
-        print(f"No executor found {func_to_run} for {func_name}")
+        print(f">> (Fuzz3) No executor found {func_to_run} for {func_name}")
         return 1
 
     # Build lists of fuzzing components
@@ -213,6 +212,7 @@ def main() -> int:
         
         # Clean a bit if deads is high!
         if deads > 2*MAX_CAPACITY:
+            print(f">> (Fuzz3) Shaking the seeds after {deads} no interesting seeds.")
             # move 10% of files from output_dir to output_dir_end
             files = [f for f in output_dir.iterdir() if f.is_file()]
             n_to_move = max(1, math.ceil(0.1 * len(files)))  # at least 1 file
@@ -297,9 +297,9 @@ def main() -> int:
                         elif _eout > _prev_eout:
                             name = name + "_interesting"
                             deads = 0
-                        elif _en > _prev_en:
-                            name = name + "_interesting" 
-                            deads = 0
+                        #elif _en > _prev_en:
+                        #    name = name + "_interesting" 
+                        #    deads = 0
                             
                 result_entropy_prev = results
 
