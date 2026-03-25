@@ -87,7 +87,8 @@ def clang_format_executor(
             text=True,
             timeout=timeout,
         )
-        return code_in, result.returncode, result.stdout.strip(), result.stderr.strip()
+        rc = 0 if result.returncode in (0, 1) else result.returncode
+        return code_in, rc, result.stdout.strip(), result.stderr.strip()
 
     except subprocess.TimeoutExpired as e:
         return code_in, 124, (e.stdout or "").strip(), (e.stderr or "timeout").strip()
