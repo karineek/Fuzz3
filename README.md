@@ -49,7 +49,7 @@ python3 blackbox.py   -i clang-format-seeds   -o out   -c crashes   --executor "
    ```
 Other flags to try:  --verbose, --sort-includes:
 ```
-python3 blackbox.py -i clang-format-seeds -o out -c crashes --executor "clang_format_executor" --executor-args "--dry-run --Werror --verbose --sort-includes" --mutators bit_flip delete_line duplicate_line crazy_indentation --observers entropy_observer --oracles entropy_sliding_window_observer --iterations 2000
+python3 blackbox.py -i clang-format-seeds -o out -c crashes --executor "clang_format_executor" --executor-args "--dry-run --Werror --verbose --sort-includes" --mutators bit_flip delete_line duplicate_line crazy_indentation --observers entropy_sliding_window_observer --oracles entropy_oracle --iterations 2000
 ```
 
 
