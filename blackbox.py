@@ -308,8 +308,9 @@ def main() -> int:
             print(f">> (Fuzz3) Writing to output dir {name}")
             shutil.copy2(tmp_path, output_dir / name)
         else:
-            print(f">> (Fuzz3) Writing to crash dir {name}")
-            shutil.copy2(tmp_path, crash_dir / name)
+            name_wt_rc = f"{name}-{_rc}" if _rc is not None else name
+            print(f">> (Fuzz3) Writing to crash dir {name_wt_rc}")
+            shutil.copy2(tmp_path, crash_dir / name_wt_rc)
 
             # If crashed and not in cold list, add parent
             if all(tag not in seed.name for tag in ["_coldlist", "_interesting", "_deadend"]):
