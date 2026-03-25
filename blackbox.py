@@ -11,6 +11,9 @@ import time
 import os
 import math
 
+from collections import deque
+
+
 
 # We need to add all imports needed for the fuzzing
 import Fuzz3.executors
