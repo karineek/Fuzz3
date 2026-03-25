@@ -183,6 +183,7 @@ def main() -> int:
     # Phase 2: fuzz loop
     result_entropy_prev = None
     deads = 0
+    ##recent_active = deque(maxlen=WINDOW_SIZE) # In case we stall, we 
     print(">> (Fuzz3) Start Fuzzing")
     for _ in range(args.iterations):
         # Clean a bit if deads is high!
@@ -275,6 +276,9 @@ def main() -> int:
         else:
             print(f">> (Fuzz3) Writing to crash dir {name}")
             shutil.copy2(tmp_path, crash_dir / name)
+            print(f">> (Fuzz3) Moving parent to output dir cold list {seed}")
+            new_name = seed + "_coldlist"
+            shutil.copy2(seed, new_name)
 
         # Cleaning
         tmp_path.unlink(missing_ok=True)
