@@ -312,7 +312,7 @@ def main() -> int:
             shutil.copy2(tmp_path, crash_dir / name)
 
             # If crashed and not in cold list, add parent
-            if "_coldlist" not in seed.name:
+            if all(tag not in seed.name for tag in ["_coldlist", "_interesting", "_deadend"]):
                 print(f">> (Fuzz3) Moving parent to output dir cold list {seed}")
                 new_name = seed.with_name(seed.name + "_coldlist")
                 seed.rename(new_name)
