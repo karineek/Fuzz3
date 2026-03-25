@@ -47,7 +47,11 @@ Can add ```--replay 1``` and blackbox.py will re-run all the input, output and c
    ```
 python3 blackbox.py   -i clang-format-seeds   -o out   -c crashes   --executor "clang_format_executor"   --executor-args "--dry-run --Werror"  --mutators bit_flip delete_line duplicate_line --observers entropy_observer --oracles entropy_oracle --iterations 400
    ```
-Other flags to try:  --verbose, --sort-includes 
+Other flags to try:  --verbose, --sort-includes:
+```
+python3 blackbox.py -i clang-format-seeds -o out -c crashes --executor "clang_format_executor" --executor-args "--dry-run --Werror --verbose --sort-includes" --mutators bit_flip delete_line duplicate_line crazy_indentation --observers entropy_observer --oracles entropy_sliding_window_observer --iterations 2000
+```
+
 
    Replay all seeds:
    ```
