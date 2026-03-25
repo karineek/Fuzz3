@@ -178,29 +178,38 @@ def main() -> int:
     observers=[getattr(Fuzz3.observers,n,None) for n in args.observers if getattr(Fuzz3.observers,n,None)]
     oracles=[getattr(Fuzz3.oracles,n,None) for n in args.oracles if getattr(Fuzz3.oracles,n,None)]   
     executor=func_to_run # Now we can start using our target wrapper to fuzz the SUT
-    
-    for seed in files:
-        _input, _rc, _out, _err = executor(arguments, seed, args.timeout)
-        for observer in observers:
-            _map_in, _map_out = observer(_input, (_rc, _out, _err)) 
-            results_map[observer.__name__] = (_map_in, _map_out)
-            
-        if _rc == 0:
-           shutil.copy2(seed, output_dir / seed.name)
-           is_valid = True
-        else:
-           shutil.copy2(seed, crash_dir / seed.name)
-
-    if not is_valid:
-        print(">> (Fuzz3) No valid non-crashing seeds found. Exiting.")
-        return 1
-
     if not mutators:
        print(f">> (Fuzz3) No mutators list found from {args.mutators}")
        return 1
 
-    
+    init_stage_results = None
+    for seed in files:
+        _input, _rc, _out, _err = executor(arguments, seed, args.timeout)
+        if _rc == 0:
+            is_valid = True
+            for observer in observers:
+                _map_in, _map_out = observer(_input, (_rc, _out, _err)) 
+                results_map[observer.__name__] = (_map_in, _map_out)
+            for oracle in oracles:
+                if (oracle.__name__ == "entropy_oracle"):
+                    init_stage_results = oracle(seed, results_map) # Just need the last ones!
+                
+            shutil.copy2(seed, output_dir / seed.name)
+        else:
+            shutil.copy2(seed, crash_dir / seed.name)
 
+    if not is_valid or init_stage_results is None:
+        print(">> (Fuzz3) No valid non-crashing seeds found. Exiting.")
+        return 1
+
+    # Check that we are not starting with entropy that is already off
+    _ein, _eout, _edist, _en = results
+    if (_ein < _eout + EPSILON):
+        print(">> (Fuzz3) Init. seeds are not good. Entropy in {_ein} is near entropy out {_eout}. Exiting.")
+        return 1  
+    ################## If we got till here, the initial setup is sensible ##################
+
+    
     ######################
     # Phase 2: fuzz loop #
     ######################
