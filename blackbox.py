@@ -78,6 +78,10 @@ def parse_args():
 #  python3 blackbox.py   -i clang-format-seeds   -o out   -c crashes   --executor "clang_format_executor"   --executor-args "--dry-run --Werror"  --mutators bit_flip delete_line duplicate_line
 # Main of the blackbox fuzzer
 def main() -> int:
+    # ================================================================    
+    #                        ---> ARGS <---
+    # ================================================================ 
+    
     print(">> (Fuzz3) Parsing input arguments")
     args = parse_args()
 
@@ -87,7 +91,11 @@ def main() -> int:
     crash_dir = Path(args.crash_dir)
     output_dir_end = Path(args.output_dir).with_name(Path(args.output_dir).name + "_end") # TO keep the queue not huge!
 
-    
+
+
+    # ================================================================    
+    #                        ---> REPLAY <---
+    # ================================================================ 
     if (args.replay):
         # REPLAY
 
@@ -119,8 +127,12 @@ def main() -> int:
         return 0
 
 
+
+
     
-    # FUZZING:
+    # ================================================================    
+    #                        ---> FUZZING <---
+    # ================================================================
     results_map = {} # Here we store all observations, including coverage information (if we have a coverage oracle)
     shutil.rmtree(output_dir, ignore_errors=True) 
     shutil.rmtree(crash_dir, ignore_errors=True)
@@ -128,7 +140,12 @@ def main() -> int:
     output_dir.mkdir(parents=True, exist_ok=True)
     crash_dir.mkdir(parents=True, exist_ok=True)
 
-    # Phase 1: collect and validate seeds once
+
+
+    
+    ############################################
+    # Phase 1: collect and validate seeds once #
+    ############################################
     if args.generators:
         generators=[getattr(Fuzz3.generators,n,None) for n in args.generators if getattr(Fuzz3.generators,n,None)]
         for g in generators:
@@ -138,7 +155,7 @@ def main() -> int:
     print(">> (Fuzz3) Copy good seeds into output folder")
     files = [p for p in input_dir.glob("*") if p.is_file()]
     if not files:
-        print(f"No Seeds found in {input_dir}/ folder. Exiting.")
+        print(f">> (Fuzz3) No Seeds found in {input_dir}/ folder. Exiting.")
         return 1
 
     # A file in the input dir that passed the executor with 
@@ -173,19 +190,24 @@ def main() -> int:
            shutil.copy2(seed, crash_dir / seed.name)
 
     if not is_valid:
-        print("No valid non-crashing seeds found. Exiting.")
+        print(">> (Fuzz3) No valid non-crashing seeds found. Exiting.")
         return 1
 
     if not mutators:
-       print(f"No mutators list found from {args.mutators}")
+       print(f">> (Fuzz3) No mutators list found from {args.mutators}")
        return 1
 
-    # Phase 2: fuzz loop
+    
+
+    ######################
+    # Phase 2: fuzz loop #
+    ######################
     result_entropy_prev = None
     deads = 0
-    ##recent_active = deque(maxlen=WINDOW_SIZE) # In case we stall, we 
+    recent_active = deque(maxlen=WINDOW_SIZE) # In case we stall, we 
     print(">> (Fuzz3) Start Fuzzing")
     for _ in range(args.iterations):
+        
         # Clean a bit if deads is high!
         if deads > 2*MAX_CAPACITY:
             # move 10% of files from output_dir to output_dir_end
@@ -196,6 +218,13 @@ def main() -> int:
                 dest = output_dir_end / f.name
                 shutil.move(str(f), str(dest))
             deads = 0
+
+            # Bring back cold seeds
+            for f in [f for f in files if "coldlist" in f.name]:
+                if (f.name not in recent_active):
+                    new_name = f.with_name(f.name.replace("_coldlist", ""))
+                    f.rename(new_name)
+                    print(f">> (Fuzz3) Restored: {f.name} → {new_name.name}")
         ## END reducing the queue
 
         # After reducing the queue, continue with the next iteration of fuzzing
@@ -203,10 +232,12 @@ def main() -> int:
         
         # Now we have a proper search
         weights = [ 2.0 if "interesting" in f.name
-               else 0.1 if "deadend" in f.name
+               else 0.1 if "deadend"     in f.name
+               else 0.2 if "coldlist"    in f.name
                else 1.0
                for f in files]
         seed = random.choices(files, weights=weights, k=1)[0]
+        recent_active.append(seed)
 
         print(f">> (Fuzz3) Fuzzing seed: {seed}")
 
@@ -277,8 +308,8 @@ def main() -> int:
             print(f">> (Fuzz3) Writing to crash dir {name}")
             shutil.copy2(tmp_path, crash_dir / name)
             print(f">> (Fuzz3) Moving parent to output dir cold list {seed}")
-            new_name = seed + "_coldlist"
-            shutil.copy2(seed, new_name)
+            new_name = seed.with_name(seed.name + "_coldlist")
+            seed.rename(new_name)
 
         # Cleaning
         tmp_path.unlink(missing_ok=True)
