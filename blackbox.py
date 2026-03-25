@@ -316,6 +316,13 @@ def main() -> int:
                 print(f">> (Fuzz3) Moving parent to output dir cold list {seed}")
                 new_name = seed.with_name(seed.name + "_coldlist")
                 seed.rename(new_name)
+                # Update recent_active deque (if there)
+                try:
+                    idx = recent_active.index(seed.name)
+                    recent_active[idx] = new_name.name
+               except ValueError:
+               # seed.name is not in recent_active; no need to update
+                    pass
 
         # Cleaning
         tmp_path.unlink(missing_ok=True)
