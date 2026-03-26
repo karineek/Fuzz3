@@ -19,12 +19,12 @@ def httpcore_executor(
     arguments: str, seed: Path, timeout: float
 ) -> tuple[str, int, str, str]:
     try:
-        s = seed.read_text().strip()
-        url = str(s.replace(",", " ").split()[2])
+        s = seed.read_text(encoding="utf-8").strip()
+        url = str(s)
     except Exception as e:
-        return e
+        return "", 1, "", str(e)
 
-    code = "import httpcore;" f'print(httpcore.request("GET", "{url}")).status;'
+    code = "import httpcore;" f"a= httpcore.request('GET', '{url}').status;" "print(a)"
 
     try:
         r = subprocess.run(
@@ -33,9 +33,9 @@ def httpcore_executor(
             text=True,
             timeout=timeout,
         )
-        return s, r.returncode, r.stdout, r.stderr
-    except subprocess.TimeoutExpired as e:
-        return s, 124, e.stdout or "", e.stderr or "timeout"
+        return url, r.returncode, r.stdout, r.stderr
+    except Exception as e:
+        return url, 124, e.stdout or "", e.stderr or "timeout"
 
 
 ## Target flaky_triangle (ok to use for triangle too) based on olc_encode_executor

@@ -181,7 +181,10 @@ python3 blackbox.py   -i h3/seeds_encoder/   -o out_h3   -c crashes_h3   --execu
 python3 blackbox.py   -i h3/seeds_decoder/   -o out_h3_d   -c crashes_h3_d   --executor "h3_decode_executor"  --mutators bit_flip --generators h3_decode_generator --observers entropy_observer --oracles entropy_oracle -r 1
    ```
 
-   
+**4. httpcore**
+python3 blackbox.py -i httpcore/seeds -o httpcore/out -c httpcore/crashes --executor httpcore_executor --mutators bit_flip delete_line duplicate_line --observers entropy_observer --oracles entropy_oracle --iterations 400 
+
+python3 blackbox.py -i httpcore/seeds -o httpcore/out -c httpcore/crashes --executor httpcore_executor --mutators bit_flip  --observers entropy_observer --oracles entropy_oracle    
 
 ## Evaluation at Scale
 

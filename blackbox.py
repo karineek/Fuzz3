@@ -23,19 +23,20 @@ WINDOW_SIZE = int(os.environ.get("ENTROPY_WINDOW_SIZE", "1024"))
 EPSILON = float(os.environ.get("EPSILON_SIZE", "0.05"))
 MAX_CAPACITY = math.log2(WINDOW_SIZE)
 
+
 def parse_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-i", "--input-dir", required=True)
     parser.add_argument("-o", "--output-dir", required=True)
     parser.add_argument("-c", "--crash-dir", required=True)
-  
+
     # Post fuzzing - replay all seeds in input, output and crash folders
-    parser.add_argument("-r", "--replay", type=float, default=0) 
-    
+    parser.add_argument("-r", "--replay", type=float, default=0)
+
     # Main functinality: Fuzzing
     parser.add_argument("-t", "--timeout", type=float, default=50)
-    parser.add_argument("-n", "--iterations", type=int, default=50) 
+    parser.add_argument("-n", "--iterations", type=int, default=50)
 
     parser.add_argument("--executor", required=True)
     parser.add_argument("--executor-args", default="")
@@ -48,7 +49,7 @@ def parse_args():
         help="List of enabled generators methods",
     )
     parser.add_argument("-sn", "--seedsno", type=int, default=200)
-    
+
     parser.add_argument(
         "-m",
         "--mutators",
@@ -71,8 +72,8 @@ def parse_args():
         help="List of enabled oracles methods",
     )
 
-
     return parser.parse_args()
+
 
 # Call:  python3 blackbox.py   -i clang-format-seeds   -o out   -c crashes   --executor "clang_format_executor"   --executor-args="--dry-run"
 #  python3 blackbox.py   -i clang-format-seeds   -o out   -c crashes   --executor "clang_format_executor"   --executor-args "--dry-run --Werror"  --mutators bit_flip delete_line duplicate_line
@@ -85,18 +86,21 @@ def main() -> int:
     input_dir = Path(args.input_dir)
     output_dir = Path(args.output_dir)
     crash_dir = Path(args.crash_dir)
-    output_dir_end = Path(args.output_dir).with_name(Path(args.output_dir).name + "_end") # TO keep the queue not huge!
+    output_dir_end = Path(args.output_dir).with_name(
+        Path(args.output_dir).name + "_end"
+    )  # TO keep the queue not huge!
 
-    
-    if (args.replay):
+    if args.replay:
         # REPLAY
 
         # Find our executor in the global space name
-        func_name = args.executor  		# This is the string "greet"
-        arguments = args.executor_args  	# This is the string "Alice"
+        func_name = args.executor  # This is the string "greet"
+        arguments = args.executor_args  # This is the string "Alice"
         func_to_run = getattr(Fuzz3.executors, func_name, None)
 
-        executor=func_to_run # Now we can start using our target wrapper to fuzz the SUT
+        executor = (
+            func_to_run  # Now we can start using our target wrapper to fuzz the SUT
+        )
 
         files = [p for p in input_dir.glob("*") if p.is_file()]
         if files:
@@ -115,14 +119,14 @@ def main() -> int:
             for seed in files:
                 print(f">> (Fuzz3, Reply) {seed}")
                 print(executor(arguments, seed, args.timeout))
-            
+
         return 0
 
-
-    
     # FUZZING:
-    results_map = {} # Here we store all observations, including coverage information (if we have a coverage oracle)
-    shutil.rmtree(output_dir, ignore_errors=True) 
+    results_map = (
+        {}
+    )  # Here we store all observations, including coverage information (if we have a coverage oracle)
+    shutil.rmtree(output_dir, ignore_errors=True)
     shutil.rmtree(crash_dir, ignore_errors=True)
 
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -130,23 +134,27 @@ def main() -> int:
 
     # Phase 1: collect and validate seeds once
     if args.generators:
-        generators=[getattr(Fuzz3.generators,n,None) for n in args.generators if getattr(Fuzz3.generators,n,None)]
+        generators = [
+            getattr(Fuzz3.generators, n, None)
+            for n in args.generators
+            if getattr(Fuzz3.generators, n, None)
+        ]
         for g in generators:
-            total=g(args.seedsno, input_dir)
+            total = g(args.seedsno, input_dir)
             print(f">> (Fuzz3) Generate {total} seeds into output folder")
-    
+
     print(">> (Fuzz3) Copy good seeds into output folder")
     files = [p for p in input_dir.glob("*") if p.is_file()]
     if not files:
         print(f"No Seeds found in {input_dir}/ folder. Exiting.")
         return 1
 
-    # A file in the input dir that passed the executor with 
+    # A file in the input dir that passed the executor with
     # return 0, into the output folder and else into the crash folder
     is_valid = False
 
     # Find our executor in the global space name
-    func_name = args.executor  		# This is a string
+    func_name = args.executor  # This is a string
     arguments = args.executor_args  # This is a string
     func_to_run = getattr(Fuzz3.executors, func_name, None)
 
@@ -155,30 +163,42 @@ def main() -> int:
         return 1
 
     # Build lists of fuzzing components
-    mutators=[getattr(Fuzz3.mutators,n,None) for n in args.mutators if getattr(Fuzz3.mutators,n,None)]
-    observers=[getattr(Fuzz3.observers,n,None) for n in args.observers if getattr(Fuzz3.observers,n,None)]
-    oracles=[getattr(Fuzz3.oracles,n,None) for n in args.oracles if getattr(Fuzz3.oracles,n,None)]   
-    executor=func_to_run # Now we can start using our target wrapper to fuzz the SUT
-    
+    mutators = [
+        getattr(Fuzz3.mutators, n, None)
+        for n in args.mutators
+        if getattr(Fuzz3.mutators, n, None)
+    ]
+    observers = [
+        getattr(Fuzz3.observers, n, None)
+        for n in args.observers
+        if getattr(Fuzz3.observers, n, None)
+    ]
+    oracles = [
+        getattr(Fuzz3.oracles, n, None)
+        for n in args.oracles
+        if getattr(Fuzz3.oracles, n, None)
+    ]
+    executor = func_to_run  # Now we can start using our target wrapper to fuzz the SUT
+
     for seed in files:
         _input, _rc, _out, _err = executor(arguments, seed, args.timeout)
         for observer in observers:
-            _map_in, _map_out = observer(_input, (_rc, _out, _err)) 
+            _map_in, _map_out = observer(_input, (_rc, _out, _err))
             results_map[observer.__name__] = (_map_in, _map_out)
-            
+
         if _rc == 0:
-           shutil.copy2(seed, output_dir / seed.name)
-           is_valid = True
+            shutil.copy2(seed, output_dir / seed.name)
+            is_valid = True
         else:
-           shutil.copy2(seed, crash_dir / seed.name)
+            shutil.copy2(seed, crash_dir / seed.name)
 
     if not is_valid:
         print("No valid non-crashing seeds found. Exiting.")
         return 1
 
     if not mutators:
-       print(f"No mutators list found from {args.mutators}")
-       return 1
+        print(f"No mutators list found from {args.mutators}")
+        return 1
 
     # Phase 2: fuzz loop
     result_entropy_prev = None
@@ -186,7 +206,7 @@ def main() -> int:
     print(">> (Fuzz3) Start Fuzzing")
     for _ in range(args.iterations):
         # Clean a bit if deads is high!
-        if deads > 2*MAX_CAPACITY:
+        if deads > 2 * MAX_CAPACITY:
             # move 10% of files from output_dir to output_dir_end
             files = [f for f in output_dir.iterdir() if f.is_file()]
             n_to_move = max(1, math.ceil(0.1 * len(files)))  # at least 1 file
@@ -199,12 +219,12 @@ def main() -> int:
 
         # After reducing the queue, continue with the next iteration of fuzzing
         files = [p for p in output_dir.glob("*") if p.is_file()]
-        
+
         # Now we have a proper search
-        weights = [ 2.0 if "interesting" in f.name
-               else 0.1 if "deadend" in f.name
-               else 1.0
-               for f in files]
+        weights = [
+            2.0 if "interesting" in f.name else 0.1 if "deadend" in f.name else 1.0
+            for f in files
+        ]
         seed = random.choices(files, weights=weights, k=1)[0]
 
         print(f">> (Fuzz3) Fuzzing seed: {seed}")
@@ -213,13 +233,13 @@ def main() -> int:
         mutator = random.choice(mutators)
         result = mutator(seed)
         if result is None:
-            continue # Mutation failed
+            continue  # Mutation failed
 
         #################### ORACLE 1+2 ####################
         ## CRASH+HANGS ORACLES ##
         # Execute the mutated file
         tmp = tempfile.NamedTemporaryFile(delete=False)
-        if isinstance(result,str):
+        if isinstance(result, str):
             Path(tmp.name).write_text(result)
         else:
             Path(tmp.name).write_bytes(result)
@@ -235,37 +255,37 @@ def main() -> int:
 
         # Observers
         for observer in observers:
-            _map_in, _map_out = observer(_input, (_rc, _out, _err)) 
+            _map_in, _map_out = observer(_input, (_rc, _out, _err))
             results_map[observer.__name__] = (_map_in, _map_out)
 
         # Oracles
         for oracle in oracles:
             results = oracle(tmp_path, results_map)
-            print(results) # Not sure yet what to do with it
-            if (oracle.__name__ == "entropy_oracle"):
+            print(results)  # Not sure yet what to do with it
+            if oracle.__name__ == "entropy_oracle":
                 if result_entropy_prev is not None:
                     _ein, _eout, _edist, _en = results
                     _prev_ein, _prev_eout, _prev_edist, _prev_en = result_entropy_prev
-                    if _en == _prev_en: # only if stable
-                        if (_ein - _eout) > (MAX_CAPACITY - 10*EPSILON):
+                    if _en == _prev_en:  # only if stable
+                        if (_ein - _eout) > (MAX_CAPACITY - 10 * EPSILON):
                             name = name + "_deadend"
                             deads = deads + 1
                         elif _ein < EPSILON and _eout < EPSILON:
-                            name = name + "_deadend" 
+                            name = name + "_deadend"
                             deads = deads + 1
                         elif _eout == 0 or _eout < EPSILON:
-                            name = name + "_interesting"  
+                            name = name + "_interesting"
                             deads = 0
                         elif _ein > _prev_ein:
-                            name = name + "_interesting"   
+                            name = name + "_interesting"
                             deads = 0
                         elif _eout > _prev_eout:
                             name = name + "_interesting"
                             deads = 0
                         elif _en > _prev_en:
-                            name = name + "_interesting" 
+                            name = name + "_interesting"
                             deads = 0
-                            
+
                 result_entropy_prev = results
 
         # Now check where the seed needs to go
@@ -279,6 +299,7 @@ def main() -> int:
         # Cleaning
         tmp_path.unlink(missing_ok=True)
         print(" ")
+
 
 if __name__ == "__main__":
     raise SystemExit(main())
