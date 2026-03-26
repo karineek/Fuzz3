@@ -58,7 +58,7 @@ python3 blackbox.py -i clang-format-seeds -o out -c crashes --executor "clang_fo
 python3 blackbox.py   -i clang-format-seeds   -o out   -c crashes   --executor "clang_format_executor"   --executor-args "--dry-run --Werror"  --mutators bit_flip delete_line duplicate_line --observers entropy_observer --oracles entropy_oracle --iterations 400 --replay 1
    ```
    
-**1.1 missing clang-format**
+***1.1 missing clang-format***
 
 If you get an error similar to 
 ```
@@ -67,6 +67,11 @@ File "...subprocess.py", in _execute_child
 FileNotFoundError: [Errno 2] No such file or directory: 'clang-format'
 ```
 ensure clang-format is installed.
+
+***1.2 Look for bugs***
+```
+for file in *; do /home/ubuntu/llvm-clang-1/llvm-install/usr/local/bin/clang-format --dry-run --Werror --sort-includes "$file"; cat -v "$file"; echo "=========-======>>>>>>>>>>>>>>"; done > ../log-test2.log 2>&1 &
+```
 
 **2. OLC**
    
