@@ -70,11 +70,33 @@ def triangle_executor(
 # Install via the LLVM project, or via apt install
 # See the readme of Fuzz3 regarding how to install it
 ##############################################################################
+def output_formatter_clang_format(in_text :str):
+    commands = [
+        'grep -vF "^" | grep -ve "fuzz3" | grep -vF ".c:" | uniq',
+        "grep -e 'fuzz3_' | cut -d'[' -f2 | uniq",
+        "grep -F '.c:' | cut -d'[' -f2 | uniq"  
+    ]
+
+    final_output = ""
+    for cmd in commands:
+        result = subprocess.run(
+            cmd,
+            shell=True,
+            input=in_text,
+            text=True,
+            capture_output=True
+        )
+        # Add the output of each command to our final string
+        if result.stdout:
+            final_output += result.stdout
+
+    return final_output.strip()
+
 def clang_format_executor(
     arguments, seed: Path, timeout: float
 ) -> tuple[str, int, str, str]:
     try:
-        code_in = seed.read_text(encoding="utf-8").strip()
+        code_in = seed.read_text(encoding="utf-8")
     except UnicodeDecodeError as e:
         return "", 125, "", f"input decode error: {e}"
 
@@ -87,8 +109,8 @@ def clang_format_executor(
             text=True,
             timeout=timeout,
         )
-        return code_in, result.returncode, result.stdout.strip(), result.stderr.strip()
-
+        return code_in, result.returncode, output_formatter_clang_format(result.stdout.strip()), output_formatter_clang_format(result.stderr.strip()) 
+            
     except subprocess.TimeoutExpired as e:
         return code_in, 124, (e.stdout or "").strip(), (e.stderr or "timeout").strip()
 

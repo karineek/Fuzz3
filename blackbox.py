@@ -11,6 +11,8 @@ import time
 import os
 import math
 
+from collections import deque
+
 
 # We need to add all imports needed for the fuzzing
 import Fuzz3.executors
@@ -79,6 +81,10 @@ def parse_args():
 #  python3 blackbox.py   -i clang-format-seeds   -o out   -c crashes   --executor "clang_format_executor"   --executor-args "--dry-run --Werror"  --mutators bit_flip delete_line duplicate_line
 # Main of the blackbox fuzzer
 def main() -> int:
+    # ================================================================
+    #                        ---> ARGS <---
+    # ================================================================
+
     print(">> (Fuzz3) Parsing input arguments")
     args = parse_args()
 
@@ -90,12 +96,15 @@ def main() -> int:
         Path(args.output_dir).name + "_end"
     )  # TO keep the queue not huge!
 
+    # ================================================================
+    #                        ---> REPLAY <---
+    # ================================================================
     if args.replay:
         # REPLAY
 
         # Find our executor in the global space name
-        func_name = args.executor  # This is the string "greet"
-        arguments = args.executor_args  # This is the string "Alice"
+        func_name = args.executor  # This is a string
+        arguments = args.executor_args  # This is a string
         func_to_run = getattr(Fuzz3.executors, func_name, None)
 
         executor = (
@@ -122,7 +131,9 @@ def main() -> int:
 
         return 0
 
-    # FUZZING:
+    # ================================================================
+    #                        ---> FUZZING <---
+    # ================================================================
     results_map = (
         {}
     )  # Here we store all observations, including coverage information (if we have a coverage oracle)
@@ -132,7 +143,9 @@ def main() -> int:
     output_dir.mkdir(parents=True, exist_ok=True)
     crash_dir.mkdir(parents=True, exist_ok=True)
 
-    # Phase 1: collect and validate seeds once
+    ############################################
+    # Phase 1: collect and validate seeds once #
+    ############################################
     if args.generators:
         generators = [
             getattr(Fuzz3.generators, n, None)
@@ -146,7 +159,7 @@ def main() -> int:
     print(">> (Fuzz3) Copy good seeds into output folder")
     files = [p for p in input_dir.glob("*") if p.is_file()]
     if not files:
-        print(f"No Seeds found in {input_dir}/ folder. Exiting.")
+        print(f">> (Fuzz3) No Seeds found in {input_dir}/ folder. Exiting.")
         return 1
 
     # A file in the input dir that passed the executor with
@@ -157,9 +170,8 @@ def main() -> int:
     func_name = args.executor  # This is a string
     arguments = args.executor_args  # This is a string
     func_to_run = getattr(Fuzz3.executors, func_name, None)
-
     if not func_to_run:
-        print(f"No executor found {func_to_run} for {func_name}")
+        print(f">> (Fuzz3) No executor found {func_to_run} for {func_name}")
         return 1
 
     # Build lists of fuzzing components
@@ -179,34 +191,53 @@ def main() -> int:
         if getattr(Fuzz3.oracles, n, None)
     ]
     executor = func_to_run  # Now we can start using our target wrapper to fuzz the SUT
+    if not mutators:
+        print(f">> (Fuzz3) No mutators list found from {args.mutators}")
+        return 1
 
+    init_stage_results = None
     for seed in files:
         _input, _rc, _out, _err = executor(arguments, seed, args.timeout)
-        for observer in observers:
-            _map_in, _map_out = observer(_input, (_rc, _out, _err))
-            results_map[observer.__name__] = (_map_in, _map_out)
-
         if _rc == 0:
-            shutil.copy2(seed, output_dir / seed.name)
             is_valid = True
+            for observer in observers:
+                _map_in, _map_out = observer(_input, (_rc, _out, _err))
+                results_map[observer.__name__] = (_map_in, _map_out)
+            for oracle in oracles:
+                if oracle.__name__ == "entropy_oracle":
+                    init_stage_results = oracle(
+                        seed, results_map
+                    )  # Just need the last ones!
+
+            shutil.copy2(seed, output_dir / seed.name)
         else:
             shutil.copy2(seed, crash_dir / seed.name)
 
-    if not is_valid:
-        print("No valid non-crashing seeds found. Exiting.")
+    if not is_valid or init_stage_results is None:
+        print(">> (Fuzz3) No valid non-crashing seeds found. Exiting.")
         return 1
 
-    if not mutators:
-        print(f"No mutators list found from {args.mutators}")
+    # Check that we are not starting with entropy that is already off
+    _ein, _eout, _edist, _en = init_stage_results
+    if _ein < _eout + EPSILON:
+        print(
+            f">> (Fuzz3) Init. seeds are not good. Entropy in {_ein} is near entropy out {_eout}. Exiting."
+        )
         return 1
+    ################## If we got till here, the initial setup is sensible ##################
 
-    # Phase 2: fuzz loop
+    ######################
+    # Phase 2: fuzz loop #
+    ######################
     result_entropy_prev = None
     deads = 0
+    recent_active = deque(maxlen=WINDOW_SIZE)  # In case we stall, we
     print(">> (Fuzz3) Start Fuzzing")
     for _ in range(args.iterations):
+
         # Clean a bit if deads is high!
         if deads > 2 * MAX_CAPACITY:
+            print(f">> (Fuzz3) Shaking the seeds after {deads} no interesting seeds.")
             # move 10% of files from output_dir to output_dir_end
             files = [f for f in output_dir.iterdir() if f.is_file()]
             n_to_move = max(1, math.ceil(0.1 * len(files)))  # at least 1 file
@@ -215,6 +246,13 @@ def main() -> int:
                 dest = output_dir_end / f.name
                 shutil.move(str(f), str(dest))
             deads = 0
+
+            # Bring back cold seeds
+            for f in [f for f in files if "_coldlist" in f.name]:
+                if f.name not in recent_active:
+                    new_name = f.with_name(f.name.replace("_coldlist", ""))
+                    f.rename(new_name)
+                    print(f">> (Fuzz3) Restored: {f.name} → {new_name.name}")
         ## END reducing the queue
 
         # After reducing the queue, continue with the next iteration of fuzzing
@@ -222,10 +260,17 @@ def main() -> int:
 
         # Now we have a proper search
         weights = [
-            2.0 if "interesting" in f.name else 0.1 if "deadend" in f.name else 1.0
+            (
+                2.0
+                if "interesting" in f.name
+                else (
+                    0.1 if "deadend" in f.name else 0.2 if "coldlist" in f.name else 1.0
+                )
+            )
             for f in files
         ]
         seed = random.choices(files, weights=weights, k=1)[0]
+        recent_active.append(seed.name)
 
         print(f">> (Fuzz3) Fuzzing seed: {seed}")
 
@@ -293,8 +338,25 @@ def main() -> int:
             print(f">> (Fuzz3) Writing to output dir {name}")
             shutil.copy2(tmp_path, output_dir / name)
         else:
-            print(f">> (Fuzz3) Writing to crash dir {name}")
-            shutil.copy2(tmp_path, crash_dir / name)
+            name_wt_rc = f"{name}-{_rc}" if _rc is not None else name
+            print(f">> (Fuzz3) Writing to crash dir {name_wt_rc}")
+            shutil.copy2(tmp_path, crash_dir / name_wt_rc)
+
+            # If crashed and not in cold list, add parent
+            if all(
+                tag not in seed.name
+                for tag in ["_coldlist", "_interesting", "_deadend"]
+            ):
+                print(f">> (Fuzz3) Moving parent to output dir cold list {seed}")
+                new_name = seed.with_name(seed.name + "_coldlist")
+                seed.rename(new_name)
+                # Update recent_active deque (if there)
+                try:
+                    idx = recent_active.index(seed.name)
+                    recent_active[idx] = new_name.name
+                except ValueError:
+                    # seed.name is not in recent_active; no need to update
+                    pass
 
         # Cleaning
         tmp_path.unlink(missing_ok=True)
