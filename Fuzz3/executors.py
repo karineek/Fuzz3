@@ -71,17 +71,27 @@ def triangle_executor(
 # See the readme of Fuzz3 regarding how to install it
 ##############################################################################
 def output_formatter_clang_format(in_text :str):
-    # The command (no 'echo' needed here)
-    command = 'grep -vF "^" | grep -ve "fuzz3" || grep -e "fuzz3_" | cut -d\'[\' -f2'
-    result = subprocess.run(
-        command, 
-        shell=True, 
-        input=in_text,  # This acts like 'echo "..." |'
-        text=True, 
-        capture_output=True
-    )
+    commands = [
+        'grep -vF "^" | grep -ve "fuzz3" | grep -vF ".c:"',
+        "grep -e 'fuzz3_' | cut -d'[' -f2 | uniq",
+        "grep -F '.c:' | cut -d'[' -f2 | uniq"  
+    ]
 
-    return result.stdout
+    final_output = ""
+    for cmd in commands:
+        result = subprocess.run(
+            cmd,
+            shell=True,
+            input=in_text,
+            text=True,
+            capture_output=True
+        )
+        # Add the output of each command to our final string
+        if result.stdout:
+            final_output += result.stdout
+
+    print(final_output)
+    return final_output
 
 def clang_format_executor(
     arguments, seed: Path, timeout: float
