@@ -70,7 +70,7 @@ def triangle_executor(
 # Install via the LLVM project, or via apt install
 # See the readme of Fuzz3 regarding how to install it
 ##############################################################################
-def output_formatter_clang_format(in_text :str)
+def output_formatter_clang_format(in_text :str):
     # The command (no 'echo' needed here)
     command = 'grep -vF "^" | grep -ve "fuzz3" || grep -e "fuzz3_" | cut -d\'[\' -f2'
     result = subprocess.run(
