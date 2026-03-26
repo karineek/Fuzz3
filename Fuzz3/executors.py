@@ -70,6 +70,19 @@ def triangle_executor(
 # Install via the LLVM project, or via apt install
 # See the readme of Fuzz3 regarding how to install it
 ##############################################################################
+def output_formatter_clang_format(in_text :str)
+    # The command (no 'echo' needed here)
+    command = 'grep -vF "^" | grep -ve "fuzz3" || grep -e "fuzz3_" | cut -d\'[\' -f2'
+    result = subprocess.run(
+        command, 
+        shell=True, 
+        input=in_text,  # This acts like 'echo "..." |'
+        text=True, 
+        capture_output=True
+    )
+
+    return result.stdout
+
 def clang_format_executor(
     arguments, seed: Path, timeout: float
 ) -> tuple[str, int, str, str]:
@@ -89,7 +102,9 @@ def clang_format_executor(
         )
         rc = 0 if result.returncode in [0, 1] else result.returncode
         ## print(f">>>> (executors) is {result.returncode} with RC is {rc}")
-        return code_in, rc, result.stdout.strip(), result.stderr.strip()
+        return code_in, rc, 
+                output_formatter_clang_format(result.stdout.strip()),  # Remove noise of the fuzzer file name 
+                output_formatter_clang_format(result.stderr.strip())   # Remove noise of the fuzzer file name 
 
     except subprocess.TimeoutExpired as e:
         return code_in, 124, (e.stdout or "").strip(), (e.stderr or "timeout").strip()
