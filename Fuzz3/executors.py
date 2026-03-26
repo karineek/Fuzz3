@@ -90,7 +90,6 @@ def output_formatter_clang_format(in_text :str):
         if result.stdout:
             final_output += result.stdout
 
-    print(final_output)
     return final_output.strip()
 
 def clang_format_executor(
