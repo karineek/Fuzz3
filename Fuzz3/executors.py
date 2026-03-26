@@ -113,8 +113,8 @@ def clang_format_executor(
         rc = 0 if result.returncode in [0, 1] else result.returncode
         ## print(f">>>> (executors) is {result.returncode} with RC is {rc}")
         return code_in, rc, 
-                output_formatter_clang_format(result.stdout.strip()),  # Remove noise of the fuzzer file name 
-                output_formatter_clang_format(result.stderr.strip())   # Remove noise of the fuzzer file name 
+            output_formatter_clang_format(result.stdout.strip()),  # Remove noise of the fuzzer file name 
+            output_formatter_clang_format(result.stderr.strip())   # Remove noise of the fuzzer file name 
 
     except subprocess.TimeoutExpired as e:
         return code_in, 124, (e.stdout or "").strip(), (e.stderr or "timeout").strip()
