@@ -72,7 +72,7 @@ def triangle_executor(
 ##############################################################################
 def output_formatter_clang_format(in_text :str):
     commands = [
-        'grep -vF "^" | grep -ve "fuzz3" | grep -vF ".c:"',
+        'grep -vF "^" | grep -ve "fuzz3" | grep -vF ".c:" | uniq',
         "grep -e 'fuzz3_' | cut -d'[' -f2 | uniq",
         "grep -F '.c:' | cut -d'[' -f2 | uniq"  
     ]
@@ -91,7 +91,7 @@ def output_formatter_clang_format(in_text :str):
             final_output += result.stdout
 
     print(final_output)
-    return final_output
+    return final_output.strip()
 
 def clang_format_executor(
     arguments, seed: Path, timeout: float
