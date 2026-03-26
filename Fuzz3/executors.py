@@ -96,7 +96,7 @@ def clang_format_executor(
     arguments, seed: Path, timeout: float
 ) -> tuple[str, int, str, str]:
     try:
-        code_in = seed.read_text(encoding="utf-8").strip()
+        code_in = seed.read_text(encoding="utf-8")
     except UnicodeDecodeError as e:
         return "", 125, "", f"input decode error: {e}"
 
@@ -109,9 +109,7 @@ def clang_format_executor(
             text=True,
             timeout=timeout,
         )
-        rc = 0 if result.returncode in [0, 1] else result.returncode
-        ## print(f">>>> (executors) is {result.returncode} with RC is {rc}")
-        return code_in, rc, output_formatter_clang_format(result.stdout.strip()), output_formatter_clang_format(result.stderr.strip()) 
+        return code_in, result.returncode, output_formatter_clang_format(result.stdout.strip()), output_formatter_clang_format(result.stderr.strip()) 
             
     except subprocess.TimeoutExpired as e:
         return code_in, 124, (e.stdout or "").strip(), (e.stderr or "timeout").strip()
