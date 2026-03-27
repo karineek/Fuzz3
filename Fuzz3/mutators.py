@@ -1,5 +1,6 @@
 #WBL 21 Mar 2026 for triangle add: add_one sub_one equilateral isosceles (and none debug)
 import random
+import re
 from pathlib import Path
 
 def bit_flip(seed: Path) -> bytes | None:
