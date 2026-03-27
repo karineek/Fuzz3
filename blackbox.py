@@ -280,8 +280,6 @@ def main() -> int:
         if result is None:
             continue  # Mutation failed
 
-        #################### ORACLE 1+2 ####################
-        ## CRASH+HANGS ORACLES ##
         # Execute the mutated file
         tmp = tempfile.NamedTemporaryFile(delete=False)
         if isinstance(result, str):
@@ -293,7 +291,7 @@ def main() -> int:
         name = f"fuzz3_{int(time.time_ns())}"
 
         _input, _rc, _out, _err = executor(arguments, tmp_path, args.timeout)
-        #################### END ORACLE 1+2 ####################
+        #################### END Execution ####################
 
         # Running Oracle - third oracle using data from Observers
         # Here we will use _out and _err
@@ -333,6 +331,9 @@ def main() -> int:
 
                 result_entropy_prev = results
 
+        #################### ORACLE 1+2 #################### 
+        ## In future work, this needs to be x2 observers and orcales
+        ## CRASH+HANGS ORACLES ##
         # Now check where the seed needs to go
         if _rc == 0:
             print(f">> (Fuzz3) Writing to output dir {name}")
@@ -357,6 +358,7 @@ def main() -> int:
                 except ValueError:
                     # seed.name is not in recent_active; no need to update
                     pass
+        #################### END ORACLE 1+2 ####################
 
         # Cleaning
         tmp_path.unlink(missing_ok=True)
