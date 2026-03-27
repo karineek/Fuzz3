@@ -19,8 +19,7 @@ def script_executor(
     arguments: str, seed: Path, timeout: float
 ) -> tuple[str, int, str, str]:
     try:
-        s = seed.read_text(encoding="utf-8").strip()
-        url = str(s)
+        code_in = seed.read_text(encoding="utf-8")
     except Exception as e:
         return "", 1, "", str(e)
 
@@ -34,7 +33,7 @@ def script_executor(
             timeout=timeout,
         )
         return code_in, result.returncode, result.stdout.strip(), result.stderr.strip()
-            
+
     except subprocess.TimeoutExpired as e:
         return code_in, 124, (e.stdout or "").strip(), (e.stderr or "timeout").strip()
 
