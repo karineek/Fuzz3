@@ -14,6 +14,30 @@ def dummy_executor(
     print(f"Running on {seed} with args {arguments}")
     return "TEST", 0, "TEST", "TEST"
 
+## General executor
+def script_executor(
+    arguments: str, seed: Path, timeout: float
+) -> tuple[str, int, str, str]:
+    try:
+        s = seed.read_text(encoding="utf-8").strip()
+        url = str(s)
+    except Exception as e:
+        return "", 1, "", str(e)
+
+    arg_parsed = shlex.split(arguments)
+    cmd = [*arg_parsed, str(seed)]
+    try:
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+        return code_in, result.returncode, result.stdout.strip(), result.stderr.strip()
+            
+    except subprocess.TimeoutExpired as e:
+        return code_in, 124, (e.stdout or "").strip(), (e.stderr or "timeout").strip()
+
 
 def httpcore_executor(
     arguments: str, seed: Path, timeout: float
