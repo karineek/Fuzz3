@@ -104,6 +104,9 @@ def add_one_mixed_tokens(seed: Path) -> str | None:
     if not matches:
         return None
 
+    ## NOTE: these 5 lines were debugged with ChatGPT (Thinking 5.4)
+    ## 27-03-2026 based on add_one which had an issue where
+    ## it fails on non-numeric tokens.
     m = random.choice(matches)
     old_value = m.group(0)
     new_value = str(int(old_value) + 1)
