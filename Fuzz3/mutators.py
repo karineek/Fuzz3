@@ -94,7 +94,22 @@ def add_one(seed: Path) -> str | None:
     words[i] = str(int(words[i]) + 1)
     return " ".join(words)
 
-#randomly reduce one side of seed by 1
+def add_one_mixed_tokens(seed: Path) -> str | None:
+    data = seed.read_text(errors="ignore")
+    if not data:
+        return None
+
+    matches = list(re.finditer(r"-?\d+", data))
+    if not matches:
+        return None
+
+    m = random.choice(matches)
+    old_value = m.group(0)
+    new_value = str(int(old_value) + 1)
+
+    return data[:m.start()] + new_value + data[m.end():]
+
+#randomly reduce one side of the seed by 1
 def sub_one(seed: Path) -> str | None:
     data = seed.read_text(errors="ignore")
     if not data:
