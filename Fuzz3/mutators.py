@@ -2,6 +2,67 @@
 import random
 import re
 from pathlib import Path
+import tempfile
+import shutil
+import subprocess
+from pathlib import Path
+import os
+import string
+
+GRAYC = os.path.expanduser("~/GrayC/build/bin/grayc")
+timeout = 50
+
+## HELPER function, do not call it directly
+def __grayc_mutators(seed: Path, mutator) -> str | None:
+    if not seed.exists() or not seed.is_file():
+        return None
+
+    suffix = seed.suffix or ".c"
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp_path = Path(tmpdir) / f"input{suffix}"
+        shutil.copy2(seed, tmp_path)
+
+        cmd = [
+            GRAYC,
+            mutator,
+            "--mutate",
+            "--apply-mutation",
+            str(tmp_path),
+            "--",
+        ]
+
+        try:
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+            )
+
+            data = tmp_path.read_text(errors="ignore")
+            if not data:
+                return None
+
+            return data
+
+        except subprocess.TimeoutExpired as e:
+            return None
+
+def cmutation_assignment_expression_mutator(seed: Path) -> str | None:
+    return __grayc_mutators(seed, '-mutations="-*,cmutation-assignment-expression-mutator"')
+
+def cmutation_conditional_expression_mutator(seed: Path) -> str | None:
+    return __grayc_mutators(seed, '-mutations="-*,cmutation-conditional-expression-mutator"')
+
+def cmutation_duplicate_statement_mutator(seed: Path) -> str | None:
+    return __grayc_mutators(seed, '-mutations="-*,cmutation-duplicate-statement-mutator"')
+
+def cmutation_jump_mutator(seed: Path) -> str | None:
+    return __grayc_mutators(seed, '-mutations="-*,cmutation-jump-mutator"') 
+
+def cmutation_unary(seed: Path) -> str | None:
+    return __grayc_mutators(seed, '-mutations="-*,cmutation-unary"')
 
 def bit_flip(seed: Path) -> bytes | None:
     data = seed.read_bytes()
@@ -74,6 +135,22 @@ def crazy_indentation(seed: Path) -> str | None:
             s.insert(i, random.choice(punct))
 
     return "".join(s)
+
+def insert_block_comment(seed: Path) -> str | None:
+    data = seed.read_text(errors="ignore")
+    if not data:
+        return None
+
+    size = random.randrange(15) + 4
+    chars=string.ascii_uppercase + string.digits
+    random_text = ''.join(random.choice(chars) for _ in range(size))
+    comment = f"/* TODO: {random_text} */"
+    lines = data.splitlines()
+    if not lines:
+        return None
+    i = random.randrange(len(lines))
+    lines.insert(i, comment)
+    return "\n".join(lines)
 
 def none(seed: Path) -> bytes | None:
     data = seed.read_bytes()
