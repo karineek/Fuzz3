@@ -2,6 +2,7 @@
 ```
 sudo apt update
 sudo apt install texlive-latex-extra texlive-fonts-recommended texlive-latex-recommended
+sudo apt install texlive-pictures texlive-science
 ./setup-cirq.sh
 ```
 
