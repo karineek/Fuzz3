@@ -1,3 +1,9 @@
+## Install:
+sudo apt update
+sudo apt install texlive-latex-extra texlive-fonts-recommended texlive-latex-recommended
+
+## Fuzz:
+
 To run with none mutator
 
 ```
@@ -16,3 +22,4 @@ python3 blackbox.py \
 >> (Fuzz3) Copy good seeds into output folder
 ....
 ```
+
