@@ -1,4 +1,6 @@
-Initial error:
+## Raw Errors:
+
+We got high out entropy, and investigated outside fuzzing loop. Initial error:
 
 ```
 cirq-core/cirq/contrib/qcircuit/qcircuit_pdf_test.py F                                                                                               [ 72%]
@@ -485,3 +487,998 @@ FAILED cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py::test_ren
 ===================================== 2 failed, 20025 passed, 10 skipped, 64 xfailed, 21 warnings in 287.81s (0:04:47) ====================================
 ```
 
+## Issues discovered during fuzzing:
+
+```
+ubuntu@fuzzer-03:~/git/try/H-Fuzz$ ./Cirq/script.sh 
+cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py:41: AssertionError
+!!! pdflatex failed on run 1 (exit code 1) !!!
+! LaTeX Error: File `standalone.cls' not found.
+!  ==> Fatal error occurred, no output PDF file produced!
+        os_error = None
+            except (OSError, IOError) as e:
+                # Use FileNotFoundError when python 2 is dropped
+                os_error = e
+                if os_error.errno == errno.ENOENT:
+            except subprocess.CalledProcessError as e:
+                # For all other errors print the output and raise the error
+                except (OSError, IOError, subprocess.CalledProcessError):
+                        except (OSError, IOError) as e:
+                            # Use FileNotFoundError when python 2 is dropped
+                CompilerError(
+E           pylatex.errors.CompilerError: No LaTex compiler was found
+.venv/lib/python3.11/site-packages/pylatex/document.py:325: CompilerError
+=============================== warnings summary ===============================
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles1-error1]
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles2-error2]
+    warnings.warn(
+    warnings.warn(f"Op {op} no qubits.")
+    warnings.warn(
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+    warnings.warn("Optimal parameters could not be found for curve fit", RuntimeWarning)
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+    warnings.warn(
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+FAILED cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py::test_render_circuit
+FAILED cirq-core/cirq/contrib/qcircuit/qcircuit_pdf_test.py::test_qcircuit_pdf
+= 2 failed, 20025 passed, 10 skipped, 64 xfailed, 21 warnings in 285.91s (0:04:45) =
+```
+
+and in fuzzing:
+
+```
+ubuntu@fuzzer-03:~/git/try/H-Fuzz$ python3 blackbox.py   -i Cirq/in   -o Cirq/out   -c Cirq/crashes   --executor script_executor   --executor-args "./Cirq/script.sh"   --mutators none   --observers entropy_sliding_window_observer   --oracles entropy_oracle   --iterations 1000 --timeout 500
+>> (Fuzz3) Parsing input arguments
+>> (Fuzz3) Start
+>> (Fuzz3) Copy good seeds into output folder
+Executing ['./Cirq/script.sh', 'Cirq/in/empty_config.ini']
+Testing seed Cirq/in/empty_config.ini, with results 0,,cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py:41: AssertionError
+!!! pdflatex failed on run 1 (exit code 1) !!!
+! LaTeX Error: File `standalone.cls' not found.
+!  ==> Fatal error occurred, no output PDF file produced!
+        os_error = None
+            except (OSError, IOError) as e:
+                # Use FileNotFoundError when python 2 is dropped
+                os_error = e
+                if os_error.errno == errno.ENOENT:
+            except subprocess.CalledProcessError as e:
+                # For all other errors print the output and raise the error
+                except (OSError, IOError, subprocess.CalledProcessError):
+                        except (OSError, IOError) as e:
+                            # Use FileNotFoundError when python 2 is dropped
+                CompilerError(
+E           pylatex.errors.CompilerError: No LaTex compiler was found
+.venv/lib/python3.11/site-packages/pylatex/document.py:325: CompilerError
+=============================== warnings summary ===============================
+    warnings.warn(f"Op {op} no qubits.")
+    warnings.warn(
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles2-error2]
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles1-error1]
+    warnings.warn(
+    warnings.warn("Optimal parameters could not be found for curve fit", RuntimeWarning)
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+    warnings.warn(
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+FAILED cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py::test_render_circuit
+FAILED cirq-core/cirq/contrib/qcircuit/qcircuit_pdf_test.py::test_qcircuit_pdf
+= 2 failed, 20025 passed, 10 skipped, 64 xfailed, 21 warnings in 286.75s (0:04:46) =
+>> (Fuzz3) Init. seeds are not good. Entropy in -0.0 is near entropy out -0.0. Exiting.
+ubuntu@fuzzer-03:~/git/try/H-Fuzz$ cd Cirq/in/
+ubuntu@fuzzer-03:~/git/try/H-Fuzz/Cirq/in$ ls -l
+total 4
+-rw-rw-r-- 1 ubuntu ubuntu 2 Mar 31 00:09 empty_config.ini
+ubuntu@fuzzer-03:~/git/try/H-Fuzz/Cirq/in$ cp empty_config.ini empty_config-1.ini 
+ubuntu@fuzzer-03:~/git/try/H-Fuzz/Cirq/in$ cp empty_config.ini empty_config-2.ini 
+ubuntu@fuzzer-03:~/git/try/H-Fuzz/Cirq/in$ cp empty_config.ini empty_config-3.ini 
+ubuntu@fuzzer-03:~/git/try/H-Fuzz/Cirq/in$ cp empty_config.ini empty_config-4.ini 
+ubuntu@fuzzer-03:~/git/try/H-Fuzz/Cirq/in$ cp empty_config.ini empty_config-5.ini 
+ubuntu@fuzzer-03:~/git/try/H-Fuzz/Cirq/in$ cd ..
+ubuntu@fuzzer-03:~/git/try/H-Fuzz/Cirq$ cd ..
+ubuntu@fuzzer-03:~/git/try/H-Fuzz$ python3 blackbox.py   -i Cirq/in   -o Cirq/out   -c Cirq/crashes   --executor script_executor   --executor-args "./Cirq/script.sh"   --mutators none   --observers entropy_sliding_window_observer   --oracles entropy_oracle   --iterations 1000 --timeout 500
+>> (Fuzz3) Parsing input arguments
+>> (Fuzz3) Start
+>> (Fuzz3) Copy good seeds into output folder
+Executing ['./Cirq/script.sh', 'Cirq/in/empty_config-5.ini']
+Testing seed Cirq/in/empty_config-5.ini, with results 0,,os_error = None
+            except (OSError, IOError) as e:
+                # Use FileNotFoundError when python 2 is dropped
+                os_error = e
+                if os_error.errno == errno.ENOENT:
+            except subprocess.CalledProcessError as e:
+                # For all other errors print the output and raise the error
+                except (OSError, IOError, subprocess.CalledProcessError):
+                        except (OSError, IOError) as e:
+                            # Use FileNotFoundError when python 2 is dropped
+                CompilerError(
+E           pylatex.errors.CompilerError: No LaTex compiler was found
+.venv/lib/python3.11/site-packages/pylatex/document.py:325: CompilerError
+cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py:41: AssertionError
+!!! pdflatex failed on run 1 (exit code 1) !!!
+! LaTeX Error: File `standalone.cls' not found.
+!  ==> Fatal error occurred, no output PDF file produced!
+=============================== warnings summary ===============================
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+    warnings.warn("Optimal parameters could not be found for curve fit", RuntimeWarning)
+    warnings.warn(
+    warnings.warn(
+    warnings.warn(f"Op {op} no qubits.")
+    warnings.warn(
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles1-error1]
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles2-error2]
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+FAILED cirq-core/cirq/contrib/qcircuit/qcircuit_pdf_test.py::test_qcircuit_pdf
+FAILED cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py::test_render_circuit
+= 2 failed, 20025 passed, 10 skipped, 64 xfailed, 21 warnings in 288.79s (0:04:48) =
+Executing ['./Cirq/script.sh', 'Cirq/in/empty_config-2.ini']
+Testing seed Cirq/in/empty_config-2.ini, with results 0,,os_error = None
+            except (OSError, IOError) as e:
+                # Use FileNotFoundError when python 2 is dropped
+                os_error = e
+                if os_error.errno == errno.ENOENT:
+            except subprocess.CalledProcessError as e:
+                # For all other errors print the output and raise the error
+                except (OSError, IOError, subprocess.CalledProcessError):
+                        except (OSError, IOError) as e:
+                            # Use FileNotFoundError when python 2 is dropped
+                CompilerError(
+E           pylatex.errors.CompilerError: No LaTex compiler was found
+.venv/lib/python3.11/site-packages/pylatex/document.py:325: CompilerError
+cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py:41: AssertionError
+!!! pdflatex failed on run 1 (exit code 1) !!!
+! LaTeX Error: File `standalone.cls' not found.
+!  ==> Fatal error occurred, no output PDF file produced!
+=============================== warnings summary ===============================
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles1-error1]
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles2-error2]
+    warnings.warn(
+    warnings.warn(f"Op {op} no qubits.")
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+    warnings.warn("Optimal parameters could not be found for curve fit", RuntimeWarning)
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+    warnings.warn(
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+    warnings.warn(
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+FAILED cirq-core/cirq/contrib/qcircuit/qcircuit_pdf_test.py::test_qcircuit_pdf
+FAILED cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py::test_render_circuit
+= 2 failed, 20025 passed, 10 skipped, 64 xfailed, 21 warnings in 286.68s (0:04:46) =
+Executing ['./Cirq/script.sh', 'Cirq/in/empty_config.ini']
+Testing seed Cirq/in/empty_config.ini, with results 0,,cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py:41: AssertionError
+!!! pdflatex failed on run 1 (exit code 1) !!!
+! LaTeX Error: File `standalone.cls' not found.
+!  ==> Fatal error occurred, no output PDF file produced!
+        os_error = None
+            except (OSError, IOError) as e:
+                # Use FileNotFoundError when python 2 is dropped
+                os_error = e
+                if os_error.errno == errno.ENOENT:
+            except subprocess.CalledProcessError as e:
+                # For all other errors print the output and raise the error
+                except (OSError, IOError, subprocess.CalledProcessError):
+                        except (OSError, IOError) as e:
+                            # Use FileNotFoundError when python 2 is dropped
+                CompilerError(
+E           pylatex.errors.CompilerError: No LaTex compiler was found
+.venv/lib/python3.11/site-packages/pylatex/document.py:325: CompilerError
+=============================== warnings summary ===============================
+    warnings.warn(
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles1-error1]
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles2-error2]
+    warnings.warn(
+    warnings.warn(f"Op {op} no qubits.")
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+    warnings.warn("Optimal parameters could not be found for curve fit", RuntimeWarning)
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+    warnings.warn(
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+FAILED cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py::test_render_circuit
+FAILED cirq-core/cirq/contrib/qcircuit/qcircuit_pdf_test.py::test_qcircuit_pdf
+= 2 failed, 20025 passed, 10 skipped, 64 xfailed, 21 warnings in 282.78s (0:04:42) =
+Executing ['./Cirq/script.sh', 'Cirq/in/empty_config-3.ini']
+Testing seed Cirq/in/empty_config-3.ini, with results 0,,cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py:41: AssertionError
+!!! pdflatex failed on run 1 (exit code 1) !!!
+! LaTeX Error: File `standalone.cls' not found.
+!  ==> Fatal error occurred, no output PDF file produced!
+        os_error = None
+            except (OSError, IOError) as e:
+                # Use FileNotFoundError when python 2 is dropped
+                os_error = e
+                if os_error.errno == errno.ENOENT:
+            except subprocess.CalledProcessError as e:
+                # For all other errors print the output and raise the error
+                except (OSError, IOError, subprocess.CalledProcessError):
+                        except (OSError, IOError) as e:
+                            # Use FileNotFoundError when python 2 is dropped
+                CompilerError(
+E           pylatex.errors.CompilerError: No LaTex compiler was found
+.venv/lib/python3.11/site-packages/pylatex/document.py:325: CompilerError
+=============================== warnings summary ===============================
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+    warnings.warn("Optimal parameters could not be found for curve fit", RuntimeWarning)
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+    warnings.warn(
+    warnings.warn(
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles2-error2]
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles1-error1]
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+    warnings.warn(
+    warnings.warn(f"Op {op} no qubits.")
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+FAILED cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py::test_render_circuit
+FAILED cirq-core/cirq/contrib/qcircuit/qcircuit_pdf_test.py::test_qcircuit_pdf
+= 2 failed, 20025 passed, 10 skipped, 64 xfailed, 21 warnings in 286.06s (0:04:46) =
+Executing ['./Cirq/script.sh', 'Cirq/in/empty_config-1.ini']
+Testing seed Cirq/in/empty_config-1.ini, with results 0,,os_error = None
+            except (OSError, IOError) as e:
+                # Use FileNotFoundError when python 2 is dropped
+                os_error = e
+                if os_error.errno == errno.ENOENT:
+            except subprocess.CalledProcessError as e:
+                # For all other errors print the output and raise the error
+                except (OSError, IOError, subprocess.CalledProcessError):
+                        except (OSError, IOError) as e:
+                            # Use FileNotFoundError when python 2 is dropped
+                CompilerError(
+E           pylatex.errors.CompilerError: No LaTex compiler was found
+.venv/lib/python3.11/site-packages/pylatex/document.py:325: CompilerError
+cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py:41: AssertionError
+!!! pdflatex failed on run 1 (exit code 1) !!!
+! LaTeX Error: File `standalone.cls' not found.
+!  ==> Fatal error occurred, no output PDF file produced!
+=============================== warnings summary ===============================
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+    warnings.warn(f"Op {op} no qubits.")
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles2-error2]
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles1-error1]
+    warnings.warn(
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+    warnings.warn(
+    warnings.warn(
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+    warnings.warn("Optimal parameters could not be found for curve fit", RuntimeWarning)
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+FAILED cirq-core/cirq/contrib/qcircuit/qcircuit_pdf_test.py::test_qcircuit_pdf
+FAILED cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py::test_render_circuit
+= 2 failed, 20025 passed, 10 skipped, 64 xfailed, 21 warnings in 287.94s (0:04:47) =
+Executing ['./Cirq/script.sh', 'Cirq/in/empty_config-4.ini']
+Testing seed Cirq/in/empty_config-4.ini, with results 0,,os_error = None
+            except (OSError, IOError) as e:
+                # Use FileNotFoundError when python 2 is dropped
+                os_error = e
+                if os_error.errno == errno.ENOENT:
+            except subprocess.CalledProcessError as e:
+                # For all other errors print the output and raise the error
+                except (OSError, IOError, subprocess.CalledProcessError):
+                        except (OSError, IOError) as e:
+                            # Use FileNotFoundError when python 2 is dropped
+                CompilerError(
+E           pylatex.errors.CompilerError: No LaTex compiler was found
+.venv/lib/python3.11/site-packages/pylatex/document.py:325: CompilerError
+cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py:41: AssertionError
+!!! pdflatex failed on run 1 (exit code 1) !!!
+! LaTeX Error: File `standalone.cls' not found.
+!  ==> Fatal error occurred, no output PDF file produced!
+=============================== warnings summary ===============================
+    warnings.warn(
+    warnings.warn(
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles2-error2]
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles1-error1]
+    warnings.warn(
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+    warnings.warn(f"Op {op} no qubits.")
+    warnings.warn("Optimal parameters could not be found for curve fit", RuntimeWarning)
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+FAILED cirq-core/cirq/contrib/qcircuit/qcircuit_pdf_test.py::test_qcircuit_pdf
+FAILED cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py::test_render_circuit
+= 2 failed, 20025 passed, 10 skipped, 64 xfailed, 21 warnings in 287.03s (0:04:47) =
+>> (Fuzz3) Init. seeds are not good. Entropy in -0.0 is near entropy out 2.584962500721156. Exiting.
+ubuntu@fuzzer-03:~/git/try/H-Fuzz$ sudo apt update
+Hit:3 http://ppa.launchpad.net/avsm/ppa/ubuntu focal InRelease                                                                                             
+Hit:4 http://ppa.launchpad.net/deadsnakes/ppa/ubuntu focal InRelease                                                                                       
+Hit:6 http://ppa.launchpad.net/ondrej/php/ubuntu focal InRelease                                                                                           
+Hit:7 http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu focal InRelease                                                                              
+Hit:8 https://packages.wazuh.com/4.x/apt stable InRelease                                                                                                
+Hit:1 https://apt.llvm.org/focal llvm-toolchain-focal-17 InRelease                                                                                       
+Hit:2 https://apt.llvm.org/focal llvm-toolchain-focal-16 InRelease                                                  
+Hit:5 https://apt.llvm.org/focal llvm-toolchain-focal-13 InRelease      
+Hit:9 https://repos.create.kcl.ac.uk/aptly/ubuntu-focal focal InRelease 
+Hit:10 https://repos.create.kcl.ac.uk/aptly/ubuntu-focal-security focal-security InRelease
+Hit:11 https://repos.create.kcl.ac.uk/aptly/ubuntu-focal-updates focal-updates InRelease
+Hit:12 https://repos.create.kcl.ac.uk/aptly/ubuntu-focal-backports focal-backports InRelease
+Hit:13 https://apt.kitware.com/ubuntu focal InRelease
+Reading package lists... Done
+Building dependency tree       
+Reading state information... Done
+62 packages can be upgraded. Run 'apt list --upgradable' to see them.
+ubuntu@fuzzer-03:~/git/try/H-Fuzz$ sudo apt install texlive-latex-extra texlive-fonts-recommended texlive-latex-recommended
+Reading package lists... Done
+Building dependency tree       
+Reading state information... Done
+The following packages were automatically installed and are no longer required:
+  libjsoncpp1 librhash0 ocaml-base
+Use 'sudo apt autoremove' to remove them.
+The following additional packages will be installed:
+  libapache-pom-java libcommons-logging-java libcommons-parent-java libfontbox-java libpdfbox-java preview-latex-style texlive-pictures
+Suggested packages:
+  libavalon-framework-java libcommons-logging-java-doc libexcalibur-logkit-java liblog4j1.2-java texlive-fonts-recommended-doc icc-profiles
+  libspreadsheet-parseexcel-perl texlive-latex-extra-doc texlive-latex-recommended-doc texlive-luatex texlive-pstricks dot2tex prerex ruby-tcltk
+  | libtcltk-ruby texlive-pictures-doc vprerex
+Recommended packages:
+  tex-gyre tipa texlive-plain-generic ruby | ruby-interpreter
+The following NEW packages will be installed:
+  libapache-pom-java libcommons-logging-java libcommons-parent-java libfontbox-java libpdfbox-java preview-latex-style texlive-fonts-recommended
+  texlive-latex-extra texlive-latex-recommended texlive-pictures
+0 upgraded, 10 newly installed, 0 to remove and 62 not upgraded.
+Need to get 43.3 MB of archives.
+After this operation, 141 MB of additional disk space will be used.
+Do you want to continue? [Y/n] Y
+Get:1 https://repos.create.kcl.ac.uk/aptly/ubuntu-focal focal/main amd64 libapache-pom-java all 18-1 [4720 B]
+Get:2 https://repos.create.kcl.ac.uk/aptly/ubuntu-focal focal/main amd64 libcommons-parent-java all 43-1 [10.8 kB]
+Get:3 https://repos.create.kcl.ac.uk/aptly/ubuntu-focal focal/main amd64 libcommons-logging-java all 1.2-2 [60.3 kB]
+Get:4 https://repos.create.kcl.ac.uk/aptly/ubuntu-focal focal/main amd64 preview-latex-style all 11.91-2ubuntu2 [184 kB]
+Get:5 https://repos.create.kcl.ac.uk/aptly/ubuntu-focal focal/main amd64 texlive-fonts-recommended all 2019.20200218-1 [4972 kB]
+Get:6 https://repos.create.kcl.ac.uk/aptly/ubuntu-focal focal/main amd64 libfontbox-java all 1:1.8.16-2 [207 kB]
+Get:7 https://repos.create.kcl.ac.uk/aptly/ubuntu-focal focal/main amd64 libpdfbox-java all 1:1.8.16-2 [5199 kB]
+Get:8 https://repos.create.kcl.ac.uk/aptly/ubuntu-focal focal/main amd64 texlive-latex-recommended all 2019.20200218-1 [15.7 MB]
+Get:9 https://repos.create.kcl.ac.uk/aptly/ubuntu-focal focal/main amd64 texlive-pictures all 2019.20200218-1 [4492 kB]
+Get:10 https://repos.create.kcl.ac.uk/aptly/ubuntu-focal focal/main amd64 texlive-latex-extra all 2019.202000218-1 [12.5 MB]
+Fetched 43.3 MB in 0s (98.9 MB/s)              
+Selecting previously unselected package libapache-pom-java.
+(Reading database ... 161003 files and directories currently installed.)
+Preparing to unpack .../0-libapache-pom-java_18-1_all.deb ...
+Unpacking libapache-pom-java (18-1) ...
+Selecting previously unselected package libcommons-parent-java.
+Preparing to unpack .../1-libcommons-parent-java_43-1_all.deb ...
+Unpacking libcommons-parent-java (43-1) ...
+Selecting previously unselected package libcommons-logging-java.
+Preparing to unpack .../2-libcommons-logging-java_1.2-2_all.deb ...
+Unpacking libcommons-logging-java (1.2-2) ...
+Selecting previously unselected package preview-latex-style.
+Preparing to unpack .../3-preview-latex-style_11.91-2ubuntu2_all.deb ...
+Unpacking preview-latex-style (11.91-2ubuntu2) ...
+Selecting previously unselected package texlive-fonts-recommended.
+Preparing to unpack .../4-texlive-fonts-recommended_2019.20200218-1_all.deb ...
+Unpacking texlive-fonts-recommended (2019.20200218-1) ...
+Selecting previously unselected package libfontbox-java.
+Preparing to unpack .../5-libfontbox-java_1%3a1.8.16-2_all.deb ...
+Unpacking libfontbox-java (1:1.8.16-2) ...
+Selecting previously unselected package libpdfbox-java.
+Preparing to unpack .../6-libpdfbox-java_1%3a1.8.16-2_all.deb ...
+Unpacking libpdfbox-java (1:1.8.16-2) ...
+Selecting previously unselected package texlive-latex-recommended.
+Preparing to unpack .../7-texlive-latex-recommended_2019.20200218-1_all.deb ...
+Unpacking texlive-latex-recommended (2019.20200218-1) ...
+Selecting previously unselected package texlive-pictures.
+Preparing to unpack .../8-texlive-pictures_2019.20200218-1_all.deb ...
+Unpacking texlive-pictures (2019.20200218-1) ...
+Selecting previously unselected package texlive-latex-extra.
+Preparing to unpack .../9-texlive-latex-extra_2019.202000218-1_all.deb ...
+Unpacking texlive-latex-extra (2019.202000218-1) ...
+Setting up preview-latex-style (11.91-2ubuntu2) ...
+Setting up libfontbox-java (1:1.8.16-2) ...
+Setting up libapache-pom-java (18-1) ...
+Setting up texlive-latex-recommended (2019.20200218-1) ...
+Setting up texlive-pictures (2019.20200218-1) ...
+Setting up texlive-fonts-recommended (2019.20200218-1) ...
+Setting up libpdfbox-java (1:1.8.16-2) ...
+Setting up libcommons-parent-java (43-1) ...
+Setting up libcommons-logging-java (1.2-2) ...
+Setting up texlive-latex-extra (2019.202000218-1) ...
+Processing triggers for tex-common (6.13) ...
+Running mktexlsr. This may take some time... done.
+Running updmap-sys. This may take some time... done.
+Running mktexlsr /var/lib/texmf ... done.
+Building format(s) --all.
+	This may take some time... done.
+Processing triggers for fontconfig (2.13.1-2ubuntu3) ...
+Processing triggers for man-db (2.9.1-1) ...
+ubuntu@fuzzer-03:~/git/try/H-Fuzz$ 
+ubuntu@fuzzer-03:~/git/try/H-Fuzz$ 
+ubuntu@fuzzer-03:~/git/try/H-Fuzz$ python3 blackbox.py   -i Cirq/in   -o Cirq/out   -c Cirq/crashes   --executor script_executor   --executor-args "./Cirq/script.sh"   --mutators none   --observers entropy_sliding_window_observer   --oracles entropy_oracle   --iterations 1000 --timeout 500
+>> (Fuzz3) Parsing input arguments
+>> (Fuzz3) Start
+>> (Fuzz3) Copy good seeds into output folder
+Executing ['./Cirq/script.sh', 'Cirq/in/empty_config-5.ini']
+Testing seed Cirq/in/empty_config-5.ini, with results 0,,os_error = None
+            except (OSError, IOError) as e:
+                # Use FileNotFoundError when python 2 is dropped
+                os_error = e
+                if os_error.errno == errno.ENOENT:
+            except subprocess.CalledProcessError as e:
+                # For all other errors print the output and raise the error
+                except (OSError, IOError, subprocess.CalledProcessError):
+                        except (OSError, IOError) as e:
+                            # Use FileNotFoundError when python 2 is dropped
+                CompilerError(
+E           pylatex.errors.CompilerError: No LaTex compiler was found
+.venv/lib/python3.11/site-packages/pylatex/document.py:325: CompilerError
+E       AssertionError: assert False
+cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py:42: AssertionError
+=============================== warnings summary ===============================
+    warnings.warn(f"Op {op} no qubits.")
+    warnings.warn(
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles2-error2]
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles1-error1]
+    warnings.warn(
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+    warnings.warn("Optimal parameters could not be found for curve fit", RuntimeWarning)
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+    warnings.warn(
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+FAILED cirq-core/cirq/contrib/qcircuit/qcircuit_pdf_test.py::test_qcircuit_pdf
+FAILED cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py::test_render_circuit
+= 2 failed, 20025 passed, 10 skipped, 64 xfailed, 21 warnings in 285.49s (0:04:45) =
+Executing ['./Cirq/script.sh', 'Cirq/in/empty_config-2.ini']
+Testing seed Cirq/in/empty_config-2.ini, with results 0,,os_error = None
+            except (OSError, IOError) as e:
+                # Use FileNotFoundError when python 2 is dropped
+                os_error = e
+                if os_error.errno == errno.ENOENT:
+            except subprocess.CalledProcessError as e:
+                # For all other errors print the output and raise the error
+                except (OSError, IOError, subprocess.CalledProcessError):
+                        except (OSError, IOError) as e:
+                            # Use FileNotFoundError when python 2 is dropped
+                CompilerError(
+E           pylatex.errors.CompilerError: No LaTex compiler was found
+.venv/lib/python3.11/site-packages/pylatex/document.py:325: CompilerError
+E       AssertionError: assert False
+cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py:42: AssertionError
+=============================== warnings summary ===============================
+    warnings.warn(
+    warnings.warn(f"Op {op} no qubits.")
+    warnings.warn("Optimal parameters could not be found for curve fit", RuntimeWarning)
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+    warnings.warn(
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles1-error1]
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles2-error2]
+    warnings.warn(
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+FAILED cirq-core/cirq/contrib/qcircuit/qcircuit_pdf_test.py::test_qcircuit_pdf
+FAILED cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py::test_render_circuit
+= 2 failed, 20025 passed, 10 skipped, 64 xfailed, 21 warnings in 285.83s (0:04:45) =
+Executing ['./Cirq/script.sh', 'Cirq/in/empty_config.ini']
+Testing seed Cirq/in/empty_config.ini, with results 0,,E       AssertionError: assert False
+cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py:42: AssertionError
+        os_error = None
+            except (OSError, IOError) as e:
+                # Use FileNotFoundError when python 2 is dropped
+                os_error = e
+                if os_error.errno == errno.ENOENT:
+            except subprocess.CalledProcessError as e:
+                # For all other errors print the output and raise the error
+                except (OSError, IOError, subprocess.CalledProcessError):
+                        except (OSError, IOError) as e:
+                            # Use FileNotFoundError when python 2 is dropped
+                CompilerError(
+E           pylatex.errors.CompilerError: No LaTex compiler was found
+.venv/lib/python3.11/site-packages/pylatex/document.py:325: CompilerError
+=============================== warnings summary ===============================
+    warnings.warn(
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+    warnings.warn(
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+    warnings.warn(
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles1-error1]
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles2-error2]
+    warnings.warn(f"Op {op} no qubits.")
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+    warnings.warn("Optimal parameters could not be found for curve fit", RuntimeWarning)
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+FAILED cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py::test_render_circuit
+FAILED cirq-core/cirq/contrib/qcircuit/qcircuit_pdf_test.py::test_qcircuit_pdf
+= 2 failed, 20025 passed, 10 skipped, 64 xfailed, 21 warnings in 290.43s (0:04:50) =
+Executing ['./Cirq/script.sh', 'Cirq/in/empty_config-3.ini']
+
+
+
+^Z
+[3]+  Stopped                 python3 blackbox.py -i Cirq/in -o Cirq/out -c Cirq/crashes --executor script_executor --executor-args "./Cirq/script.sh" --mutators none --observers entropy_sliding_window_observer --oracles entropy_oracle --iterations 1000 --timeout 500
+ubuntu@fuzzer-03:~/git/try/H-Fuzz$ ^C
+ubuntu@fuzzer-03:~/git/try/H-Fuzz$ 
+ubuntu@fuzzer-03:~/git/try/H-Fuzz$ 
+ubuntu@fuzzer-03:~/git/try/H-Fuzz$ 
+ubuntu@fuzzer-03:~/git/try/H-Fuzz$ sudo apt install texlive-pictures texlive-science
+Reading package lists... Done
+Building dependency tree       
+Reading state information... Done
+texlive-pictures is already the newest version (2019.20200218-1).
+texlive-pictures set to manually installed.
+The following packages were automatically installed and are no longer required:
+  libjsoncpp1 librhash0 ocaml-base
+Use 'sudo apt autoremove' to remove them.
+The following additional packages will be installed:
+  fonts-gfs-baskerville fonts-gfs-porson texlive-lang-greek
+Suggested packages:
+  texlive-science-doc
+The following NEW packages will be installed:
+  fonts-gfs-baskerville fonts-gfs-porson texlive-lang-greek texlive-science
+0 upgraded, 4 newly installed, 0 to remove and 62 not upgraded.
+Need to get 80.6 MB of archives.
+After this operation, 112 MB of additional disk space will be used.
+Do you want to continue? [Y/n] Y
+Get:1 https://repos.create.kcl.ac.uk/aptly/ubuntu-focal focal/main amd64 fonts-gfs-baskerville all 1.1-5 [43.4 kB]
+Get:2 https://repos.create.kcl.ac.uk/aptly/ubuntu-focal focal/main amd64 fonts-gfs-porson all 1.1-6 [33.7 kB]
+Get:3 https://repos.create.kcl.ac.uk/aptly/ubuntu-focal focal/main amd64 texlive-lang-greek all 2019.20200218-1 [77.3 MB]
+Get:4 https://repos.create.kcl.ac.uk/aptly/ubuntu-focal focal/main amd64 texlive-science all 2019.202000218-1 [3217 kB]
+Fetched 80.6 MB in 1s (107 MB/s)          
+Selecting previously unselected package fonts-gfs-baskerville.
+(Reading database ... 172921 files and directories currently installed.)
+Preparing to unpack .../fonts-gfs-baskerville_1.1-5_all.deb ...
+Unpacking fonts-gfs-baskerville (1.1-5) ...
+Selecting previously unselected package fonts-gfs-porson.
+Preparing to unpack .../fonts-gfs-porson_1.1-6_all.deb ...
+Unpacking fonts-gfs-porson (1.1-6) ...
+Selecting previously unselected package texlive-lang-greek.
+Preparing to unpack .../texlive-lang-greek_2019.20200218-1_all.deb ...
+Unpacking texlive-lang-greek (2019.20200218-1) ...
+Selecting previously unselected package texlive-science.
+Preparing to unpack .../texlive-science_2019.202000218-1_all.deb ...
+Unpacking texlive-science (2019.202000218-1) ...
+Setting up fonts-gfs-porson (1.1-6) ...
+Setting up fonts-gfs-baskerville (1.1-5) ...
+Setting up texlive-lang-greek (2019.20200218-1) ...
+Setting up texlive-science (2019.202000218-1) ...
+Processing triggers for tex-common (6.13) ...
+Running mktexlsr. This may take some time... done.
+Running updmap-sys. This may take some time... done.
+Running mktexlsr /var/lib/texmf ... done.
+Building format(s) --all.
+	This may take some time... done.
+Processing triggers for fontconfig (2.13.1-2ubuntu3) ...
+Processing triggers for man-db (2.9.1-1) ...
+ubuntu@fuzzer-03:~/git/try/H-Fuzz$ 
+ubuntu@fuzzer-03:~/git/try/H-Fuzz$ 
+ubuntu@fuzzer-03:~/git/try/H-Fuzz$ 
+ubuntu@fuzzer-03:~/git/try/H-Fuzz$ python3 blackbox.py   -i Cirq/in   -o Cirq/out   -c Cirq/crashes   --executor script_executor   --executor-args "./Cirq/script.sh"   --mutators none   --observers entropy_sliding_window_observer   --oracles entropy_oracle   --iterations 1000 --timeout 500
+>> (Fuzz3) Parsing input arguments
+>> (Fuzz3) Start
+>> (Fuzz3) Copy good seeds into output folder
+Executing ['./Cirq/script.sh', 'Cirq/in/empty_config-5.ini']
+Testing seed Cirq/in/empty_config-5.ini, with results 0,,os_error = None
+            except (OSError, IOError) as e:
+                # Use FileNotFoundError when python 2 is dropped
+                os_error = e
+                if os_error.errno == errno.ENOENT:
+            except subprocess.CalledProcessError as e:
+                # For all other errors print the output and raise the error
+                except (OSError, IOError, subprocess.CalledProcessError):
+                        except (OSError, IOError) as e:
+                            # Use FileNotFoundError when python 2 is dropped
+                CompilerError(
+E           pylatex.errors.CompilerError: No LaTex compiler was found
+.venv/lib/python3.11/site-packages/pylatex/document.py:325: CompilerError
+E       AssertionError: assert False
+cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py:42: AssertionError
+=============================== warnings summary ===============================
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles2-error2]
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles1-error1]
+    warnings.warn(
+    warnings.warn(
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+    warnings.warn("Optimal parameters could not be found for curve fit", RuntimeWarning)
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+    warnings.warn(f"Op {op} no qubits.")
+    warnings.warn(
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+FAILED cirq-core/cirq/contrib/qcircuit/qcircuit_pdf_test.py::test_qcircuit_pdf
+FAILED cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py::test_render_circuit
+= 2 failed, 20025 passed, 10 skipped, 64 xfailed, 21 warnings in 287.10s (0:04:47) =
+Executing ['./Cirq/script.sh', 'Cirq/in/empty_config-2.ini']
+Testing seed Cirq/in/empty_config-2.ini, with results 0,,E       AssertionError: assert False
+cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py:42: AssertionError
+        os_error = None
+            except (OSError, IOError) as e:
+                # Use FileNotFoundError when python 2 is dropped
+                os_error = e
+                if os_error.errno == errno.ENOENT:
+            except subprocess.CalledProcessError as e:
+                # For all other errors print the output and raise the error
+                except (OSError, IOError, subprocess.CalledProcessError):
+                        except (OSError, IOError) as e:
+                            # Use FileNotFoundError when python 2 is dropped
+                CompilerError(
+E           pylatex.errors.CompilerError: No LaTex compiler was found
+.venv/lib/python3.11/site-packages/pylatex/document.py:325: CompilerError
+=============================== warnings summary ===============================
+    warnings.warn("Optimal parameters could not be found for curve fit", RuntimeWarning)
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+    warnings.warn(
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+    warnings.warn(f"Op {op} no qubits.")
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles2-error2]
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles1-error1]
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+    warnings.warn(
+    warnings.warn(
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+FAILED cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py::test_render_circuit
+FAILED cirq-core/cirq/contrib/qcircuit/qcircuit_pdf_test.py::test_qcircuit_pdf
+= 2 failed, 20025 passed, 10 skipped, 64 xfailed, 21 warnings in 286.50s (0:04:46) =
+Executing ['./Cirq/script.sh', 'Cirq/in/empty_config.ini']
+Testing seed Cirq/in/empty_config.ini, with results 0,,os_error = None
+            except (OSError, IOError) as e:
+                # Use FileNotFoundError when python 2 is dropped
+                os_error = e
+                if os_error.errno == errno.ENOENT:
+            except subprocess.CalledProcessError as e:
+                # For all other errors print the output and raise the error
+                except (OSError, IOError, subprocess.CalledProcessError):
+                        except (OSError, IOError) as e:
+                            # Use FileNotFoundError when python 2 is dropped
+                CompilerError(
+E           pylatex.errors.CompilerError: No LaTex compiler was found
+.venv/lib/python3.11/site-packages/pylatex/document.py:325: CompilerError
+E       AssertionError: assert False
+cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py:42: AssertionError
+=============================== warnings summary ===============================
+    warnings.warn("Optimal parameters could not be found for curve fit", RuntimeWarning)
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+    warnings.warn(f"Op {op} no qubits.")
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles2-error2]
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles1-error1]
+    warnings.warn(
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+    warnings.warn(
+    warnings.warn(
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+FAILED cirq-core/cirq/contrib/qcircuit/qcircuit_pdf_test.py::test_qcircuit_pdf
+FAILED cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py::test_render_circuit
+= 2 failed, 20025 passed, 10 skipped, 64 xfailed, 21 warnings in 289.98s (0:04:49) =
+Executing ['./Cirq/script.sh', 'Cirq/in/empty_config-3.ini']
+Testing seed Cirq/in/empty_config-3.ini, with results 0,,os_error = None
+            except (OSError, IOError) as e:
+                # Use FileNotFoundError when python 2 is dropped
+                os_error = e
+                if os_error.errno == errno.ENOENT:
+            except subprocess.CalledProcessError as e:
+                # For all other errors print the output and raise the error
+                except (OSError, IOError, subprocess.CalledProcessError):
+                        except (OSError, IOError) as e:
+                            # Use FileNotFoundError when python 2 is dropped
+                CompilerError(
+E           pylatex.errors.CompilerError: No LaTex compiler was found
+.venv/lib/python3.11/site-packages/pylatex/document.py:325: CompilerError
+E       AssertionError: assert False
+cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py:42: AssertionError
+=============================== warnings summary ===============================
+    warnings.warn(
+    warnings.warn(
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+    warnings.warn("Optimal parameters could not be found for curve fit", RuntimeWarning)
+    warnings.warn(
+    warnings.warn(f"Op {op} no qubits.")
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles1-error1]
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles2-error2]
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+FAILED cirq-core/cirq/contrib/qcircuit/qcircuit_pdf_test.py::test_qcircuit_pdf
+FAILED cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py::test_render_circuit
+= 2 failed, 20025 passed, 10 skipped, 64 xfailed, 21 warnings in 288.42s (0:04:48) =
+Executing ['./Cirq/script.sh', 'Cirq/in/empty_config-1.ini']
+Testing seed Cirq/in/empty_config-1.ini, with results 0,,E       AssertionError: assert False
+cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py:42: AssertionError
+        os_error = None
+            except (OSError, IOError) as e:
+                # Use FileNotFoundError when python 2 is dropped
+                os_error = e
+                if os_error.errno == errno.ENOENT:
+            except subprocess.CalledProcessError as e:
+                # For all other errors print the output and raise the error
+                except (OSError, IOError, subprocess.CalledProcessError):
+                        except (OSError, IOError) as e:
+                            # Use FileNotFoundError when python 2 is dropped
+                CompilerError(
+E           pylatex.errors.CompilerError: No LaTex compiler was found
+.venv/lib/python3.11/site-packages/pylatex/document.py:325: CompilerError
+=============================== warnings summary ===============================
+    warnings.warn(
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles1-error1]
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles2-error2]
+    warnings.warn(
+    warnings.warn(
+    warnings.warn(f"Op {op} no qubits.")
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+    warnings.warn("Optimal parameters could not be found for curve fit", RuntimeWarning)
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+FAILED cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py::test_render_circuit
+FAILED cirq-core/cirq/contrib/qcircuit/qcircuit_pdf_test.py::test_qcircuit_pdf
+= 2 failed, 20025 passed, 10 skipped, 64 xfailed, 21 warnings in 286.19s (0:04:46) =
+Executing ['./Cirq/script.sh', 'Cirq/in/empty_config-4.ini']
+Testing seed Cirq/in/empty_config-4.ini, with results 0,,E       AssertionError: assert False
+cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py:42: AssertionError
+        os_error = None
+            except (OSError, IOError) as e:
+                # Use FileNotFoundError when python 2 is dropped
+                os_error = e
+                if os_error.errno == errno.ENOENT:
+            except subprocess.CalledProcessError as e:
+                # For all other errors print the output and raise the error
+                except (OSError, IOError, subprocess.CalledProcessError):
+                        except (OSError, IOError) as e:
+                            # Use FileNotFoundError when python 2 is dropped
+                CompilerError(
+E           pylatex.errors.CompilerError: No LaTex compiler was found
+.venv/lib/python3.11/site-packages/pylatex/document.py:325: CompilerError
+=============================== warnings summary ===============================
+    warnings.warn(
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles1-error1]
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles2-error2]
+    warnings.warn(f"Op {op} no qubits.")
+    warnings.warn(
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+    warnings.warn("Optimal parameters could not be found for curve fit", RuntimeWarning)
+    warnings.warn(
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+FAILED cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py::test_render_circuit
+FAILED cirq-core/cirq/contrib/qcircuit/qcircuit_pdf_test.py::test_qcircuit_pdf
+= 2 failed, 20025 passed, 10 skipped, 64 xfailed, 22 warnings in 286.61s (0:04:46) =
+>> (Fuzz3) Init. seeds are not good. Entropy in -0.0 is near entropy out 2.584962500721156. Exiting.
+ubuntu@fuzzer-03:~/git/try/H-Fuzz$ 
+ubuntu@fuzzer-03:~/git/try/H-Fuzz$ python3 blackbox.py   -i Cirq/in   -o Cirq/out   -c Cirq/crashes   --executor script_executor   --executor-args "./Cirq/script.sh"   --mutators none   --observers entropy_sliding_window_observer   --oracles entropy_oracle   --iterations 1000 --timeout 500
+>> (Fuzz3) Parsing input arguments
+>> (Fuzz3) Start
+>> (Fuzz3) Copy good seeds into output folder
+Executing ['./Cirq/script.sh', 'Cirq/in/empty_config-5.ini']
+Testing seed Cirq/in/empty_config-5.ini, with results 0,,E       AssertionError: assert False
+cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py:42: AssertionError
+stdout = b'Latexmk: This is Latexmk, John Collins, 26 Dec. 2019, version: 4.67.\nRule \'latex\': The following rules & subrules...or was exceeding maximum runs, or warnings treated as errors.\nLatexmk: Errors, so I did not complete making targets\n'
+        CalledProcessError. The CalledProcessError object will have the return code
+        triggered by setting any of text, encoding, errors or universal_newlines.
+                raise ValueError('stdin and input arguments may not both be used.')
+                raise ValueError('stdout and stderr arguments may not be used '
+>               raise CalledProcessError(retcode, process.args,
+E               subprocess.CalledProcessError: Command '['latexmk', '-pdfps', '--interaction=nonstopmode', '/tmp/pytest-of-ubuntu/pytest-25/test_qcircuit_pdf0/test_file.tex']' returned non-zero exit status 12.
+/usr/lib/python3.11/subprocess.py:571: CalledProcessError
+Collected error summary (may duplicate other messages):
+ unless error was exceeding maximum runs, or warnings treated as errors.
+Latexmk: Errors, so I did not complete making targets
+=============================== warnings summary ===============================
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles2-error2]
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles1-error1]
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+    warnings.warn(f"Op {op} no qubits.")
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+    warnings.warn(
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+    warnings.warn("Optimal parameters could not be found for curve fit", RuntimeWarning)
+    warnings.warn(
+    warnings.warn(
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+FAILED cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py::test_render_circuit
+FAILED cirq-core/cirq/contrib/qcircuit/qcircuit_pdf_test.py::test_qcircuit_pdf
+= 2 failed, 20025 passed, 10 skipped, 64 xfailed, 21 warnings in 289.64s (0:04:49) =
+Executing ['./Cirq/script.sh', 'Cirq/in/empty_config-2.ini']
+Testing seed Cirq/in/empty_config-2.ini, with results 0,,E       AssertionError: assert False
+cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py:42: AssertionError
+stdout = b'Latexmk: This is Latexmk, John Collins, 26 Dec. 2019, version: 4.67.\nRule \'latex\': The following rules & subrules...or was exceeding maximum runs, or warnings treated as errors.\nLatexmk: Errors, so I did not complete making targets\n'
+        CalledProcessError. The CalledProcessError object will have the return code
+        triggered by setting any of text, encoding, errors or universal_newlines.
+                raise ValueError('stdin and input arguments may not both be used.')
+                raise ValueError('stdout and stderr arguments may not be used '
+>               raise CalledProcessError(retcode, process.args,
+E               subprocess.CalledProcessError: Command '['latexmk', '-pdfps', '--interaction=nonstopmode', '/tmp/pytest-of-ubuntu/pytest-26/test_qcircuit_pdf0/test_file.tex']' returned non-zero exit status 12.
+/usr/lib/python3.11/subprocess.py:571: CalledProcessError
+Collected error summary (may duplicate other messages):
+ unless error was exceeding maximum runs, or warnings treated as errors.
+Latexmk: Errors, so I did not complete making targets
+=============================== warnings summary ===============================
+    warnings.warn(
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles2-error2]
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles1-error1]
+    warnings.warn(
+    warnings.warn(
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+    warnings.warn("Optimal parameters could not be found for curve fit", RuntimeWarning)
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+    warnings.warn(f"Op {op} no qubits.")
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+FAILED cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py::test_render_circuit
+FAILED cirq-core/cirq/contrib/qcircuit/qcircuit_pdf_test.py::test_qcircuit_pdf
+= 2 failed, 20025 passed, 10 skipped, 64 xfailed, 21 warnings in 286.50s (0:04:46) =
+Executing ['./Cirq/script.sh', 'Cirq/in/empty_config.ini']
+Testing seed Cirq/in/empty_config.ini, with results 0,,stdout = b'Latexmk: This is Latexmk, John Collins, 26 Dec. 2019, version: 4.67.\nRule \'latex\': The following rules & subrules...or was exceeding maximum runs, or warnings treated as errors.\nLatexmk: Errors, so I did not complete making targets\n'
+        CalledProcessError. The CalledProcessError object will have the return code
+        triggered by setting any of text, encoding, errors or universal_newlines.
+                raise ValueError('stdin and input arguments may not both be used.')
+                raise ValueError('stdout and stderr arguments may not be used '
+>               raise CalledProcessError(retcode, process.args,
+E               subprocess.CalledProcessError: Command '['latexmk', '-pdfps', '--interaction=nonstopmode', '/tmp/pytest-of-ubuntu/pytest-27/test_qcircuit_pdf0/test_file.tex']' returned non-zero exit status 12.
+/usr/lib/python3.11/subprocess.py:571: CalledProcessError
+Collected error summary (may duplicate other messages):
+ unless error was exceeding maximum runs, or warnings treated as errors.
+Latexmk: Errors, so I did not complete making targets
+E       AssertionError: assert False
+cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py:42: AssertionError
+=============================== warnings summary ===============================
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+    warnings.warn(
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles2-error2]
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles1-error1]
+    warnings.warn(
+    warnings.warn(f"Op {op} no qubits.")
+    warnings.warn(
+    warnings.warn("Optimal parameters could not be found for curve fit", RuntimeWarning)
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+FAILED cirq-core/cirq/contrib/qcircuit/qcircuit_pdf_test.py::test_qcircuit_pdf
+FAILED cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py::test_render_circuit
+= 2 failed, 20025 passed, 10 skipped, 64 xfailed, 21 warnings in 287.40s (0:04:47) =
+Executing ['./Cirq/script.sh', 'Cirq/in/empty_config-3.ini']
+Testing seed Cirq/in/empty_config-3.ini, with results 0,,stdout = b'Latexmk: This is Latexmk, John Collins, 26 Dec. 2019, version: 4.67.\nRule \'latex\': The following rules & subrules...or was exceeding maximum runs, or warnings treated as errors.\nLatexmk: Errors, so I did not complete making targets\n'
+        CalledProcessError. The CalledProcessError object will have the return code
+        triggered by setting any of text, encoding, errors or universal_newlines.
+                raise ValueError('stdin and input arguments may not both be used.')
+                raise ValueError('stdout and stderr arguments may not be used '
+>               raise CalledProcessError(retcode, process.args,
+E               subprocess.CalledProcessError: Command '['latexmk', '-pdfps', '--interaction=nonstopmode', '/tmp/pytest-of-ubuntu/pytest-28/test_qcircuit_pdf0/test_file.tex']' returned non-zero exit status 12.
+/usr/lib/python3.11/subprocess.py:571: CalledProcessError
+Collected error summary (may duplicate other messages):
+ unless error was exceeding maximum runs, or warnings treated as errors.
+Latexmk: Errors, so I did not complete making targets
+E       AssertionError: assert False
+cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py:42: AssertionError
+=============================== warnings summary ===============================
+    warnings.warn(
+    warnings.warn(f"Op {op} no qubits.")
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+    warnings.warn("Optimal parameters could not be found for curve fit", RuntimeWarning)
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles2-error2]
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles1-error1]
+    warnings.warn(
+    warnings.warn(
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+FAILED cirq-core/cirq/contrib/qcircuit/qcircuit_pdf_test.py::test_qcircuit_pdf
+FAILED cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py::test_render_circuit
+= 2 failed, 20025 passed, 10 skipped, 64 xfailed, 21 warnings in 289.75s (0:04:49) =
+Executing ['./Cirq/script.sh', 'Cirq/in/empty_config-1.ini']
+Testing seed Cirq/in/empty_config-1.ini, with results 0,,E       AssertionError: assert False
+cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py:42: AssertionError
+stdout = b'Latexmk: This is Latexmk, John Collins, 26 Dec. 2019, version: 4.67.\nRule \'latex\': The following rules & subrules...or was exceeding maximum runs, or warnings treated as errors.\nLatexmk: Errors, so I did not complete making targets\n'
+        CalledProcessError. The CalledProcessError object will have the return code
+        triggered by setting any of text, encoding, errors or universal_newlines.
+                raise ValueError('stdin and input arguments may not both be used.')
+                raise ValueError('stdout and stderr arguments may not be used '
+>               raise CalledProcessError(retcode, process.args,
+E               subprocess.CalledProcessError: Command '['latexmk', '-pdfps', '--interaction=nonstopmode', '/tmp/pytest-of-ubuntu/pytest-29/test_qcircuit_pdf0/test_file.tex']' returned non-zero exit status 12.
+/usr/lib/python3.11/subprocess.py:571: CalledProcessError
+Collected error summary (may duplicate other messages):
+ unless error was exceeding maximum runs, or warnings treated as errors.
+Latexmk: Errors, so I did not complete making targets
+=============================== warnings summary ===============================
+    warnings.warn(
+    warnings.warn(f"Op {op} no qubits.")
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles1-error1]
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles2-error2]
+    warnings.warn(
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+    warnings.warn("Optimal parameters could not be found for curve fit", RuntimeWarning)
+    warnings.warn(
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+FAILED cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py::test_render_circuit
+FAILED cirq-core/cirq/contrib/qcircuit/qcircuit_pdf_test.py::test_qcircuit_pdf
+= 2 failed, 20025 passed, 10 skipped, 64 xfailed, 21 warnings in 287.09s (0:04:47) =
+Executing ['./Cirq/script.sh', 'Cirq/in/empty_config-4.ini']
+Testing seed Cirq/in/empty_config-4.ini, with results 0,,E       AssertionError: assert False
+cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py:42: AssertionError
+stdout = b'Latexmk: This is Latexmk, John Collins, 26 Dec. 2019, version: 4.67.\nRule \'latex\': The following rules & subrules...or was exceeding maximum runs, or warnings treated as errors.\nLatexmk: Errors, so I did not complete making targets\n'
+        CalledProcessError. The CalledProcessError object will have the return code
+        triggered by setting any of text, encoding, errors or universal_newlines.
+                raise ValueError('stdin and input arguments may not both be used.')
+                raise ValueError('stdout and stderr arguments may not be used '
+>               raise CalledProcessError(retcode, process.args,
+E               subprocess.CalledProcessError: Command '['latexmk', '-pdfps', '--interaction=nonstopmode', '/tmp/pytest-of-ubuntu/pytest-30/test_qcircuit_pdf0/test_file.tex']' returned non-zero exit status 12.
+/usr/lib/python3.11/subprocess.py:571: CalledProcessError
+Collected error summary (may duplicate other messages):
+ unless error was exceeding maximum runs, or warnings treated as errors.
+Latexmk: Errors, so I did not complete making targets
+=============================== warnings summary ===============================
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles1-error1]
+cirq-core/cirq/experiments/z_phase_calibration_test.py::test_calibrate_z_phases_workflow_no_options[angles2-error2]
+    warnings.warn(
+    warnings.warn(
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+cirq-core/cirq/work/observable_measurement_data_test.py::test_bitstring_accumulator_errors
+    warnings.warn("Optimal parameters could not be found for curve fit", RuntimeWarning)
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+cirq-core/cirq/experiments/t1_decay_experiment_test.py::test_plot_does_not_raise_error
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+cirq-core/cirq/experiments/single_qubit_readout_calibration_test.py::test_estimate_parallel_readout_errors_no_noise
+    warnings.warn(f"Op {op} no qubits.")
+    warnings.warn(
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+FAILED cirq-core/cirq/contrib/quantikz/circuit_to_latex_render_test.py::test_render_circuit
+FAILED cirq-core/cirq/contrib/qcircuit/qcircuit_pdf_test.py::test_qcircuit_pdf
+= 2 failed, 20025 passed, 10 skipped, 64 xfailed, 21 warnings in 289.32s (0:04:49) =
+>> (Fuzz3) Init. seeds are not good. Entropy in -0.0 is near entropy out 2.584962500721156. Exiting.
+```
