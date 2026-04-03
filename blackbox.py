@@ -227,9 +227,12 @@ def main() -> int:
     _ein, _eout, _edist, _en = init_stage_results
     if _ein < _eout + EPSILON:
         print(
-            f">> (Fuzz3) Init. seeds are not good. Entropy in {_ein} is near entropy out {_eout}. Exiting."
+             f">> (Fuzz3) Init. seeds are not good. Entropy in {_ein} is near entropy out {_eout}. Exiting."
         )
         return 1
+
+    print(f">> (Fuzz3) Init. Entropy in is {_ein} and entropy out is {_eout}. Start Fuzzing....")
+
     ################## If we got till here, the initial setup is sensible ##################
 
     ######################
