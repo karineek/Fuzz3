@@ -135,7 +135,9 @@ def main() -> int:
         if files:
             for seed in files:
                 print(f">> (Fuzz3, Reply) {seed}")
-                print(executor(arguments, seed, args.timeout))
+                _input, _rc, _out, _out = executor(arguments, seed, args.timeout)
+                #print(executor(arguments, seed, args.timeout))
+                print(f"Input: {_input}\nRC: {_rc}\nStdout: {_out}\nStderr:\n{_out}")
                 print("===")
 
         return 0
