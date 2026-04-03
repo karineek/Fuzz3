@@ -225,9 +225,8 @@ TODO: We should consider adding *.CSV output to this stage once we know which gr
 - ok lets call it fuzz3 (since HFuzz name used at ICSE last year (2025) https://conf.researchr.org/details/icse-2025/sbft-2025-papers/13/HFuzz-Havoc-Mode-Guided-Fuzzing )
 
 ## Emails
-* Phil: p.mcminn@sheffield.ac.uk
-* Janine: janine.obiri.25@ucl.ac.uk
-* j.petke@ucl.ac.uk,
-* karine.even_mendoza@kcl.ac.uk,
-* <strike> "dif": Thanatad Songpetchmongkol <thanatad.songpetchmongkol.22@ucl.ac.uk>,</strike>
-* w.langdon@cs.ucl.ac.uk
+* Karine: <karine.even_mendoza@kcl.ac.uk>,
+* Janine: <janine.obiri.25@ucl.ac.uk>,
+* Aidan Dakhama	<aidan@dakhama.com>,
+* Phil: <p.mcminn@sheffield.ac.uk>,
+* Bill <w.langdon@cs.ucl.ac.uk>,
