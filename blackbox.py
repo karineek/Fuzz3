@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+#WBL 3 Apr 2026 Add NUMBER_OUT, why interesting
+
 from pathlib import Path
 import argparse
 import random
@@ -23,8 +25,12 @@ import Fuzz3.generators
 
 WINDOW_SIZE = int(os.environ.get("ENTROPY_WINDOW_SIZE", "1024"))
 EPSILON = float(os.environ.get("EPSILON_SIZE", "0.05"))
+NUMBER_OUT = float(os.environ.get("NUMBER_OUT", "-1.0"))
 MAX_CAPACITY = math.log2(WINDOW_SIZE)
-
+if NUMBER_OUT > 0 :
+    MAX_EOUT = math.log2(NUMBER_OUT)
+else:
+    MAX_EOUT = float("inf")
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -232,7 +238,7 @@ def main() -> int:
     result_entropy_prev = None
     deads = 0
     recent_active = deque(maxlen=WINDOW_SIZE)  # In case we stall, we
-    print(">> (Fuzz3) Start Fuzzing")
+    print(f">> (Fuzz3) Start Fuzzing {args.iterations}")
     for _ in range(args.iterations):
 
         # Clean a bit if deads is high!
@@ -272,7 +278,7 @@ def main() -> int:
         seed = random.choices(files, weights=weights, k=1)[0]
         recent_active.append(seed.name)
 
-        print(f">> (Fuzz3) Fuzzing seed: {seed}")
+        print(f">> (Fuzz3) Fuzzing seed: {seed} {_}")
 
         # Mutate
         mutator = random.choice(mutators)
@@ -300,11 +306,13 @@ def main() -> int:
         for observer in observers:
             _map_in, _map_out = observer(_input, (_rc, _out, _err))
             results_map[observer.__name__] = (_map_in, _map_out)
+            #print(f"observer({_input}, ({_rc}, {_out}, {_err}) _map_in {_map_in}")
+            #print(f"observer({_input}, ({_rc}, {_out}, {_err}) _map_out {_map_out}")
 
         # Oracles
         for oracle in oracles:
             results = oracle(tmp_path, results_map)
-            print(results)  # Not sure yet what to do with it
+            _why = ""
             if oracle.__name__ == "entropy_oracle":
                 if result_entropy_prev is not None:
                     _ein, _eout, _edist, _en = results
@@ -312,24 +320,36 @@ def main() -> int:
                     if _en == _prev_en:  # only if stable
                         if (_ein - _eout) > (MAX_CAPACITY - 10 * EPSILON):
                             name = name + "_deadend"
+                            _why = "_deadend1"
                             deads = deads + 1
                         elif _ein < EPSILON and _eout < EPSILON:
                             name = name + "_deadend"
+                            _why = "_deadend2"
                             deads = deads + 1
                         elif _eout == 0 or _eout < EPSILON:
                             name = name + "_interesting"
+                            _why = "_interesting1"
                             deads = 0
                         elif _ein > _prev_ein:
                             name = name + "_interesting"
+                            _why = "_interesting2"
                             deads = 0
                         elif _eout > _prev_eout:
                             name = name + "_interesting"
+                            _why = "_interesting3"
                             deads = 0
                         elif _en > _prev_en:
                             name = name + "_interesting"
+                            _why = "_interesting4"
                             deads = 0
 
+                        if _ein < _prev_ein:
+                            _why = "_interesting5"
+                        elif _eout > MAX_EOUT:
+                            _why = "_interesting6"
+
                 result_entropy_prev = results
+            print(f"entropy {_} {results} {_why}")
 
         #################### ORACLE 1+2 #################### 
         ## In future work, this needs to be x2 observers and orcales
