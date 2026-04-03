@@ -33,9 +33,12 @@ def script_executor(
             timeout=timeout,
         )
         return code_in, result.returncode, result.stdout.strip(), result.stderr.strip()
-
+    
     except subprocess.TimeoutExpired as e:
         return code_in, 124, (e.stdout or "").strip(), (e.stderr or "timeout").strip()
+    
+    except Exception as e:
+        return code_in, 123, "", f"Execution System Error: {str(e)}"
 
 
 def httpcore_executor(
@@ -45,7 +48,7 @@ def httpcore_executor(
         s = seed.read_text(encoding="utf-8").strip()
         url = str(s)
     except Exception as e:
-        return "", 1, "", str(e)
+        return "", 125, "", f"input load error: {e}"
 
     code = "import httpcore;" f"a= httpcore.request('GET', '{url}').status;" "print(a)"
 
@@ -57,9 +60,10 @@ def httpcore_executor(
             timeout=timeout,
         )
         return url, r.returncode, r.stdout, r.stderr
+    except subprocess.TimeoutExpired as e:
+        return url, 124, e.stdout or "", e.stderr or "timeout"        
     except Exception as e:
-        return url, 124, e.stdout or "", e.stderr or "timeout"
-
+        return url, 123, "", f"System Error: {str(e)}"
 
 ## Target flaky_triangle (ok to use for triangle too) based on olc_encode_executor
 def triangle_executor(
