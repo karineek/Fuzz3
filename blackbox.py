@@ -122,18 +122,21 @@ def main() -> int:
             for seed in files:
                 print(f">> (Fuzz3, Reply) {seed}")
                 print(executor(arguments, seed, args.timeout))
+                print("===")
 
         files = [p for p in output_dir.glob("*") if p.is_file()]
         if files:
             for seed in files:
                 print(f">> (Fuzz3, Reply) {seed}")
                 print(executor(arguments, seed, args.timeout))
+                print("===")
 
         files = [p for p in crash_dir.glob("*") if p.is_file()]
         if files:
             for seed in files:
                 print(f">> (Fuzz3, Reply) {seed}")
                 print(executor(arguments, seed, args.timeout))
+                print("===")
 
         return 0
 
