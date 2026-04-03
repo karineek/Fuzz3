@@ -89,6 +89,13 @@ def delete_line(seed: Path) -> str | None:
     del lines[i]
     return "\n".join(lines)
 
+def delete_char(seed: Path) -> str | None:
+    data = seed.read_text(errors="ignore")
+    if not data:
+        return None
+
+    i = random.randrange(1, len(data) - 1)
+    return data[:i] + data[i+1:]
 
 def duplicate_line(seed: Path) -> str | None:
     data = seed.read_text(errors="ignore")
@@ -102,6 +109,16 @@ def duplicate_line(seed: Path) -> str | None:
     i = random.randrange(len(lines))
     lines.insert(i, lines[i])
     return "\n".join(lines)
+
+def duplicate_char(seed: Path) -> str | None:
+    data = seed.read_text(errors="ignore")
+    if not data:
+        return None
+
+    char_to_add = random.choice(data) 
+    i = random.randrange(len(data) + 1) # +1 allows adding at the very end
+    return data[:i] + char_to_add + data[i:]
+    
 
 def crazy_indentation(seed: Path) -> str | None:
     data = seed.read_text(errors="ignore")
