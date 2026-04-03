@@ -51,6 +51,10 @@ Other flags to try:  --verbose, --sort-includes:
 ```
 python3 blackbox.py -i clang-format-seeds -o out -c crashes --executor "clang_format_executor" --executor-args "--dry-run --Werror --verbose --sort-includes" --mutators bit_flip delete_line duplicate_line crazy_indentation --observers entropy_sliding_window_observer --oracles entropy_oracle --iterations 2000
 ```
+And with many mutators:
+```
+python3 blackbox.py -i clang-format-seeds -o out -c crashes --executor "clang_format_executor" --executor-args "--dry-run --Werror --verbose --sort-includes" --mutators bit_flip delete_line duplicate_line crazy_indentation cmutation_assignment_expression_mutator cmutation_assignment_expression_mutator cmutation_duplicate_statement_mutator cmutation_jump_mutator cmutation_unary delete_char duplicate_char insert_block_comment --observers entropy_sliding_window_observer --oracles entropy_oracle --iterations 2000
+```
 
 
    Replay all seeds:
