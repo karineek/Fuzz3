@@ -140,9 +140,9 @@ def main() -> int:
 
         # Build lists of replay components for diff-testing
         executors = [
-            getattr(Fuzz3.replay_executors, n, None)
+            getattr(Fuzz3.executors, n, None)
             for n in args.replay_executors
-            if getattr(Fuzz3.replay_executors, n, None)
+            if getattr(Fuzz3.executors, n, None)
         ]
         if executors and len(args.replay_executors) != len(args.replay_executors_args):
             print(f">> (Fuzz3:ERROR) --replay-executors and --replay-executors-args must have the same length")
