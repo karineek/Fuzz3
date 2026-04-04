@@ -23,7 +23,7 @@ cd csmith/
 mkdir build
 cd build
 sudo apt install g++ cmake m4
-cmake -DCMAKE_INSTALL_PREFIX=<INSTALL-PREFIX> .
+cmake ../
 make && make install
 ```
 
