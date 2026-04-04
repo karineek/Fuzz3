@@ -82,6 +82,15 @@ def parse_args():
 
     return parser.parse_args()
 
+def confirm_overwrite(path: Path, name: str) -> bool:
+    if not path.exists():
+        return True
+
+    resp = input(
+        f">> {name} folder already exists. Overwrite contents? [Y/n]: "
+    ).strip().lower()
+
+    return resp in ("y", "yes", "")
 
 # Call:  python3 blackbox.py   -i clang-format-seeds   -o out   -c crashes   --executor "clang_format_executor"   --executor-args="--dry-run"
 #  python3 blackbox.py   -i clang-format-seeds   -o out   -c crashes   --executor "clang_format_executor"   --executor-args "--dry-run --Werror"  --mutators bit_flip delete_line duplicate_line
@@ -131,6 +140,13 @@ def main() -> int:
                 print(executor(arguments, seed, args.timeout))
                 print("===")
 
+        files = [p for p in output_dir_end.glob("*") if p.is_file()]
+        if files:
+            for seed in files:
+                print(f">> (Fuzz3, Reply) {seed}")
+                print(executor(arguments, seed, args.timeout))
+                print("===")
+
         files = [p for p in crash_dir.glob("*") if p.is_file()]
         if files:
             for seed in files:
@@ -145,14 +161,28 @@ def main() -> int:
     # ================================================================
     #                        ---> FUZZING <---
     # ================================================================
+    if not confirm_overwrite(crash_dir, args.crash_dir):
+        print(f">> (Fuzz3) Crash folder '{crash_dir.name}' is already exists. Please Save Old Fuzzing Results and remove the folder. Exiting.")
+        return 1
+
+    if not confirm_overwrite(output_dir, args.output_dir):
+        print(f">> (Fuzz3) Output folder '{output_dir.name}' is already exists. Please Save Old Fuzzing Results and remove the folder. Exiting.")
+        return 1
+
+    if not confirm_overwrite(output_dir_end, args.output_dir + "_end"):
+        print(f">> (Fuzz3) Output END folder '{output_dir_end.name}' is already exists. Please Save Old Fuzzing Results and remove the folder. Exiting.")
+        return 1
+
     results_map = (
         {}
     )  # Here we store all observations, including coverage information (if we have a coverage oracle)
     shutil.rmtree(output_dir, ignore_errors=True)
     shutil.rmtree(crash_dir, ignore_errors=True)
+    shutil.rmtree(output_dir_end, ignore_errors=True)
 
     output_dir.mkdir(parents=True, exist_ok=True)
     crash_dir.mkdir(parents=True, exist_ok=True)
+    output_dir_end.mkdir(parents=True, exist_ok=True)
 
     ############################################
     # Phase 1: collect and validate seeds once #
