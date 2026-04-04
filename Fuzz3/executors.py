@@ -40,7 +40,6 @@ def script_executor(
     except Exception as e:
         return code_in, 123, "", f"Execution System Error: {str(e)}"
 
-
 def httpcore_executor(
     arguments: str, seed: Path, timeout: float
 ) -> tuple[str, int, str, str]:
@@ -92,6 +91,37 @@ def triangle_executor(
     except subprocess.TimeoutExpired as e:
         return s, 124, e.stdout or "", e.stderr or "timeout"
 
+
+############################ Target: C compilers #############################
+# See the readme of clang-format/ in Fuzz3 regarding how to run it
+##############################################################################
+def c_compiler_executor(
+    arguments: str, seed: Path, timeout: float
+) -> tuple[str, int, str, str]:
+
+    if (not seed):
+        return "", 122, "", "Invalid Path"
+    if not seed.is_file():
+       return "", 121, "", "Not a File"
+
+    if (seed.suffix.lower() != '.c'):
+        c_seed_path = None
+
+        try:
+            with tempfile.NamedTemporaryFile(suffix=".c", delete=False) as tmp:
+                shutil.copyfile(original_path, tmp.name)
+                c_seed_path = tmp.name
+                return script_executor(arguments, Path(c_seed_path), timeout)
+
+        except Exception as e:
+            return "", 120, "", f"File Sufix is Not .c. Failed to create temp .c file: {e}"
+
+        finally:
+            if c_seed and os.path.exists(c_seed): # Clean up
+                os.remove(c_seed)
+
+    else:
+        return script_executor(arguments, seed, timeout) # All good, it is a file + it ends with .c
 
 ############################ Target: Clang Format #############################
 # Install via the LLVM project, or via apt install
