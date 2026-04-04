@@ -84,9 +84,15 @@ def parse_args():
         "--replay-executors",
         nargs="+",
         default=[],
-        help="List of enabled executor methods to diff-testing with main executor target in replay option",
+        help="List of enabled executor methods to diff-testing with the main executor target in the replay option",
     )
-
+    parser.add_argument(
+        "--replay-executors-args",
+        nargs="+",
+        default=[],
+        help="List of enabled executor arguments to diff-testing should be paired with the replay-executors target in the replay option",
+    )
+    
     return parser.parse_args()
 
 def confirm_overwrite(path: Path, name: str) -> bool:
@@ -128,7 +134,6 @@ def main() -> int:
         func_name = args.executor  # This is a string
         arguments = args.executor_args  # This is a string
         func_to_run = getattr(Fuzz3.executors, func_name, None)
-
         executor = (
             func_to_run  # Now we can start using our target wrapper to fuzz the SUT
         )
@@ -139,22 +144,30 @@ def main() -> int:
             for n in args.replay_executors
             if getattr(Fuzz3.replay_executors, n, None)
         ]
+        if executors and len(args.replay_executors) != len(args.replay_executors_args):
+            print(f">> (Fuzz3:ERROR) --replay-executors and --replay-executors-args must have the same length")
+            return 1
+        diff_execs = [
+            (func, exec_args)
+            for name, exec_args in zip(args.replay_executors, args.replay_executors_args)
+            if (func := getattr(Fuzz3.replay_executors, name, None))
+        ]
 
         all_dirs = [input_dir, output_dir, output_dir_end, crash_dir]
-
         files = [
             p for d in all_dirs
                 if d.exists()
                 for p in d.glob("*")
                 if p.is_file()
         ]
+        
         for seed in files:
             print(f">> (Fuzz3, Reply) {seed}")
             _input, _rc, _out, _out_err = executor(arguments, seed, args.timeout)
             print(f"Input: {_input}\nRC: {_rc}\nStdout: {_out}\nStderr:\n{_out_err}")
-            if not executors: # Diff Testing
-                for diff_executor in executors:
-                    _input_2, _rc_2, _out_2, _out_err_2 = diff_executor(arguments, seed, args.timeout)
+            if executors: # Diff Testing
+                for diff_executor, diff_args in diff_execs:
+                    _input_2, _rc_2, _out_2, _out_err_2 = diff_executor(diff_args, seed, args.timeout)
                     if (_rc_2 != _rc) or (_out_2 != _out) or (_out_err_2 != _out_err):
                         print("!! DIFF DETECTED !!")
                         print(f">>>>> RC: {_rc_2}\nStdout: {_out_2}\nStderr:\n{_out_err_2}")
