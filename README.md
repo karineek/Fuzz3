@@ -200,6 +200,8 @@ python3 blackbox.py -i httpcore/seeds -o httpcore/out -c httpcore/crashes --exec
 
 python3 blackbox.py -i httpcore/seeds -o httpcore/out -c httpcore/crashes --executor httpcore_executor --mutators bit_flip  --observers entropy_observer --oracles entropy_oracle    
 
+httpcore must be installed first. This can be done with pip install httpcore.
+
 ## Evaluation at Scale
 
 We will use FuzzBench:
