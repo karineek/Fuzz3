@@ -144,13 +144,16 @@ def main() -> int:
             for n in args.replay_executors
             if getattr(Fuzz3.executors, n, None)
         ]
+        if None in executors:
+            missing = [n for n, e in zip(args.replay_executors, executors) if e is None]
+            print(f">> (Fuzz3:ERROR) The following executors were not found: {', '.join(missing)}")
+            return 1
         if executors and len(args.replay_executors) != len(args.replay_executors_args):
             print(f">> (Fuzz3:ERROR) --replay-executors and --replay-executors-args must have the same length")
             return 1
         diff_execs = [
-            (func, exec_args)
-            for name, exec_args in zip(args.replay_executors, args.replay_executors_args)
-            if (func := getattr(Fuzz3.replay_executors, name, None))
+            (exec, exec_args)
+            for exec, exec_args in zip(executors, args.replay_executors_args)
         ]
 
         all_dirs = [input_dir, output_dir, output_dir_end, crash_dir]
