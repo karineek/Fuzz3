@@ -9,7 +9,9 @@ from pathlib import Path
 import os
 import string
 
-GRAYC = os.path.expanduser("~/GrayC/build/bin/grayc")
+GRAYC_PATH = os.getenv("GRAYC", "~/GrayC/build/bin/grayc")
+GRAYC = os.path.expanduser(GRAYC_PATH)
+# GRAYC = os.path.expanduser("~/GrayC/build/bin/grayc")
 timeout = 50
 
 ## HELPER function, do not call it directly
