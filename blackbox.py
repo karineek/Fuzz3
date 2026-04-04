@@ -80,6 +80,13 @@ def parse_args():
         help="List of enabled oracles methods",
     )
 
+    parser.add_argument(
+        "--replay-executors",
+        nargs="+",
+        default=[],
+        help="List of enabled executor methods to diff-testing with main executor target in replay option",
+    )
+
     return parser.parse_args()
 
 def confirm_overwrite(path: Path, name: str) -> bool:
@@ -126,51 +133,52 @@ def main() -> int:
             func_to_run  # Now we can start using our target wrapper to fuzz the SUT
         )
 
-        files = [p for p in input_dir.glob("*") if p.is_file()]
-        if files:
-            for seed in files:
-                print(f">> (Fuzz3, Reply) {seed}")
-                print(executor(arguments, seed, args.timeout))
-                print("===")
+        # Build lists of replay components for diff-testing
+        executors = [
+            getattr(Fuzz3.replay_executors, n, None)
+            for n in args.replay_executors
+            if getattr(Fuzz3.replay_executors, n, None)
+        ]
 
-        files = [p for p in output_dir.glob("*") if p.is_file()]
-        if files:
-            for seed in files:
-                print(f">> (Fuzz3, Reply) {seed}")
-                print(executor(arguments, seed, args.timeout))
-                print("===")
+        all_dirs = [input_dir, output_dir, output_dir_end, crash_dir]
 
-        files = [p for p in output_dir_end.glob("*") if p.is_file()]
-        if files:
-            for seed in files:
-                print(f">> (Fuzz3, Reply) {seed}")
-                print(executor(arguments, seed, args.timeout))
-                print("===")
-
-        files = [p for p in crash_dir.glob("*") if p.is_file()]
-        if files:
-            for seed in files:
-                print(f">> (Fuzz3, Reply) {seed}")
-                _input, _rc, _out, _out = executor(arguments, seed, args.timeout)
-                #print(executor(arguments, seed, args.timeout))
-                print(f"Input: {_input}\nRC: {_rc}\nStdout: {_out}\nStderr:\n{_out}")
-                print("===")
+        files = [
+            p for d in all_dirs
+                if d.exists()
+                for p in d.glob("*")
+                if p.is_file()
+        ]
+        for seed in files:
+            print(f">> (Fuzz3, Reply) {seed}")
+            _input, _rc, _out, _out_err = executor(arguments, seed, args.timeout)
+            print(f"Input: {_input}\nRC: {_rc}\nStdout: {_out}\nStderr:\n{_out_err}")
+            if not executors: # Diff Testing
+                for diff_executor in executors:
+                    _input_2, _rc_2, _out_2, _out_err_2 = diff_executor(arguments, seed, args.timeout)
+                    if (_rc_2 != _rc) or (_out_2 != _out) or (_out_err_2 != _out_err):
+                        print("!! DIFF DETECTED !!")
+                        print(f">>>>> RC: {_rc_2}\nStdout: {_out_2}\nStderr:\n{_out_err_2}")
+                    
+            print("===")
 
         return 0
 
     # ================================================================
     #                        ---> FUZZING <---
     # ================================================================
+    if args.replay_executors:
+        print(f">> (Fuzz3:WARNING) 'replay-executors' option is valid only during REPLAY. Not in Fuzzing. Ignoring this list of arguments.")
+        
     if not confirm_overwrite(crash_dir, args.crash_dir):
-        print(f">> (Fuzz3) Crash folder '{crash_dir.name}' is already exists. Please Save Old Fuzzing Results and remove the folder. Exiting.")
+        print(f">> (Fuzz3:ERROR) Crash folder '{crash_dir.name}' is already exists. Please Save Old Fuzzing Results and remove the folder. Exiting.")
         return 1
 
     if not confirm_overwrite(output_dir, args.output_dir):
-        print(f">> (Fuzz3) Output folder '{output_dir.name}' is already exists. Please Save Old Fuzzing Results and remove the folder. Exiting.")
+        print(f">> (Fuzz3:ERROR) Output folder '{output_dir.name}' is already exists. Please Save Old Fuzzing Results and remove the folder. Exiting.")
         return 1
 
     if not confirm_overwrite(output_dir_end, args.output_dir + "_end"):
-        print(f">> (Fuzz3) Output END folder '{output_dir_end.name}' is already exists. Please Save Old Fuzzing Results and remove the folder. Exiting.")
+        print(f">> (Fuzz3:ERROR) Output END folder '{output_dir_end.name}' is already exists. Please Save Old Fuzzing Results and remove the folder. Exiting.")
         return 1
 
     results_map = (
