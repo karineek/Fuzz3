@@ -184,9 +184,9 @@ def main() -> int:
     # ================================================================
     #                        ---> FUZZING <---
     # ================================================================
-    if args.replay_executors:
+    if args.replay_executors or args.replay_executors_args:
         print(f">> (Fuzz3:WARNING) 'replay-executors' option is valid only during REPLAY. Not in Fuzzing. Ignoring this list of arguments.")
-        
+
     if not confirm_overwrite(crash_dir, args.crash_dir):
         print(f">> (Fuzz3:ERROR) Crash folder '{crash_dir.name}' is already exists. Please Save Old Fuzzing Results and remove the folder. Exiting.")
         return 1
@@ -219,9 +219,13 @@ def main() -> int:
             for n in args.generators
             if getattr(Fuzz3.generators, n, None)
         ]
+        if (not generators):
+            print(f">> (Fuzz3) No Generator was found.")
         for g in generators:
             total = g(args.seedsno, input_dir)
             print(f">> (Fuzz3) Generate {total} seeds into output folder")
+    else:
+        print(f">> (Fuzz3) No Generator was found.")
 
     print(">> (Fuzz3) Copy good seeds into output folder")
     files = [p for p in input_dir.glob("*") if p.is_file()]
