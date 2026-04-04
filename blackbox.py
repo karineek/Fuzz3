@@ -173,7 +173,9 @@ def main() -> int:
                     _input_2, _rc_2, _out_2, _out_err_2 = diff_executor(diff_args, seed, args.timeout)
                     if (_rc_2 != _rc) or (_out_2 != _out) or (_out_err_2 != _out_err):
                         print("!! DIFF DETECTED !!")
-                        print(f">>>>> RC: {_rc_2}\nStdout: {_out_2}\nStderr:\n{_out_err_2}")
+                        print(f">>>>> RC: {_rc_2}\nStdout: {_out_2}\nStderr:\n{_out_err_2} of {diff_executor.name} {diff_args}")
+                    else
+                        print(f"!! DIFF OK !! with {diff_args} !!")
                     
             print("===")
 
