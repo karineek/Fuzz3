@@ -105,21 +105,20 @@ def c_compiler_executor(
        return "", 121, "", "Not a File"
 
     if (seed.suffix.lower() != '.c'):
-        c_seed_path = None
-
+        target_path = None
         try:
             with tempfile.NamedTemporaryFile(suffix=".c", delete=False) as tmp:
-                shutil.copyfile(original_path, tmp.name)
-                c_seed_path = tmp.name
-                return script_executor(arguments, Path(c_seed_path), timeout)
+                target_path = Path(tmp.name)
+                shutil.copyfile(seed, target_path)
+                return script_executor(arguments, target_path, timeout)
 
         except Exception as e:
-            return "", 120, "", f"File Sufix is Not .c. Failed to create temp .c file: {e}"
+            return "", 120, "", f"File Suffix is Not .c. Failed to create temp .c file: {e}"
 
         finally:
-            if c_seed and os.path.exists(c_seed): # Clean up
-                os.remove(c_seed)
-
+            if target_path and target_path.exists():
+                os.remove(target_path)
+                
     else:
         return script_executor(arguments, seed, timeout) # All good, it is a file + it ends with .c
 
