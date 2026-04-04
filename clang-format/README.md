@@ -24,7 +24,8 @@ mkdir build
 cd build
 sudo apt install g++ cmake m4
 cmake ../
-make && make install
+make
+sudo make install
 ```
 
 Then install GrayC: (with Clang-17)
@@ -46,5 +47,5 @@ You can edit the path of GRAYC via the Fuzz3 parameter. Just do ```setenv GRAYC 
 
 Then run the compiler you wish to test from H-Fuzz$ folder, like this:
 ```
-python3 blackbox.py -i clang-format-seeds -o out -c crashes --executor c_compiler_executor --executor-args "clang -O3 -w -I /usr/include/x86_64-linux-gnu/ -I ~/csmith/build" --mutators bit_flip delete_line duplicate_line crazy_indentation cmutation_assignment_expression_mutator cmutation_assignment_expression_mutator cmutation_duplicate_statement_mutator cmutation_jump_mutator cmutation_unary delete_char duplicate_char insert_block_comment --observers entropy_sliding_window_observer --oracles entropy_oracle --iterations 2000 
+python3 blackbox.py -i clang-format-seeds -o out -c crashes --executor c_compiler_executor --executor-args "clang -O3 -w -I /usr/include/x86_64-linux-gnu/ -I /usr/local/include/" --mutators bit_flip delete_line duplicate_line crazy_indentation cmutation_assignment_expression_mutator cmutation_assignment_expression_mutator cmutation_duplicate_statement_mutator cmutation_jump_mutator cmutation_unary delete_char duplicate_char insert_block_comment --observers entropy_sliding_window_observer --oracles entropy_oracle --iterations 2000 
 ```
