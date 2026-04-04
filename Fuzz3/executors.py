@@ -104,23 +104,7 @@ def c_compiler_executor(
     if not seed.is_file():
        return "", 121, "", "Not a File"
 
-    if (seed.suffix.lower() != '.c'):
-        target_path = None
-        try:
-            with tempfile.NamedTemporaryFile(suffix=".c", delete=False) as tmp:
-                target_path = Path(tmp.name)
-                shutil.copyfile(seed, target_path)
-                return script_executor(arguments, target_path, timeout)
-
-        except Exception as e:
-            return "", 120, "", f"File Suffix is Not .c. Failed to create temp .c file: {e}"
-
-        finally:
-            if target_path and target_path.exists():
-                os.remove(target_path)
-                
-    else:
-        return script_executor(arguments, seed, timeout) # All good, it is a file + it ends with .c
+    return script_executor(f"{arguments} -x c", seed, timeout) # All good, it is a file + it ends with .c
 
 ############################ Target: Clang Format #############################
 # Install via the LLVM project, or via apt install
@@ -130,7 +114,7 @@ def output_formatter_clang_format(in_text :str):
     commands = [
         'grep -vF "^" | grep -ve "fuzz3" | grep -vF ".c:" | uniq',
         "grep -e 'fuzz3_' | cut -d'[' -f2 | uniq",
-        "grep -F '.c:' | cut -d'[' -f2 | uniq"  
+        "grep -F '.c:' | cut -d'[' -f2 | uniq"
     ]
 
     final_output = ""
