@@ -65,11 +65,24 @@ def olc_decoder_generator_legal(seedsno: int, outputfolder: Path) -> int:
         long = random.randint(-180, 180)
 
         # Then encode it, and we get legal decoder seeds!
+        code = (
+            "from openlocationcode import openlocationcode as olc;"
+            f"print(olc.encode({lat},{long}))"
+        )
 
-        seed_path = outputfolder / f"fuzz3_olc_{i}.seed"
-        seed_path.write_text(f"{lat},{long}\n")
-
-        total += 1
+        try:
+            r = subprocess.run(
+                [sys.executable, "-c", code],
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+            )
+            if r.returncode == 0:
+                seed_path = outputfolder / f"fuzz3_olc_{i}.seed"
+                seed_path.write_text(f"{r.stdou}\n")
+                total += 1
+            else:
+                print(f"(Fuzz3:INFO) Failed to generate 1 seed {lat},{long} mapped to invalid seed. Skip.")
 
     return total
 
