@@ -43,7 +43,7 @@ def olc_encoder_generator_illegal(seedsno: int, outputfolder: Path) -> int:
 def _helper_gen_olc_code_semi_legal() -> str:
     alphabet = "123456789CFGHJMPQRVWX"
     
-    total_length = random.randint(3, 16)  # must be at least 3 to allow split
+    total_length = random.randint(3, 18)  # must be at least 3 to allow split
     split_index = total_length // 2       # position of '+'
     
     left = "".join(random.choice(alphabet) for _ in range(split_index))
@@ -65,7 +65,7 @@ def olc_decoder_generator_semi_legal(seedsno: int, outputfolder: Path) -> tuple[
     
 def _helper_gen_olc_code() -> str:
     alphabet = "123456789CFGHJMPQRVWX+-?"
-    length = random.randint(2, 18)
+    length = random.randint(2, 25)
 
     # 9C5V2RP7+JVXH835 examplple
     return "".join(random.choice(alphabet) for _ in range(length))
