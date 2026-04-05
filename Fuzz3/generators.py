@@ -78,7 +78,7 @@ def olc_decoder_generator_legal(seedsno: int, outputfolder: Path) -> int:
                 [sys.executable, "-c", code],
                 capture_output=True,
                 text=True,
-                timeout=timeout,
+                timeout=50,
             )
             if r.returncode == 0:
                 seed_path = outputfolder / f"fuzz3_olc_{i}.seed"
