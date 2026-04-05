@@ -83,6 +83,8 @@ def olc_decoder_generator_legal(seedsno: int, outputfolder: Path) -> int:
                 total += 1
             else:
                 print(f"(Fuzz3:INFO) Failed to generate 1 seed {lat},{long} mapped to invalid seed. Skip.")
+        except subprocess.TimeoutExpired as e:
+            print(f"(Fuzz3:INFO) Failed to generate 1 seed {lat},{long} timed out. Skip.")
 
     return total
 
