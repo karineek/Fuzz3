@@ -82,7 +82,7 @@ def olc_decoder_generator_legal(seedsno: int, outputfolder: Path) -> int:
             )
             if r.returncode == 0:
                 seed_path = outputfolder / f"fuzz3_olc_{i}.seed"
-                seed_path.write_text(f"{r.stdou}\n")
+                seed_path.write_text(f"{r.stdout}\n")
                 total += 1
             else:
                 print(f"(Fuzz3:INFO) Failed to generate 1 seed {lat},{long} mapped to invalid seed. Skip.")
