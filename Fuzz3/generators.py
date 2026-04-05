@@ -43,7 +43,7 @@ def _helper_gen_olc_code() -> str:
 
     return "".join(random.choice(alphabet) for _ in range(length))
 
-def olc_decoder_generator(seedsno: int, outputfolder: Path) -> tuple[int, int]:
+def olc_decoder_generator_illegal(seedsno: int, outputfolder: Path) -> tuple[int, int]:
     outputfolder.mkdir(parents=True, exist_ok=True)
 
     total = 0
@@ -51,6 +51,24 @@ def olc_decoder_generator(seedsno: int, outputfolder: Path) -> tuple[int, int]:
         ret = _helper_gen_olc_code() 
         seed_path = outputfolder / f"fuzz3_olc_{i}.seed"
         seed_path.write_text(f"{ret}\n")
+        total += 1
+
+    return total
+
+
+def olc_decoder_generator_legal(seedsno: int, outputfolder: Path) -> int:
+    outputfolder.mkdir(parents=True, exist_ok=True)
+
+    total = 0
+    for i in range(seedsno):
+        lat = random.randint(-90, 90)
+        long = random.randint(-180, 180)
+
+        # Then encode it, and we get legal decoder seeds!
+
+        seed_path = outputfolder / f"fuzz3_olc_{i}.seed"
+        seed_path.write_text(f"{lat},{long}\n")
+
         total += 1
 
     return total
