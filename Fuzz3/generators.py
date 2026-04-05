@@ -40,10 +40,34 @@ def olc_encoder_generator_illegal(seedsno: int, outputfolder: Path) -> int:
 
     return total
 
-def _helper_gen_olc_code() -> str:
-    alphabet = "23456789CFGHJMPQRVWX"
-    length = random.randint(2, 15)
+def _helper_gen_olc_code_semi_legal() -> str:
+    alphabet = "123456789CFGHJMPQRVWX"
+    
+    total_length = random.randint(3, 16)  # must be at least 3 to allow split
+    split_index = total_length // 2       # position of '+'
+    
+    left = "".join(random.choice(alphabet) for _ in range(split_index))
+    right = "".join(random.choice(alphabet) for _ in range(total_length - split_index))
+    
+    return f"{left}+{right}"
 
+def olc_decoder_generator_semi_legal(seedsno: int, outputfolder: Path) -> tuple[int, int]:
+    outputfolder.mkdir(parents=True, exist_ok=True)
+
+    total = 0
+    for i in range(seedsno):
+        ret = _helper_gen_olc_code_semi_legal() 
+        seed_path = outputfolder / f"fuzz3_olc_{i}.seed"
+        seed_path.write_text(f"{ret}\n")
+        total += 1
+
+    return total
+    
+def _helper_gen_olc_code() -> str:
+    alphabet = "123456789CFGHJMPQRVWX+-?"
+    length = random.randint(2, 18)
+
+    # 9C5V2RP7+JVXH835 examplple
     return "".join(random.choice(alphabet) for _ in range(length))
 
 def olc_decoder_generator_illegal(seedsno: int, outputfolder: Path) -> tuple[int, int]:
