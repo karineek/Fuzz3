@@ -200,7 +200,8 @@ def olc_decode_executor(
     code = (
         "from openlocationcode import openlocationcode as olc;"
         f'a=olc.decode("{code_in}");'
-        "print(a.latitudeCenter,a.longitudeCenter)"
+#        "print(a.latitudeCenter,a.longitudeCenter)"
+        "print(f'{a.latitudeCenter:.3f} {a.longitudeCenter:.3f}')"
     )
 
     try:
