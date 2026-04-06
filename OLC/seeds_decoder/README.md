@@ -7,3 +7,4 @@ These are grouped into widely separated clusters.
 
 Similarly olc_seeds_decode_finecluster.zip contains 1000 unique valid inputs for OLC decoder.
 Again data are clustered but within clusters they represent places that are even closer.
+Opps bug so first seed in olc_seeds_decode_finecluster.zip is not valid
