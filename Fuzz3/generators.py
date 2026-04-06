@@ -17,7 +17,7 @@ def olc_encoder_generator_legal(seedsno: int, outputfolder: Path) -> int:
         lat = random.randint(-90, 90)
         long = random.randint(-180, 180)
 
-        seed_path = outputfolder / f"fuzz3_olc_{i}.seed"
+        seed_path = outputfolder / f"fuzz3_olce_legal_{i}.seed"
         seed_path.write_text(f"{lat},{long}")
 
         total += 1
@@ -33,7 +33,7 @@ def olc_encoder_generator_illegal(seedsno: int, outputfolder: Path) -> int:
         lat = random.randint(-1024, 1024)
         long = random.randint(-1024, 1024)
 
-        seed_path = outputfolder / f"fuzz3_olc_{i}.seed"
+        seed_path = outputfolder / f"fuzz3_olce_illegal_{i}.seed"
         seed_path.write_text(f"{lat},{long}")
 
         total += 1
@@ -57,7 +57,7 @@ def olc_decoder_generator_semi_legal(seedsno: int, outputfolder: Path) -> tuple[
     total = 0
     for i in range(seedsno):
         ret = _helper_gen_olc_code_semi_legal() 
-        seed_path = outputfolder / f"fuzz3_olc_{i}.seed"
+        seed_path = outputfolder / f"fuzz3_olcd_sm_{i}.seed"
         seed_path.write_text(f"{ret}")
         total += 1
 
@@ -76,7 +76,7 @@ def olc_decoder_generator_illegal(seedsno: int, outputfolder: Path) -> tuple[int
     total = 0
     for i in range(seedsno):
         ret = _helper_gen_olc_code() 
-        seed_path = outputfolder / f"fuzz3_olc_{i}.seed"
+        seed_path = outputfolder / f"fuzz3_olcd_illegal_{i}.seed"
         seed_path.write_text(f"{ret}")
         total += 1
 
@@ -105,7 +105,7 @@ def olc_decoder_generator_legal(seedsno: int, outputfolder: Path) -> int:
                 timeout=50,
             )
             if r.returncode == 0:
-                seed_path = outputfolder / f"fuzz3_olc_{i}.seed"
+                seed_path = outputfolder / f"fuzz3_olcd_legal_{i}.seed"
                 seed_path.write_text(f"{r.stdout}")
                 total += 1
             else:
@@ -137,7 +137,7 @@ def h3_encoder_generator(seedsno: int, outputfolder: Path) -> tuple[int, int]:
     total = 0
     for i in range(seedsno):
         ret = _helper_gen_h3_encode_seed() 
-        seed_path = outputfolder / f"fuzz3_olc_{i}.seed"
+        seed_path = outputfolder / f"fuzz3_h3e_{i}.seed"
         seed_path.write_text(f"{ret}")
         total += 1
 
@@ -149,7 +149,7 @@ def h3_decoder_generator(seedsno: int, outputfolder: Path) -> tuple[int, int]:
     total = 0
     for i in range(seedsno):
         ret = _helper_gen_h3_index() 
-        seed_path = outputfolder / f"fuzz3_olc_{i}.seed"
+        seed_path = outputfolder / f"fuzz3_h3d_{i}.seed"
         seed_path.write_text(f"{ret}")
         total += 1
 
