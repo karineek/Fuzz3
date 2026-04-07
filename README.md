@@ -216,19 +216,5 @@ We will use FuzzBench:
 
 Unlike the fuzzing campaign, where the tool mutates inputs and discovers new behaviours or crashes, saving those inputs in output (out_*) or crash (crashes_*) folders, when you add ```--replay 1```, the fuzzer switches into a replay mode where it takes those saved inputs and executes them again through the target program. This is mainly useful for verifying results, reproducing crashes, or analysing how the system behaves on known inputs without continuing the fuzzing process.
 
-TODO: We should consider adding *.CSV output to this stage once we know which graphs can support the findings presenation.
+TODO: We should consider adding *.CSV output to this stage once we know which graphs can support the findings presentation.
 
-## TODO
-
-- Karine add more targets and seeds.
-- Karine add more projects.
-- Phil is doing the link up with the sliding window. 
-- Janine is modifying one_step to separate the mutator, executor and entropy calculation functions
-- ok lets call it fuzz3 (since HFuzz name used at ICSE last year (2025) https://conf.researchr.org/details/icse-2025/sbft-2025-papers/13/HFuzz-Havoc-Mode-Guided-Fuzzing )
-
-## Emails
-* Karine: <karine.even_mendoza@kcl.ac.uk>,
-* Janine: <janine.obiri.25@ucl.ac.uk>,
-* Aidan Dakhama	<aidan@dakhama.com>,
-* Phil: <p.mcminn@sheffield.ac.uk>,
-* Bill <w.langdon@cs.ucl.ac.uk>,
