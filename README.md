@@ -292,4 +292,4 @@ We analysed the input-output entropy over 50,000 iterations:
 
 and also just the output entropy:
 
-<img width="700" height="500" alt="image" src="https://github.com/user-attachments/assets/dfc94c3c-bcaa-4f80-9271-99fce47c4f7a" />
+<img width="800" height="547" alt="image" src="https://github.com/user-attachments/assets/dfc94c3c-bcaa-4f80-9271-99fce47c4f7a" />
