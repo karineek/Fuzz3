@@ -13,10 +13,10 @@ Applied to 6 open source software, it found 4 bugs, 2 of which has already been 
 
 **Content:**
 
-[📦 Fuzz3 – Fuzz Targets & Code Locations](https://github.com/karineek/Fuzz3/edit/main/README.md#-fuzz3--fuzz-targets--code-locations)
-[🧪 Evaluation](https://github.com/karineek/Fuzz3/edit/main/README.md#-evaluation)
-[🔁 Replay Seeds](https://github.com/karineek/Fuzz3/edit/main/README.md#-replay-seeds)
-[🌍 Evaluation at Scale](https://github.com/karineek/Fuzz3/edit/main/README.md#-evaluation-at-scale)
+⦿ [📦 Fuzz3 – Fuzz Targets & Code Locations](https://github.com/karineek/Fuzz3/edit/main/README.md#-fuzz3--fuzz-targets--code-locations)
+⦿ [🧪 Evaluation](https://github.com/karineek/Fuzz3/edit/main/README.md#-evaluation)
+⦿ [🔁 Replay Seeds](https://github.com/karineek/Fuzz3/edit/main/README.md#-replay-seeds)
+⦿ [🌍 Evaluation at Scale](https://github.com/karineek/Fuzz3/edit/main/README.md#-evaluation-at-scale)
 
 ---- 
 
