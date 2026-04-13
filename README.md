@@ -111,6 +111,10 @@ We applied Fuzz3 to existing code reporsitories.
 
 To execute with a specific target you pass its executor name with the ```--executor``` flag (See below examples).
 
+We wrote some scripts to auto-run some of the SUTs [HERE](https://github.com/karineek/Fuzz3/tree/main/SUT).
+
+We discuss some in detail, below.
+
 **0. flaky_triangle:**
    
    Run it
