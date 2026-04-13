@@ -73,7 +73,9 @@ We applied Fuzz3 to existing code reporsitories.
 - **Location:** Fuzz3/Fuzz3/executors.py
 
 
-## Evaluation
+## 🧪 Evaluation
+
+To execute with a specific target you pass its executor name with the ```--executor``` flag (See below examples).
 
 **0. flaky_triangle:**
    
@@ -260,6 +262,7 @@ We will use FuzzBench:
 - https://google.github.io/fuzzbench/
 
 - Reported bug (confirmed): https://github.com/llvm/llvm-project/issues/188500
+
 
 
 ## Replay Seeds
