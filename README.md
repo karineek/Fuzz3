@@ -1,16 +1,25 @@
 # Fuzz3
 
-EntFuzz is a fuzzer extension that uses entropy on input/output of a SUT to guide exploration.
+Fuzz3 is a fuzzer extension that uses entropy on input/output of a SUT to guide exploration.
+
+# 📦 Fuzz3 – Fuzz Targets & Code Locations
+
+## 🧠 Overview
+In this framework, **fuzz targets = executors**.  
+Each executor defines how inputs (seeds) are fed into a System Under Test (SUT).
+
+👉 All primary fuzz targets are implemented in Fuzz3/executors.py file.
 
 ## Demo Repositories
 
+We applied Fuzz3 to existing code reporsitories.
+
+### Location:
 - Google OLC Open location code (Plus codes): https://github.com/google/open-location-code
 
   previously with OLC I tried resolution 1,2,3,4..15
   and 2000 samples drawn from GB post codes open_postcode_geo.csv.gz
 
-
-  
 - Uber's H3 A Hexagonal Hierarchical Geospatial Indexing System: https://github.com/uber/h3
   
 - The data directory has the locations (lat,long) from 
@@ -19,7 +28,50 @@ EntFuzz is a fuzzer extension that uses entropy on input/output of a SUT to guid
   
   Perhaps to break OLC or H3 we will need to test edge cases, eg North or South Pole, invalid regions, numbers bigger/smaller than 360, positionns very close to valid places, linear interpolation between valid places.
 
-Code: https://github.com/google/open-location-code 
+### Code:
+
+- GCC
+- Clang
+- Clang-Format
+
+### Applications:
+- httpcore
+- pytest with Cirq
+- General CLI Targets (any)
+
+
+## 🎯 Supported Core Fuzz Targets in Fuzz3
+
+## 1. 📜 Script / CLI Target (Generic)
+**Purpose:** Fuzz any command-line program or script (e.g. for pytest fuzzing)
+
+- **Function:** `script_executor`
+- **Location:** Fuzz3/Fuzz3/executors.py
+
+## 2. 🌐 HTTP Target (httpcore)
+**Purpose:** Fuzz HTTP requests via URLs
+
+- **Function:** `httpcore_executor`
+- **Location:** Fuzz3/Fuzz3/executors.py
+
+## 3. 🔺 Triangle Program Target
+**Purpose:** Fuzz a triangle classification program
+
+- **Function:** `triangle_executor`
+- **Location:** Fuzz3/Fuzz3/executors.py
+
+## 5. 🧵 C Compiler Target
+**Purpose:** Fuzz C compilers (e.g., gcc, clang)
+
+- **Function:** `c_compiler_executor`
+- **Location:** Fuzz3/Fuzz3/executors.py
+
+## 6. 🧹 Clang Format Target (Output Processing)
+**Purpose:** Normalize and analyze compiler output
+
+- **Function:** `output_formatter_clang_format`
+- **Location:** Fuzz3/Fuzz3/executors.py
+
 
 ## Evaluation
 
