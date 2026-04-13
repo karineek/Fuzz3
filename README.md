@@ -2,6 +2,21 @@
 
 Fuzz3 is a fuzzer extension that uses entropy on input/output of a SUT to guide exploration.
 
+Zenodo Record of Fuzz3: https://zenodo.org/uploads/19494172.
+
+```
+@misc{anon_2026_19494172,
+  author       = {anon.},
+  title        = {Artifact of Fuzz3: Entropy as a Third Oracle},
+  month        = apr,
+  year         = 2026,
+  publisher    = {Zenodo},
+  version      = {1.0},
+  doi          = {10.5281/zenodo.19494172},
+  url          = {https://doi.org/10.5281/zenodo.19494172},
+}
+```
+
 # 📦 Fuzz3 – Fuzz Targets & Code Locations
 
 ## 🧠 Overview
@@ -270,5 +285,7 @@ Reported bugs:
 - Cirq/Pytest: Reported bug (confired & fixed): https://github.com/quantumlib/Cirq/issues/8013
 - CLANG/LLVM: Reported bug (confired & fixed): https://github.com/llvm/llvm-project/issues/188500
 - Httpcore: Reported bug: https://github.com/encode/httpcore/discussions/1069
+
+
 
 We analysed the input-output entropy over 50,000 iterations:
