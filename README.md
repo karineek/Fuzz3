@@ -17,6 +17,7 @@ Applied to 6 open source software, it found 4 bugs, 2 of which has already been 
 ⦿ [🧪 Evaluation](https://github.com/karineek/Fuzz3/edit/main/README.md#-evaluation)
 ⦿ [🔁 Replay Seeds](https://github.com/karineek/Fuzz3/edit/main/README.md#-replay-seeds)
 ⦿ [🌍 Evaluation at Scale](https://github.com/karineek/Fuzz3/edit/main/README.md#-evaluation-at-scale)
+⦿ 
 
 ---- 
 
