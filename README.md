@@ -1,7 +1,7 @@
 # Fuzz3
 
 <p align="left">
-  <img src="https://github.com/user-attachments/assets/04e9d3dd-e5fa-4918-bc52-a7bd17c72809" width="500" align="right" />
+  <img src="https://github.com/user-attachments/assets/cbe6a03d-58b2-4d00-a020-3db2fa291fb0" width="400" align="right" />
 </p>
 
 Fuzz3 is a fuzzer extension that uses entropy on input/output of a SUT to guide exploration.
