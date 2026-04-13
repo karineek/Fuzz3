@@ -256,16 +256,7 @@ python3 blackbox.py -i httpcore/seeds -o httpcore/out -c httpcore/crashes --exec
 
 httpcore must be installed first. This can be done with pip install httpcore.
 
-## Evaluation at Scale
-
-We will use FuzzBench:
-- https://google.github.io/fuzzbench/
-
-- Reported bug (confirmed): https://github.com/llvm/llvm-project/issues/188500
-
-
-
-## Replay Seeds
+# Replay Seeds
 
 ```--replay 1``` is a command-line flag used when running blackbox.py in this project to re-run previously generated test cases (seeds) instead of creating new ones. 
 
@@ -273,3 +264,11 @@ Unlike the fuzzing campaign, where the tool mutates inputs and discovers new beh
 
 TODO: We should consider adding *.CSV output to this stage once we know which graphs can support the findings presentation.
 
+# Evaluation at Scale
+
+Reported bugs:
+- Cirq/Pytest: Reported bug (confired & fixed): https://github.com/quantumlib/Cirq/issues/8013
+- CLANG/LLVM: Reported bug (confired & fixed): https://github.com/llvm/llvm-project/issues/188500
+- Httpcore: Reported bug: https://github.com/encode/httpcore/discussions/1069
+
+We analysed the input-output entropy over 50,000 iterations:
