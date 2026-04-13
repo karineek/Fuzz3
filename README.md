@@ -1,6 +1,24 @@
 # Fuzz3
 
+<p align="left">
+  <img src="https://github.com/user-attachments/assets/04e9d3dd-e5fa-4918-bc52-a7bd17c72809" width="500" align="right" />
+</p>
+
 Fuzz3 is a fuzzer extension that uses entropy on input/output of a SUT to guide exploration.
+
+Abstract. Fuzz testing finds security issues and improves robustness, however it has only two implicit test oracles: timeout and crash. 
+Information theory gives a third: entropy, which is generic, low cost and widely applicable. 
+Fuzz3 is programming language agnostic, treating software as a black box, searching its input space based on entropy distributions. 
+Applied to 6 open source software, it found 4 bugs, 2 of which has already been fixed since we reported it to the original developers. 
+
+**Content:**
+
+[📦 Fuzz3 – Fuzz Targets & Code Locations](https://github.com/karineek/Fuzz3/edit/main/README.md#-fuzz3--fuzz-targets--code-locations)
+[🧪 Evaluation](https://github.com/karineek/Fuzz3/edit/main/README.md#-evaluation)
+[🔁 Replay Seeds](https://github.com/karineek/Fuzz3/edit/main/README.md#-replay-seeds)
+[🌍 Evaluation at Scale](https://github.com/karineek/Fuzz3/edit/main/README.md#-evaluation-at-scale)
+
+---- 
 
 Zenodo Record of Fuzz3: https://zenodo.org/uploads/19494172.
 
@@ -271,7 +289,7 @@ python3 blackbox.py -i httpcore/seeds -o httpcore/out -c httpcore/crashes --exec
 
 httpcore must be installed first. This can be done with pip install httpcore.
 
-# Replay Seeds
+# 🔁 Replay Seeds
 
 ```--replay 1``` is a command-line flag used when running blackbox.py in this project to re-run previously generated test cases (seeds) instead of creating new ones. 
 
@@ -279,7 +297,7 @@ Unlike the fuzzing campaign, where the tool mutates inputs and discovers new beh
 
 TODO: We should consider adding *.CSV output to this stage once we know which graphs can support the findings presentation.
 
-# Evaluation at Scale
+# 🌍 Evaluation at Scale
 
 Reported bugs:
 - Cirq/Pytest: Reported bug (confired & fixed): https://github.com/quantumlib/Cirq/issues/8013
