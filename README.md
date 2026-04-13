@@ -286,6 +286,9 @@ Reported bugs:
 - CLANG/LLVM: Reported bug (confired & fixed): https://github.com/llvm/llvm-project/issues/188500
 - Httpcore: Reported bug: https://github.com/encode/httpcore/discussions/1069
 
-
-
 We analysed the input-output entropy over 50,000 iterations:
+
+<img width="800" height="547" alt="image" src="https://github.com/user-attachments/assets/dfc94c3c-bcaa-4f80-9271-99fce47c4f7a" />
+
+
+
