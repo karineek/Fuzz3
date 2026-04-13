@@ -10,7 +10,7 @@ Each executor defines how inputs (seeds) are fed into a System Under Test (SUT).
 
 👉 All primary fuzz targets are implemented in Fuzz3/executors.py file.
 
-## Demo Repositories
+## 🧩 Demo Repositories
 
 We applied Fuzz3 to existing code reporsitories.
 
