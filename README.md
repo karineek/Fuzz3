@@ -310,7 +310,7 @@ Reported bugs:
 - Httpcore: Reported bug: https://github.com/encode/httpcore/discussions/1069
 
 We analysed the input-output entropy over 50,000 iterations:
-<img width="940" height="547" alt="image" src="https://github.com/user-attachments/assets/95238c0f-b882-40a4-b3ea-10305118b40a" />
+<img width="940" height="547" alt="image" src="https://github.com/user-attachments/assets/54b9935c-10aa-4571-8f76-f82bbfd54139" />
 
 and also just the output entropy:
 <img width="800" height="547" alt="image" src="https://github.com/user-attachments/assets/2925143d-0608-4be4-a58c-9e8dd50537b5" />
