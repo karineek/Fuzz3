@@ -305,14 +305,12 @@ TODO: We should consider adding *.CSV output to this stage once we know which gr
 # 🌍 Evaluation at Scale
 
 Reported bugs:
-- Cirq/Pytest: Reported bug (confired & fixed): https://github.com/quantumlib/Cirq/issues/8013
-- CLANG/LLVM: Reported bug (confired & fixed): https://github.com/llvm/llvm-project/issues/188500
+- Cirq/Pytest: Reported bug (confirmed & fixed): https://github.com/quantumlib/Cirq/issues/8013
+- CLANG/LLVM: Reported bug (confirmed & fixed): https://github.com/llvm/llvm-project/issues/188500
 - Httpcore: Reported bug: https://github.com/encode/httpcore/discussions/1069
 
 We analysed the input-output entropy over 50,000 iterations:
-
-<img width="940" height="547" alt="image" src="https://github.com/user-attachments/assets/dabd2597-da7c-4b08-ae06-5ad5fde46c31" />
+<img width="940" height="547" alt="image" src="https://github.com/user-attachments/assets/95238c0f-b882-40a4-b3ea-10305118b40a" />
 
 and also just the output entropy:
-
-<img width="800" height="547" alt="image" src="https://github.com/user-attachments/assets/dfc94c3c-bcaa-4f80-9271-99fce47c4f7a" />
+<img width="800" height="547" alt="image" src="https://github.com/user-attachments/assets/2925143d-0608-4be4-a58c-9e8dd50537b5" />
