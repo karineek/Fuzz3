@@ -280,7 +280,7 @@ def main() -> int:
                         seed, results_map
                     )  # Just need the last ones!
 
-            shutil.copy2(seed, output_dir / seed.name)
+            shutil.copy2(seed, output_dir / seed.name) 
         else:
             shutil.copy2(seed, crash_dir / seed.name)
 
@@ -425,11 +425,11 @@ def main() -> int:
         # Now check where the seed needs to go
         if _rc == 0:
             print(f">> (Fuzz3) Writing to output dir {name}")
-            shutil.copy2(tmp_path, output_dir / name)
+            shutil.move(tmp_path, output_dir / name)
         else:
             name_wt_rc = f"{name}-{_rc}" if _rc is not None else name
             print(f">> (Fuzz3) Writing to crash dir {name_wt_rc}")
-            shutil.copy2(tmp_path, crash_dir / name_wt_rc)
+            shutil.move(tmp_path, crash_dir / name_wt_rc)
 
             # If crashed and not in cold list, add parent
             if all(
@@ -449,7 +449,7 @@ def main() -> int:
         #################### END ORACLE 1+2 ####################
 
         # Cleaning
-        tmp_path.unlink(missing_ok=True)
+        # tmp_path.unlink(missing_ok=True)
         print(" ")
 
 
