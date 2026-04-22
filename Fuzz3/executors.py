@@ -21,7 +21,7 @@ def script_executor(
     try:
         code_in = seed.read_text(encoding="utf-8")
     except Exception as e:
-        return "", 1, "", "Invalid (Fuzz3)"
+        return "", 125, "", "Invalid (Fuzz3)"
 
     arg_parsed = shlex.split(arguments)
     cmd = [*arg_parsed, str(seed)]
@@ -72,7 +72,7 @@ def triangle_executor(
         s = seed.read_text().strip()
         a, b, c = s.replace(",", " ").split()
     except Exception as e:
-        return "", 1, "", "Invalid (Fuzz3)"
+        return "", 125, "", "Invalid (Fuzz3)"
 
     cmd = ["flaky_triangle", a, b, c]
 
@@ -166,7 +166,7 @@ def olc_encode_executor(
         lat = float(a)
         lng = float(b)
     except Exception as e:
-        return "", 1, "", "Invalid (Fuzz3)"
+        return "", 125, "", "Invalid (Fuzz3)"
 
     code = (
         "from openlocationcode import openlocationcode as olc;"
@@ -192,7 +192,7 @@ def olc_decode_executor(
     try:
         code_in = seed.read_text().strip()
     except Exception as e:
-        return "", 1, "", "Invalid (Fuzz3)"
+        return "", 125, "", "Invalid (Fuzz3)"
 
     code = (
         "from openlocationcode import openlocationcode as olc;"
@@ -226,7 +226,7 @@ def h3_encode_executor(
         lng = float(parts[1])
         res = int(arguments) if arguments else 10
     except Exception as e:
-        return "", 1, "", "Invalid (Fuzz3)"
+        return "", 125, "", "Invalid (Fuzz3)"
 
     code = "import h3;" f"print(h3.latlng_to_cell({lat},{lng},{res}))"
 
@@ -248,7 +248,7 @@ def h3_decode_executor(
     try:
         h3_index = seed.read_text().strip()
     except Exception as e:
-        return "", 1, "", "Invalid (Fuzz3)"
+        return "", 125, "", "Invalid (Fuzz3)"
 
     code = (
         "import h3;"
