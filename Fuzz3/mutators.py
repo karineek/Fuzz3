@@ -1,3 +1,4 @@
+#WBL 22 Apr 2026 bugfix delete_char
 #WBL 21 Mar 2026 for triangle add: add_one sub_one equilateral isosceles (and none debug)
 import random
 import re
@@ -96,7 +97,9 @@ def delete_char(seed: Path) -> str | None:
     if not data:
         return None
 
-    i = random.randrange(1, len(data) - 1)
+    l = len(data)
+    i = random.randrange(l)
+    assert i >= 0 and i < l
     return data[:i] + data[i+1:]
 
 def duplicate_line(seed: Path) -> str | None:
