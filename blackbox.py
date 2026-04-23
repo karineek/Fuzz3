@@ -269,7 +269,10 @@ def main() -> int:
     init_stage_results = None
     for seed in files:
         _input, _rc, _out, _err = executor(arguments, seed, args.timeout)
-        if _rc == 0:
+        if _rc == 300: 
+            shutil.move(seed, crash_dir / seed.name) # Should have never reach the input folder!
+            continue # Not a real bug, skip this
+        elif _rc == 0:
             is_valid = True
             for observer in observers:
                 _map_in, _map_out = observer(_input, (_rc, _out, _err))
@@ -282,7 +285,7 @@ def main() -> int:
 
             shutil.copy2(seed, output_dir / seed.name) 
         else:
-            shutil.copy2(seed, crash_dir / seed.name)
+            shutil.move(seed, crash_dir / seed.name) # Should have never reach the input folder!
 
     if not is_valid or init_stage_results is None:
         print(">> (Fuzz3) No valid non-crashing seeds found. Exiting.")
@@ -309,7 +312,7 @@ def main() -> int:
     print(f">> (Fuzz3) Start Fuzzing {args.iterations}")
     for _ in range(args.iterations):
 
-        # Clean a bit if deads is high!
+        # Clean a bit if the deaths counter is high!
         if deads > 2 * MAX_CAPACITY:
             print(f">> (Fuzz3) Shaking the seeds after {deads} no interesting seeds.")
             # move 10% of files from output_dir to output_dir_end
@@ -365,6 +368,9 @@ def main() -> int:
         name = f"fuzz3_{int(time.time_ns())}"
 
         _input, _rc, _out, _err = executor(arguments, tmp_path, args.timeout)
+        if _rc == 300: 
+            tmp_path.unlink(missing_ok=True) # Should have never reached the output folder! + skip observer
+            continue # Not a real bug, skip this
         #################### END Execution ####################
 
         # Running Oracle - third oracle using data from Observers
