@@ -267,6 +267,7 @@ def main() -> int:
         return 1
 
     init_stage_results = None
+    files = [f for f in output_dir.iterdir() if f.is_file()] # Read first here, and every 1000 files
     for seed in files:
         _input, _rc, _out, _err = executor(arguments, seed, args.timeout)
         if _rc == 300: 
@@ -431,7 +432,9 @@ def main() -> int:
         # Now check where the seed needs to go
         if _rc == 0:
             print(f">> (Fuzz3) Writing to output dir {name}")
-            shutil.move(tmp_path, output_dir / name)
+            out_path = output_dir / name
+            shutil.move(tmp_path, out_path)
+            files.append(out_path)
         else:
             name_wt_rc = f"{name}-{_rc}" if _rc is not None else name
             print(f">> (Fuzz3) Writing to crash dir {name_wt_rc}")
@@ -458,6 +461,13 @@ def main() -> int:
         # tmp_path.unlink(missing_ok=True)
         print(" ")
 
+        # Deduplication of seeds
+        counter = counter + 1
+        if counter > 1000:
+            dedup_seeds(output_dir)
+            dedup_seeds(crash_dir)
+            files = [f for f in output_dir.iterdir() if f.is_file()]
+            counter = 0
 
 if __name__ == "__main__":
     raise SystemExit(main())
