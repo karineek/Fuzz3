@@ -308,6 +308,7 @@ def main() -> int:
     ######################
     result_entropy_prev = None
     deads = 0
+    counter = 0
     recent_active = deque(maxlen=WINDOW_SIZE)  # In case we stall, we
     print(f">> (Fuzz3) Start Fuzzing {args.iterations}")
     files = [f for f in output_dir.iterdir() if f.is_file()] # Read first here, and every 1000 files
