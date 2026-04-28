@@ -267,7 +267,6 @@ def main() -> int:
         return 1
 
     init_stage_results = None
-    files = [f for f in output_dir.iterdir() if f.is_file()] # Read first here, and every 1000 files
     for seed in files:
         _input, _rc, _out, _err = executor(arguments, seed, args.timeout)
         if _rc == 300: 
@@ -311,6 +310,7 @@ def main() -> int:
     deads = 0
     recent_active = deque(maxlen=WINDOW_SIZE)  # In case we stall, we
     print(f">> (Fuzz3) Start Fuzzing {args.iterations}")
+    files = [f for f in output_dir.iterdir() if f.is_file()] # Read first here, and every 1000 files
     for _ in range(args.iterations):
 
         # Clean a bit if the deaths counter is high!
