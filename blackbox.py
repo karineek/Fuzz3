@@ -95,6 +95,22 @@ def parse_args():
     
     return parser.parse_args()
 
+# This code is taken from a different project on ECU fuzzing of Karine. It should work here as is. 29/04/2026
+def dedup_seeds(folder: Path) -> int:
+    """Remove duplicate seed files. Returns number of duplicates removed."""
+    result = subprocess.run(
+        ["fdupes", "-r", "-N", str(folder)],
+        capture_output=True,
+        text=True
+    )
+    if result.returncode != 0:
+        print(f"fdupes failed: {result.stderr}")
+        return 0
+    # count removed files from output
+    removed = result.stdout.count("\n")
+    print(f">> {time_str()} dedup: removed {removed} duplicate seeds")
+    return removed
+    
 def confirm_overwrite(path: Path, name: str) -> bool:
     if not path.exists():
         return True
