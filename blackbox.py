@@ -110,6 +110,11 @@ def dedup_seeds(folder: Path) -> int:
     removed = result.stdout.count("\n")
     print(f">> {time_str()} dedup: removed {removed} duplicate seeds")
     return removed
+
+# This code is taken from a different project on ECU fuzzing of Karine. It should work here as is. 29/04/2026
+def time_str() -> str:
+    now = time.strftime("%H:%M:%S")
+    return f"[{now}]"
     
 def confirm_overwrite(path: Path, name: str) -> bool:
     if not path.exists():
@@ -129,7 +134,7 @@ def main() -> int:
     #                        ---> ARGS <---
     # ================================================================
 
-    print(">> (Fuzz3) Parsing input arguments")
+    print(">> {time_str()} (Fuzz3) Parsing input arguments")
     args = parse_args()
 
     print(">> (Fuzz3) Start")
@@ -326,7 +331,7 @@ def main() -> int:
     deads = 0
     counter = 0
     recent_active = deque(maxlen=WINDOW_SIZE)  # In case we stall, we
-    print(f">> (Fuzz3) Start Fuzzing {args.iterations}")
+    print(f">> {time_str()} (Fuzz3) Start Fuzzing {args.iterations}")
     files = [f for f in output_dir.iterdir() if f.is_file()] # Read first here, and every 1000 files
     for _ in range(args.iterations):
 
@@ -347,7 +352,7 @@ def main() -> int:
                 if f.name not in recent_active:
                     new_name = f.with_name(f.name.replace("_coldlist", ""))
                     f.rename(new_name)
-                    print(f">> (Fuzz3) Restored: {f.name} → {new_name.name}")
+                    print(f">> {time_str()} (Fuzz3) Restored: {f.name} → {new_name.name}")
         ## END reducing the queue
 
         # After reducing the queue, continue with the next iteration of fuzzing
@@ -367,7 +372,7 @@ def main() -> int:
         seed = random.choices(files, weights=weights, k=1)[0]
         recent_active.append(seed.name)
 
-        print(f">> (Fuzz3) Fuzzing seed: {seed} {_}")
+        print(f">> {time_str()} (Fuzz3) Fuzzing seed: {seed} {_}")
 
         # Mutate
         mutator = random.choice(mutators)
@@ -448,7 +453,7 @@ def main() -> int:
         ## CRASH+HANGS ORACLES ##
         # Now check where the seed needs to go
         if _rc == 0:
-            print(f">> (Fuzz3) Writing to output dir {name}")
+            print(f">> {time_str()} (Fuzz3) Writing to output dir {name}")
             out_path = output_dir / name
             shutil.move(tmp_path, out_path)
             files.append(out_path)
