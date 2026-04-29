@@ -134,7 +134,7 @@ def main() -> int:
     #                        ---> ARGS <---
     # ================================================================
 
-    print(">> {time_str()} (Fuzz3) Parsing input arguments")
+    print(f">> {time_str()} (Fuzz3) Parsing input arguments")
     args = parse_args()
 
     print(">> (Fuzz3) Start")
