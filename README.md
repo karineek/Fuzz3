@@ -44,6 +44,13 @@ Each executor defines how inputs (seeds) are fed into a System Under Test (SUT).
 
 👉 All primary fuzz targets are implemented in Fuzz3/executors.py file.
 
+## ⚙️ Requirements
+
+Please install:
+```
+sudo apt install fdupes
+```
+
 ## 🧩 Demo Repositories
 
 We applied Fuzz3 to existing code repositories.
