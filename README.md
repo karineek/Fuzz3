@@ -46,7 +46,7 @@ Each executor defines how inputs (seeds) are fed into a System Under Test (SUT).
 
 ## 🧩 Demo Repositories
 
-We applied Fuzz3 to existing code reporsitories.
+We applied Fuzz3 to existing code repositories.
 
 ### Location:
 - Google OLC Open location code (Plus codes): https://github.com/google/open-location-code
@@ -58,7 +58,7 @@ We applied Fuzz3 to existing code reporsitories.
   
 - The data directory has the locations (lat,long) from 
    https://www.getthedata.com/downloads/open_postcode_geo.csv.zip
-  (3 august 2022)
+  (3 August 2022)
   
   Perhaps to break OLC or H3 we will need to test edge cases, eg North or South Pole, invalid regions, numbers bigger/smaller than 360, positionns very close to valid places, linear interpolation between valid places.
 
