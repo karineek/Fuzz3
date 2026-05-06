@@ -24,8 +24,9 @@ Applied to 6 open source software, it found 4 bugs, 2 of which has already been 
 Zenodo Record of Fuzz3: https://zenodo.org/uploads/19494172.
 
 ```
-@misc{anon_2026_19494172,
-  author       = {anon.},
+@misc{Even-Mendoza_2026_19392254,
+  author       = {Karine Even-Mendoza and Janine Obiri and
+                  Aidan Dakhama and Phil McMinn and William B. Langdon},
   title        = {Artifact of Fuzz3: Entropy as a Third Oracle},
   month        = apr,
   year         = 2026,
@@ -321,3 +322,37 @@ We analysed the input-output entropy over 50,000 iterations:
 
 and also just the output entropy:
 <img width="800" height="547" alt="image" src="https://github.com/user-attachments/assets/2925143d-0608-4be4-a58c-9e8dd50537b5" />
+
+
+```
+@inproceedings (Even-Mendoza:2026:SSBSE,
+  author =	{Karine Even-Mendoza and Janine Obiri and Aidan Dakhama and Phil McMinn and W. B Langdon},
+  title =	{Fuzz3: Entropy as a Third Oracle},
+  booktitle =	{Search-Based Software Engineering 2025 - Challenge Track},
+  year =	2025,
+  editor =	"Moataz Chouchen and Carol Hanna",
+  volume =	{},
+  series =	{Lecture Notes in Computer Science},
+  pages =	{},
+  address = 	{Montreal},
+  publisher_address = 	{},
+  month = 	{5-6 July},
+  organisation = {},
+  publisher =	"Springer Nature",
+  note =	{Forthcoming},
+  keywords =    {fuzzing, testing},
+  ISBN13 =      {},
+  url =         {},
+  code_url =	{https://doi.org/10.5281/zenodo.19392372},
+  size = 	{6 pages},
+  abstract =	{Fuzz testing finds security issues and improves
+  robustness, however it has only two implicit test oracles: timeout
+  and crash. Information theory gives a third: entropy, which is
+  generic, low cost and widely applicable. Fuzz3 is SBSE blackbox and
+  programming language agnostic. Applied to 5 open source software it
+  found 4 bugs, 2 already fixed.},
+  notes =	{
+
+https://conf.researchr.org/track/ssbse-2026/ssbse-2026-ssbse-challenge},
+)
+```
