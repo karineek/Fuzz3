@@ -329,7 +329,7 @@ and also just the output entropy:
   author =	{Karine Even-Mendoza and Janine Obiri and Aidan Dakhama and Phil McMinn and W. B Langdon},
   title =	{Fuzz3: Entropy as a Third Oracle},
   booktitle =	{Search-Based Software Engineering 2025 - Challenge Track},
-  year =	2025,
+  year =	2026,
   editor =	"Moataz Chouchen and Carol Hanna",
   volume =	{},
   series =	{Lecture Notes in Computer Science},
