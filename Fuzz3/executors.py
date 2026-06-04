@@ -23,8 +23,8 @@ def script_executor(
         #code_in = seed.read_text(encoding="utf-8")
         code_in = seed.read_bytes()
     except Exception as e:
-        print(f'Execption {e} seed {seed}')
-        return "", 125, "", "Invalid (Fuzz3)"
+        print(f'Execption {e} seed {seed} Invalid (Fuzz3)')
+        return "", 300, "", "Invalid (Fuzz3)"
 
     arg_parsed = shlex.split(arguments)
     cmd = [*arg_parsed, str(seed)]
@@ -50,7 +50,8 @@ def httpcore_executor(
         s = seed.read_text(encoding="utf-8").strip()
         url = str(s)
     except Exception as e:
-        return "", 125, "", "Invalid (Fuzz3)"
+        print(f'Execption {e} seed {seed} httpcore_executor Invalid (Fuzz3)')
+        return "", 300, "", "Invalid (Fuzz3)"
 
     code = "import httpcore;" f"a= httpcore.request('GET', '{url}').status;" "print(a)"
 
@@ -75,7 +76,8 @@ def triangle_executor(
         s = seed.read_text().strip()
         a, b, c = s.replace(",", " ").split()
     except Exception as e:
-        return "", 125, "", "Invalid (Fuzz3)"
+        print(f'Execption {e} seed {seed} triangle_executo Invalid (Fuzz3)')
+        return "", 300, "", "Invalid (Fuzz3)"
 
     cmd = ["flaky_triangle", a, b, c]
 
@@ -100,9 +102,11 @@ def c_compiler_executor(
 ) -> tuple[str, int, str, str]:
     
     if (not seed):
-        return "", 122, "", "Invalid Path"
+        print(f'Execption {e} seed {seed} Invalid Path')
+        return "", 300, "", "Invalid Path"
     elif not seed.is_file():
-       return "", 121, "", "Not a File"
+        print(f'Execption {e} seed {seed} Not a File')
+        return "", 300, "", "Not a File"
 
     return script_executor(f"{arguments} -x c", seed, timeout) # All good, it is a file + it ends with .c
 
@@ -138,7 +142,8 @@ def clang_format_executor(
     try:
         code_in = seed.read_text(encoding="utf-8")
     except UnicodeDecodeError as e:
-        return "", 125, "", "Invalid (Fuzz3)"
+        print(f'Execption {e} seed {seed} clang_format_executor')
+        return "", 300, "", "Invalid (Fuzz3)"
 
     arg_parsed = shlex.split(arguments)
     cmd = ["clang-format", *arg_parsed, str(seed)]
@@ -169,7 +174,8 @@ def olc_encode_executor(
         lat = float(a)
         lng = float(b)
     except Exception as e:
-        return "", 125, "", "Invalid (Fuzz3)"
+        print(f'Execption {e} seed {seed} olc_encode_executor Invalid (Fuzz3)')
+        return "", 300, "", "Invalid (Fuzz3)"
 
     code = (
         "from openlocationcode import openlocationcode as olc;"
@@ -188,31 +194,52 @@ def olc_encode_executor(
         return s, 124, e.stdout or "", e.stderr or "timeout"
 
 
+#based on https://stackoverflow.com/questions/339537/end-line-characters-from-lines-read-from-text-file-using-python
+def strip_trailing_newline(line):
+    if line[-1] == '\n':
+        return line[:-1]
+    else:
+        return line
+
 # Target decode olc
 def olc_decode_executor(
     arguments: str, seed: Path, timeout: float
 ) -> tuple[str, int, str, str]:
     try:
-        code_in = seed.read_text().strip()
+        #WBL 30 Apr 2026
+        print(f'olc_decode_executor {seed}.read_bytes')
+        #code_in = seed.read_text().strip()
+        code_in1 = seed.read_bytes()
+        #code_in = code_in1.removesuffix('\n')
+        code_in2 = strip_trailing_newline(code_in1)
+        code_in = code_in2.decode('utf-8')
+        #code_in = code_in2.rstrip('\n')
+        #print(f'code_in={code_in}')
     except Exception as e:
-        return "", 125, "", "Invalid (Fuzz3)"
+        print(f'Exception {e} seed {seed} olc_decode_executor')
+        return "", 300, "", "Invalid (Fuzz3)"
 
     code = (
         "from openlocationcode import openlocationcode as olc;"
         f'a=olc.decode("{code_in}");'
         "print(f'{a.latitudeCenter:.3f},{a.longitudeCenter:.3f}', end='')"
     )
-
+    
     try:
+        print(f'olc_decode_executor try code={code}')
         r = subprocess.run(
             [sys.executable, "-c", code],
             capture_output=True,
             text=True,
             timeout=timeout,
         )
+        print(f'olc_decode_executor returncode={r.returncode} stdout={r.stdout} stderr={r.stderr}')
         return code_in, r.returncode, r.stdout, r.stderr
     except subprocess.TimeoutExpired as e:
+        print(f'Exception {e} seed {seed} olc_decode_executor TimeoutExpired')
         return code_in, 124, e.stdout or "", e.stderr or "timeout"
+    except Exception as e:
+        print(f'Exception {e} seed {seed} olc_decode_executor other')
 
 
 ################################# Target: H3 #################################
@@ -229,7 +256,8 @@ def h3_encode_executor(
         lng = float(parts[1])
         res = int(arguments) if arguments else 10
     except Exception as e:
-        return "", 125, "", "Invalid (Fuzz3)"
+        print(f'Execption {e} seed {seed} h3_encode_executor Invalid (Fuzz3)')
+        return "", 300, "", "Invalid (Fuzz3)"
 
     code = "import h3;" f"print(h3.latlng_to_cell({lat},{lng},{res}))"
 
@@ -251,7 +279,8 @@ def h3_decode_executor(
     try:
         h3_index = seed.read_text().strip()
     except Exception as e:
-        return "", 125, "", "Invalid (Fuzz3)"
+        print(f'Execption {e} seed {seed} h3_decode_executor Invalid (Fuzz3)')
+        return "", 300, "", "Invalid (Fuzz3)"
 
     code = (
         "import h3;"
