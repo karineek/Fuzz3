@@ -21,7 +21,7 @@ def script_executor(
     try:
         #WBL 1 May 2026
         #code_in = seed.read_text(encoding="utf-8")
-        code_in = seed.read_bytes()
+        code_in = seed.read_bytes().decode(encoding="utf-8")
     except Exception as e:
         print(f'Execption {e} seed {seed} Invalid (Fuzz3)')
         return "", 300, "", "Invalid (Fuzz3)"

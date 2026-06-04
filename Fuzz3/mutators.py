@@ -67,7 +67,7 @@ def cmutation_jump_mutator(seed: Path) -> str | None:
 def cmutation_unary(seed: Path) -> str | None:
     return __grayc_mutators(seed, '-mutations="-*,cmutation-unary"')
 
-def bit_flip(seed: Path) -> bytes | None:
+def bit_flip(seed: Path) -> str | None:
     data = seed.read_bytes()
     if not data:
         return None
@@ -76,7 +76,9 @@ def bit_flip(seed: Path) -> bytes | None:
     i = random.randrange(len(b))
     bit = 1 << random.randrange(8)
     b[i] ^= bit
-    return bytes(b)
+    res = bytes(b).decode(encoding="utf-8")
+    
+    return res
 
 
 def delete_line(seed: Path) -> str | None:
