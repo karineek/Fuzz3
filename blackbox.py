@@ -380,7 +380,12 @@ def main() -> int:
 
         # Mutate
         mutator = random.choice(mutators)
-        result = mutator(seed)
+        try:
+            result = mutator(seed)
+        except Exception as e:
+            print(f">> (Fuzz3) Mutator {mutator.__name__} failed: {e}")
+            continue
+
         if result is None:
             continue  # Mutation failed
 
