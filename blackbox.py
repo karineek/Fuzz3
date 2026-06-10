@@ -115,7 +115,7 @@ def dedup_seeds(folder: Path) -> int:
 def time_str() -> str:
     now = time.strftime("%H:%M:%S")
     return f"[{now}]"
-    
+
 def confirm_overwrite(path: Path, name: str) -> bool:
     if not path.exists():
         return True
@@ -125,6 +125,11 @@ def confirm_overwrite(path: Path, name: str) -> bool:
     ).strip().lower()
 
     return resp in ("y", "yes", "")
+
+# instead of checking if a file, check we do not include common files in repos:
+SKIP_SEED_SUFFIXES = {".zip", ".md"}
+def is_seed_file(path: Path) -> bool:
+    return path.is_file() and path.suffix.lower() not in SKIP_SEED_SUFFIXES
 
 # Call:  python3 blackbox.py   -i clang-format-seeds   -o out   -c crashes   --executor "clang_format_executor"   --executor-args="--dry-run"
 #  python3 blackbox.py   -i clang-format-seeds   -o out   -c crashes   --executor "clang_format_executor"   --executor-args "--dry-run --Werror"  --mutators bit_flip delete_line duplicate_line
@@ -182,7 +187,7 @@ def main() -> int:
             p for d in all_dirs
                 if d.exists()
                 for p in d.glob("*")
-                if p.is_file()
+                if p.is_seed_file()
         ]
         
         for seed in files:
@@ -249,7 +254,7 @@ def main() -> int:
         print(f">> (Fuzz3) No Generator was found.")
 
     print(">> (Fuzz3) Copy good seeds into output folder")
-    files = [p for p in input_dir.glob("*") if p.is_file()]
+    files = [p for p in input_dir.glob("*") if p.is_seed_file()]
     if not files:
         print(f">> (Fuzz3) No Seeds found in {input_dir}/ folder. Exiting.")
         return 1
@@ -332,14 +337,14 @@ def main() -> int:
     counter = 0
     recent_active = deque(maxlen=WINDOW_SIZE)  # In case we stall, we
     print(f">> {time_str()} (Fuzz3) Start Fuzzing {args.iterations}")
-    files = [f for f in output_dir.iterdir() if f.is_file()] # Read first here, and every 1000 files
+    files = [f for f in output_dir.iterdir() if f.is_seed_file()] # Read first here, and every 1000 files
     for _ in range(args.iterations):
 
         # Clean a bit if the deaths counter is high!
         if deads > 2 * MAX_CAPACITY:
             print(f">> (Fuzz3) Shaking the seeds after {deads} no interesting seeds.")
             # move 10% of files from output_dir to output_dir_end
-            files = [f for f in output_dir.iterdir() if f.is_file()]
+            files = [f for f in output_dir.iterdir() if f.is_seed_file()]
             n_to_move = max(1, math.ceil(0.1 * len(files)))  # at least 1 file
             selected = random.sample(files, n_to_move)
             for f in selected:
@@ -356,7 +361,7 @@ def main() -> int:
         ## END reducing the queue
 
         # After reducing the queue, continue with the next iteration of fuzzing
-        files = [p for p in output_dir.glob("*") if p.is_file()]
+        files = [p for p in output_dir.glob("*") if p.is_seed_file()]
 
         # Now we have a proper search
         weights = [
@@ -488,7 +493,7 @@ def main() -> int:
         if counter > 1000:
             dedup_seeds(output_dir)
             dedup_seeds(crash_dir)
-            files = [f for f in output_dir.iterdir() if f.is_file()]
+            files = [f for f in output_dir.iterdir() if f.is_seed_file()]
             counter = 0
 
 if __name__ == "__main__":
