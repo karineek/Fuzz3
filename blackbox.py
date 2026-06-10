@@ -189,7 +189,7 @@ def main() -> int:
                 for p in d.glob("*")
                 if is_seed_file(p)
         ]
-        
+
         for seed in files:
             print(f">> (Fuzz3, Reply) {seed}")
             _input, _rc, _out, _out_err = executor(arguments, seed, args.timeout)
@@ -202,7 +202,6 @@ def main() -> int:
                         print(f">>>>> RC: {_rc_2}\nStdout: {_out_2}\nStderr:\n{_out_err_2} of {diff_executor.__name__} {diff_args}")
                     else:
                         print(f"!! DIFF OK !! with {diff_args} !!")
-                    
             print("===")
 
         return 0
@@ -295,7 +294,7 @@ def main() -> int:
     init_stage_results = None
     for seed in files:
         _input, _rc, _out, _err = executor(arguments, seed, args.timeout)
-        if _rc == 300: 
+        if _rc == 300:
             shutil.move(seed, crash_dir / seed.name) # Should have never reach the input folder!
             continue # Not a real bug, skip this
         elif _rc == 0:
@@ -309,7 +308,7 @@ def main() -> int:
                         seed, results_map
                     )  # Just need the last ones!
 
-            shutil.copy2(seed, output_dir / seed.name) 
+            shutil.copy2(seed, output_dir / seed.name)
         else:
             shutil.move(seed, crash_dir / seed.name) # Should have never reach the input folder!
 

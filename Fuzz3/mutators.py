@@ -62,10 +62,25 @@ def cmutation_duplicate_statement_mutator(seed: Path) -> str | None:
     return __grayc_mutators(seed, '-mutations="-*,cmutation-duplicate-statement-mutator"')
 
 def cmutation_jump_mutator(seed: Path) -> str | None:
-    return __grayc_mutators(seed, '-mutations="-*,cmutation-jump-mutator"') 
+    return __grayc_mutators(seed, '-mutations="-*,cmutation-jump-mutator"')
 
 def cmutation_unary(seed: Path) -> str | None:
     return __grayc_mutators(seed, '-mutations="-*,cmutation-unary"')
+
+
+#def bit_flip(seed: Path) -> str | None:
+#    data = seed.read_bytes()
+#    if not data:
+#        return None
+#
+#    b = bytearray(data)
+#    i = random.randrange(len(b))
+#    bit = 1 << random.randrange(8)
+#    b[i] ^= bit
+#    res = bytes(b).decode(encoding="utf-8")
+#
+#    return res
+
 
 def bit_flip(seed: Path) -> str | None:
     data = seed.read_bytes()
@@ -76,9 +91,11 @@ def bit_flip(seed: Path) -> str | None:
     i = random.randrange(len(b))
     bit = 1 << random.randrange(8)
     b[i] ^= bit
-    res = bytes(b).decode(encoding="utf-8")
-    
-    return res
+
+    try:
+        return bytes(b).decode(encoding="utf-8")
+    except UnicodeDecodeError:
+        return None
 
 
 def delete_line(seed: Path) -> str | None:
