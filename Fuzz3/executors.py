@@ -36,10 +36,10 @@ def script_executor(
             timeout=timeout,
         )
         return code_in, result.returncode, result.stdout.strip(), result.stderr.strip()
-    
+
     except subprocess.TimeoutExpired as e:
         return code_in, 124, (e.stdout or "").strip(), (e.stderr or "timeout").strip()
-    
+
     except Exception as e:
         return code_in, 123, "", f"Execution System Error: {str(e)}"
 
@@ -64,7 +64,7 @@ def httpcore_executor(
         )
         return url, r.returncode, r.stdout, r.stderr
     except subprocess.TimeoutExpired as e:
-        return url, 124, e.stdout or "", e.stderr or "timeout"        
+        return url, 124, e.stdout or "", e.stderr or "timeout"
     except Exception as e:
         return url, 123, "", f"System Error: {str(e)}"
 
@@ -99,8 +99,7 @@ def triangle_executor(
 ##############################################################################
 def c_compiler_executor(
     arguments: str, seed: Path, timeout: float
-) -> tuple[str, int, str, str]:
-    
+    ) -> tuple[str, int, str, str]:
     if (not seed):
         print(f'Execption {e} seed {seed} Invalid Path')
         return "", 300, "", "Invalid Path"
@@ -221,7 +220,7 @@ def olc_decode_executor(
 
     code = (
         "from openlocationcode import openlocationcode as olc;"
-        f'a=olc.decode("{code_in}");'
+        f'a=olc.decode("{code_in!r}");'
         "print(f'{a.latitudeCenter:.3f},{a.longitudeCenter:.3f}', end='')"
     )
     
