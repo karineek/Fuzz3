@@ -211,7 +211,7 @@ def olc_decode_executor(
         code_in1 = seed.read_bytes()
         #code_in = code_in1.removesuffix('\n')
         code_in2 = strip_trailing_newline(code_in1)
-        code_in = code_in2.decode('utf-8')
+        code_in = code_in2.decode('utf-8').rstrip('\n')
         #code_in = code_in2.rstrip('\n')
         #print(f'code_in={code_in}')
     except Exception as e:
