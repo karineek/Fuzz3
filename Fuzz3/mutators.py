@@ -329,3 +329,65 @@ def digit_block_to_same(seed: Path) -> str | None:
         digit if start <= i < end and ch.isdigit() else ch
         for i, ch in enumerate(data)
     )
+
+# More OLC-specific mutators:
+def plus_to_many_plus(seed: Path) -> str | None:
+    data = seed.read_text(errors="ignore")
+    if not data:
+        return None
+    return data.replace("+", "++")
+
+def remove_plus(seed: Path) -> str | None:
+    data = seed.read_text(errors="ignore")
+    if not data or "+" not in data:
+        return None
+    return data.replace("+", "")
+
+def inject_invalid_olc_chars(seed: Path) -> str | None:
+    data = seed.read_text(errors="ignore")
+    if not data:
+        return None
+
+    invalids = "ILOilo!@#$%_"
+    return "".join(random.choice(invalids) if ch.isalnum() else ch for ch in data)
+
+def plus_left(seed: Path) -> str | None:
+    data = seed.read_text(errors="ignore")
+    if not data:
+        return None
+        
+    pos = data.find("+")
+    if pos <= 0:
+        return None
+
+    chars = list(data)
+    chars[pos], chars[pos - 1] = chars[pos - 1], chars[pos]
+
+    return "".join(chars)
+
+def plus_right(seed: Path) -> str | None:
+    data = seed.read_text(errors="ignore")
+    if not data:
+        return None
+
+    pos = data.find("+")
+    if pos == -1 or pos >= len(data) - 1:
+        return None
+
+    chars = list(data)
+    chars[pos], chars[pos + 1] = chars[pos + 1], chars[pos]
+
+    return "".join(chars)
+
+OLC_ALPHABET = "23456789CFGHJMPQRVWX"
+def olc_random_char(seed: Path) -> str | None:
+    data = seed.read_text(errors="ignore")
+    if not data:
+        return None
+
+    chars = list(data)
+
+    pos = random.randrange(len(chars))
+    chars[pos] = random.choice(OLC_ALPHABET)
+
+    return "".join(chars)
