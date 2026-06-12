@@ -278,3 +278,39 @@ def isosceles(seed: Path) -> str | None:
 
     #print(f"isosceles data={data} i={i} total={total} ans={ans}.")
     return ans
+
+# Adding YarpGEN style constant mutators
+def digits_to_same(seed: Path) -> str | None:
+    digit = str(random.randint(0, 9))
+    data = seed.read_text(errors="ignore")
+    if not data:
+        return None
+
+    return "".join(
+        digit if ch.isdigit() else ch
+        for ch in data
+    )
+
+def digits_lower_half_to_same(seed: Path) -> str | None:
+    digit = str(random.randint(0, 9))
+    data = seed.read_text(errors="ignore")
+    if not data:
+        return None
+        
+    midpoint = len(data) // 2
+    return "".join(
+        digit if i < midpoint and ch.isdigit() else ch
+        for i, ch in enumerate(data)
+    )
+
+def digits_upper_half_to_same(seed: Path) -> str | None:
+    digit = str(random.randint(0, 9))
+    data = seed.read_text(errors="ignore")
+    if not data:
+        return None
+        
+    midpoint = len(data) // 2
+    return "".join(
+        digit if i >= midpoint and ch.isdigit() else ch
+        for i, ch in enumerate(data)
+    )
