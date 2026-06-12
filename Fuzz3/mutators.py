@@ -314,3 +314,18 @@ def digits_upper_half_to_same(seed: Path) -> str | None:
         digit if i >= midpoint and ch.isdigit() else ch
         for i, ch in enumerate(data)
     )
+
+def digit_block_to_same(seed: Path) -> str | None:
+    digit = str(random.randint(0, 9))
+    data = seed.read_text(errors="ignore")
+    if not data:
+        return None
+
+    start = random.randrange(len(data))
+    length = random.randint(1, max(1, len(data) // 4))
+    end = min(len(data), start + length)
+
+    return "".join(
+        digit if start <= i < end and ch.isdigit() else ch
+        for i, ch in enumerate(data)
+    )
