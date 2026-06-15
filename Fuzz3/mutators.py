@@ -379,6 +379,8 @@ def plus_right(seed: Path) -> str | None:
 
     return "".join(chars)
 
+##################################################
+## Decoder Specific Mutators:
 OLC_ALPHABET = "23456789CFGHJMPQRVWX"
 def olc_random_char(seed: Path) -> str | None:
     data = seed.read_text(errors="ignore")
@@ -391,3 +393,32 @@ def olc_random_char(seed: Path) -> str | None:
     chars[pos] = random.choice(OLC_ALPHABET)
 
     return "".join(chars)
+
+def olc_neighbour(seed: Path) -> str | None:
+    data = seed.read_text(errors="ignore")
+    if not data:
+        return None
+
+    pos = random.randrange(len(data))
+    ch = data[pos].upper()
+
+    if ch not in OLC_ALPHABET:
+        return None
+
+    idx = OLC_ALPHABET.index(ch)
+
+    if idx == 0:
+        new_ch = OLC_ALPHABET[idx + 1]
+    elif idx == len(OLC_ALPHABET) - 1:
+        new_ch = OLC_ALPHABET[idx - 1]
+    elif random.choice([True, False]):
+        new_ch = OLC_ALPHABET[idx + 1]
+    else:
+        new_ch = OLC_ALPHABET[idx - 1]
+
+    if data[pos].islower():
+        new_ch = new_ch.lower()
+
+    return data[:pos] + new_ch + data[pos + 1:]
+
+## End of Decoder Specific Mutators.
