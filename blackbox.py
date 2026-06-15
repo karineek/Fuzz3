@@ -383,12 +383,15 @@ def main() -> int:
         try:
             result = mutator(seed)
         except Exception as e:
-            print(f">> (Fuzz3) Mutator {mutator.__name__} failed: {e}")
+            print(f">> (Fuzz3) Mutator {mutator.__name__} failed: {e}.")
             continue
 
         if result is None:
+            print(f">> (Fuzz3) Mutator {mutator.__name__} returned no result.")
             continue  # Mutation failed
-
+            
+        print(f">> (Fuzz3) Mutator {mutator.__name__} OK.")
+        
         # Execute the mutated file
         tmp = tempfile.NamedTemporaryFile(delete=False)
         if isinstance(result, str):
