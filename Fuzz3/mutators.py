@@ -1,3 +1,4 @@
+#WBL 15 Jun 2026 add flip_case_char and olc_short
 #WBL 22 Apr 2026 bugfix delete_char
 #WBL 21 Mar 2026 for triangle add: add_one sub_one equilateral isosceles (and none debug)
 import random
@@ -391,6 +392,36 @@ def olc_random_char(seed: Path) -> str | None:
 
     pos = random.randrange(len(chars))
     chars[pos] = random.choice(OLC_ALPHABET)
+
+    return "".join(chars)
+
+#remove area code (first 4 chars) to give short code
+#WBL 15 Jun 2026 so far not useful
+def olc_short(seed: Path) -> str | None:
+    data = seed.read_text(errors="ignore")
+    if not data:
+        return None
+
+    chars = list(data)
+    if len(chars) > 7+4:
+        return "".join(chars[4:])
+    else:
+        return None
+
+def flip_case_char(seed: Path) -> str | None:
+    data = seed.read_text(errors="ignore")
+    if not data:
+        return None
+
+    chars = list(data)
+
+    pos = random.randrange(len(chars))
+    if chars[pos].islower():
+        chars[pos] = chars[pos].upper()
+    elif chars[pos].isupper():
+        chars[pos] = chars[pos].lower()
+    else: #no change
+        return None
 
     return "".join(chars)
 
