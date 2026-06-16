@@ -1,3 +1,5 @@
+#WBL 15 Jun 2026 add olc_decoder_generator_corner
+
 from pathlib import Path
 import random
 import subprocess
@@ -112,6 +114,20 @@ def olc_decoder_generator_legal(seedsno: int, outputfolder: Path) -> int:
                 print(f"(Fuzz3:INFO) Failed to generate 1 seed {lat},{long} mapped to invalid seed. Skip.")
         except subprocess.TimeoutExpired as e:
             print(f"(Fuzz3:INFO) Failed to generate 1 seed {lat},{long} timed out. Skip.")
+
+    return total
+
+def olc_decoder_generator_corner(seedsno: int, outputfolder: Path) -> int:
+    outputfolder.mkdir(parents=True, exist_ok=True)
+
+    OLC_ALPHABET = "23456789CFGHJMPQRVWX"
+    total = 0
+    for lat in range(12):                    #southpole to northpole plus errors
+        for long in range(len(OLC_ALPHABET)):#round equator plus errors
+            seed_path = outputfolder / f"fuzz3_olcd_corner_{lat}_{long}.seed"
+            text = OLC_ALPHABET[lat]+OLC_ALPHABET[long]+"222222+22"
+            seed_path.write_text(f"{text}")
+            total += 1
 
     return total
 
