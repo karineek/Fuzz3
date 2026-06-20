@@ -17,9 +17,41 @@ Applied to 6 open source software, it found 4 bugs, 2 of which has already been 
 ⦿ [🧪 Evaluation](https://github.com/karineek/Fuzz3/edit/main/README.md#-evaluation)
 ⦿ [🔁 Replay Seeds](https://github.com/karineek/Fuzz3/edit/main/README.md#-replay-seeds)
 ⦿ [🌍 Evaluation at Scale](https://github.com/karineek/Fuzz3/edit/main/README.md#-evaluation-at-scale)
-⦿ 
+⦿ [🔴 Bugs found with Fuzz3]()
 
 ---- 
+
+SSBSE 2026 Paper:
+```
+@inproceedings(Even-Mendoza:2026:SSBSE,
+  author =	{Karine Even-Mendoza and Janine Obiri and Aidan Dakhama and Phil McMinn and W. B Langdon},
+  title =	{Fuzz3: Entropy as a Third Oracle},
+  booktitle =	{Search-Based Software Engineering 2025 - Challenge Track},
+  year =	2026,
+  editor =	"Moataz Chouchen and Carol Hanna",
+  volume =	{},
+  series =	{Lecture Notes in Computer Science},
+  pages =	{},
+  address = 	{Montreal},
+  publisher_address = 	{},
+  month = 	{5-6 July},
+  organisation = {},
+  publisher =	"Springer Nature",
+  note =	{Forthcoming},
+  keywords =    {fuzzing, testing},
+  ISBN13 =      {},
+  url =         {},
+  code_url =	{https://doi.org/10.5281/zenodo.19392372},
+  size = 	{6 pages},
+  abstract =	{Fuzz testing finds security issues and improves
+  robustness, however it has only two implicit test oracles: timeout
+  and crash. Information theory gives a third: entropy, which is
+  generic, low cost and widely applicable. Fuzz3 is SBSE blackbox and
+  programming language agnostic. Applied to 5 open source software it
+  found 4 bugs, 2 already fixed.},
+  notes =	{https://conf.researchr.org/track/ssbse-2026/ssbse-2026-ssbse-challenge},
+)
+```
 
 Zenodo Record of Fuzz3: https://zenodo.org/uploads/19494172.
 
@@ -323,36 +355,11 @@ We analysed the input-output entropy over 50,000 iterations:
 and also just the output entropy:
 <img width="800" height="547" alt="image" src="https://github.com/user-attachments/assets/2925143d-0608-4be4-a58c-9e8dd50537b5" />
 
+# 🔴 Bugs found with Fuzz3
 
-```
-@inproceedings (Even-Mendoza:2026:SSBSE,
-  author =	{Karine Even-Mendoza and Janine Obiri and Aidan Dakhama and Phil McMinn and W. B Langdon},
-  title =	{Fuzz3: Entropy as a Third Oracle},
-  booktitle =	{Search-Based Software Engineering 2025 - Challenge Track},
-  year =	2026,
-  editor =	"Moataz Chouchen and Carol Hanna",
-  volume =	{},
-  series =	{Lecture Notes in Computer Science},
-  pages =	{},
-  address = 	{Montreal},
-  publisher_address = 	{},
-  month = 	{5-6 July},
-  organisation = {},
-  publisher =	"Springer Nature",
-  note =	{Forthcoming},
-  keywords =    {fuzzing, testing},
-  ISBN13 =      {},
-  url =         {},
-  code_url =	{https://doi.org/10.5281/zenodo.19392372},
-  size = 	{6 pages},
-  abstract =	{Fuzz testing finds security issues and improves
-  robustness, however it has only two implicit test oracles: timeout
-  and crash. Information theory gives a third: entropy, which is
-  generic, low cost and widely applicable. Fuzz3 is SBSE blackbox and
-  programming language agnostic. Applied to 5 open source software it
-  found 4 bugs, 2 already fixed.},
-  notes =	{
+- LLVM Project: [188500](https://github.com/llvm/llvm-project/issues/188500)
+- Cirq Project: [8013](https://github.com/quantumlib/Cirq/issues/8013)
+- httpcore Project: [1069](https://github.com/encode/httpcore/discussions/1069)
+- Google Open Location Code (OLC) Project: [759](https://github.com/google/open-location-code/issues/759)
 
-https://conf.researchr.org/track/ssbse-2026/ssbse-2026-ssbse-challenge},
-)
-```
+  
