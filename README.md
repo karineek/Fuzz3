@@ -4,19 +4,22 @@
   <img src="https://github.com/user-attachments/assets/cbe6a03d-58b2-4d00-a020-3db2fa291fb0" width="400" align="right" />
 </p>
 
-Fuzz3 is a fuzzer extension that uses entropy on input/output of a SUT to guide exploration.
+**Fuzz3 is a fuzzer extension that uses entropy on the input/output of a SUT to guide exploration.
 
-Abstract. Fuzz testing finds security issues and improves robustness, however it has only two implicit test oracles: timeout and crash. 
-Information theory gives a third: entropy, which is generic, low cost and widely applicable. 
+Currently, Fuzz3 supports the fuzzing of six different systems. We list below instructions on how to add new SuTs.**
+
+Abstract. Fuzz testing finds security issues and improves robustness; however, it has only two implicit test oracles: timeout and crash. 
+Information theory gives a third: entropy, which is generic, low-cost and widely applicable. 
 Fuzz3 is programming language agnostic, treating software as a black box, searching its input space based on entropy distributions. 
-Applied to 6 open source software, it found 4 bugs, 2 of which has already been fixed since we reported it to the original developers. 
+Applied to 6 open source software, it found 5 bugs, 2 of which have already been fixed since we reported them to the original developers. 
 
 **Content:**
 
 ⦿ [📦 Fuzz3 – Fuzz Targets & Code Locations](https://github.com/karineek/Fuzz3/edit/main/README.md#-fuzz3--fuzz-targets--code-locations)
+⦿ [🎯 Supported Core Fuzz Targets in Fuzz3](https://github.com/karineek/Fuzz3#-supported-core-fuzz-targets-in-fuzz3)
+
 ⦿ [🧪 Evaluation](https://github.com/karineek/Fuzz3/edit/main/README.md#-evaluation)
 ⦿ [🔁 Replay Seeds](https://github.com/karineek/Fuzz3/edit/main/README.md#-replay-seeds)
-
 ⦿ [🌍 Evaluation at Scale](https://github.com/karineek/Fuzz3/edit/main/README.md#-evaluation-at-scale)
 ⦿ [🔴 Bugs found with Fuzz3](https://github.com/karineek/Fuzz3#-bugs-found-with-fuzz3)
 
