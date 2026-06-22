@@ -33,7 +33,7 @@ SSBSE 2026 Paper:
   booktitle =	{Search-Based Software Engineering 2025 - Challenge Track},
   year =	2026,
   editor =	"Moataz Chouchen and Carol Hanna",
-  volume =	{},
+  volume =	{16699},
   series =	{Lecture Notes in Computer Science},
   pages =	{},
   address = 	{Montreal},
