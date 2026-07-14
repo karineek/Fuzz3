@@ -47,7 +47,7 @@ SSBSE 2026 Paper:
   url =         {https://conf.researchr.org/program/ssbse-2026/program-ssbse-2026/},
   url =         {https://solar.cs.ucl.ac.uk/pdf/Even-Mendoza_2026_SSBSE.pdf},
   doi =		{10.1007/978-3-032-30699-9_9}
-  code_url =	{https://doi.org/10.5281/zenodo.19392372},
+  code_url =	{https://doi.org/10.5281/zenodo.19392253},
   size = 	{6 pages},
   abstract =	{Fuzz testing finds security issues and improves
   robustness, however it has only two implicit test oracles: timeout
@@ -70,8 +70,8 @@ Zenodo Record of Fuzz3: https://zenodo.org/uploads/19494172.
   year         = 2026,
   publisher    = {Zenodo},
   version      = {1.0},
-  doi          = {10.5281/zenodo.19494172},
-  url          = {https://doi.org/10.5281/zenodo.19494172},
+  doi          = {10.5281/zenodo.19392253},
+  url          = {https://doi.org/10.5281/zenodo.19392253},
 }
 ```
 
