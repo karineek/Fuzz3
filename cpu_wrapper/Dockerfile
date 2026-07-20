@@ -33,8 +33,8 @@ RUN if [ "$TARGET_LIBRARY" = "cutlass" ] ; then \
         rm -rf /var/lib/apt/lists/* ; \
     fi
 
-COPY ../gpu_wrapper/harness.cu /fuzz_workspace/harness.cu
-COPY ../gpu_wrapper/forkserver.py /fuzz_workspace/forkserver.py
+COPY harness.cu /fuzz_workspace/harness.cu
+COPY forkserver.py /fuzz_workspace/forkserver.py
 
 RUN macro_backend=$(if [ "$BACKEND" = "cpu" ]; then echo "-DMODE_CPU"; else echo "-DMODE_GPU"; fi) && \
     compiler=$(if [ "$BACKEND" = "cpu" ] && [ "$TARGET_LIBRARY" = "thrust" ]; then echo "g++ -x c++"; else echo "nvcc"; fi) && \
