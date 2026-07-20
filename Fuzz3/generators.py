@@ -172,3 +172,32 @@ def h3_decoder_generator(seedsno: int, outputfolder: Path) -> tuple[int, int]:
     return total
 
 
+
+################################ Target: GPU Utilities #######################
+# Source code from TODO
+##############################################################################
+
+def sort_generator_legal(seedsno: int, outputfolder: Path) -> int:
+    outputfolder.mkdir(parents=True, exist_ok=True)
+
+    total = 0
+    while total < seedsno: # finish the loop, no need to be precise +-5 seeds it is okay
+        values_count = random.randint(1, 10)
+        values = [
+            round(random.uniform(-500.0, 500.0), 4)
+            for _ in range(values_count)
+        ]
+        payload = ",".join(str(value) for value in values)
+        seed_path = outputfolder / f"fuzz3_sort_legal_{total}.seed"
+        seed_path.write_text(payload, encoding="utf-8")
+        total += 1
+
+        for lat in range(4): 
+            shuffled = values.copy()
+            random.shuffle(shuffled)
+            payload = ",".join(str(value) for value in shuffled)
+            seed_path = outputfolder / f"fuzz3_sort_legal_{total}.seed"
+            seed_path.write_text(payload, encoding="utf-8") 
+            total += 1
+            
+    return total
