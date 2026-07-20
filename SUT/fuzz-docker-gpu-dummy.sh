@@ -3,8 +3,13 @@ inseed=$1 # docker-in-gpu-dummy
 out=$2    # out
 crash=$3  # crashes
 itr=$4    # 10000
+container="$5" # e9c4c6988976
 
-export DOCKER_CONTAINER=94b5f443c3bc
+# CPU: ./fuzz-docker-gpu-dummy.sh docker-in-gpu-dummy docker-out docker-crash 100 fuzz3-worker-cpu
+# GPU: ./fuzz-docker-gpu-dummy.sh docker-in-gpu-dummy docker-out docker-crash 100 fuzz3-worker-gpu
+
+#export DOCKER_CONTAINER=$continaer
+export DOCKER_CONTAINER="$container"
 
 if ! docker inspect "$DOCKER_CONTAINER" >/dev/null 2>&1; then
     echo "ERROR: Container $DOCKER_CONTAINER does not exist"
