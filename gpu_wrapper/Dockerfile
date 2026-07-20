@@ -48,5 +48,4 @@ RUN macro_backend=$(if [ "$BACKEND" = "cpu" ]; then echo "-DMODE_CPU"; else echo
 
 # ENTRYPOINT ["python3", "-u", "/fuzz_workspace/forkserver.py"]
 # ADD option to work in reactive mode:
-ENTRYPOINT ["/bin/bash", "-lc"]
-CMD ["python3 -u /fuzz_workspace/forkserver.py"]
+CMD ["python3", "-u", "/fuzz_workspace/forkserver.py"]

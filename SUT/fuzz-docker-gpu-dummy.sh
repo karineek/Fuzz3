@@ -4,9 +4,7 @@ out=$2    # out
 crash=$3  # crashes
 itr=$4    # 10000
 
-export DOCKER_CONTAINER=e5e647c5cfb4
-
-export DOCKER_CONTAINER=e5e647c5cfb4
+export DOCKER_CONTAINER=4e615220dfad
 
 if ! docker inspect "$DOCKER_CONTAINER" >/dev/null 2>&1; then
     echo "ERROR: Container $DOCKER_CONTAINER does not exist"
