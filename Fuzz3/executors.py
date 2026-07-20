@@ -79,6 +79,8 @@ def docker_executor(
         print (result.stdout.strip()) # Debug
         
         parsed = json.loads(result.stdout.strip())
+        print (input_data) # Debug
+        print (parsed["output"]) # Debug
         return input_data, result.returncode or parsed["return_code"], parsed["output"], result.stderr.strip()
 
     except subprocess.TimeoutExpired as e:
