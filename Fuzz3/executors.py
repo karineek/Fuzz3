@@ -5,7 +5,7 @@ import shlex
 import sys
 import os
 
-DOCKER_IMAGE = os.environ.get("DOCKER_IMAGE", "10c3cd4d4526")
+DOCKER_CONTAINER = os.environ.get("DOCKER_CONTAINER", "10c3cd4d4526")
 
 
 # List here all the SUTs
@@ -60,7 +60,7 @@ def docker_executor(
 
     arg_parsed = shlex.split(arguments)
     shell_command = shlex.join([*arg_parsed, str(input_data)])
-    cmd = ["docker", "exec", "-it", DOCKER_IMAGE, "sh", "-lc", shell_command]
+    cmd = ["docker", "exec", "-it", DOCKER_CONTAINER, "sh", "-lc", shell_command]
     ## E.g. docker exec -it 10c3cd4d4526 sh -lc 'python3 /opt/test_ollama.py'
     try:
         result = subprocess.run(
