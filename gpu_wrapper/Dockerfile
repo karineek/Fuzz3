@@ -46,4 +46,7 @@ RUN macro_backend=$(if [ "$BACKEND" = "cpu" ]; then echo "-DMODE_CPU"; else echo
         nvcc -O3 harness.cu -lafire -o native_harness -DTRACK_ARRAYFIRE $macro_backend ; \
     fi
 
-ENTRYPOINT ["python3", "-u", "/fuzz_workspace/forkserver.py"]
+# ENTRYPOINT ["python3", "-u", "/fuzz_workspace/forkserver.py"]
+# ADD option to work in reactive mode:
+ENTRYPOINT ["/bin/bash", "-lc"]
+CMD ["python3 -u /fuzz_workspace/forkserver.py"]
