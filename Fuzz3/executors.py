@@ -3,8 +3,9 @@ from pathlib import Path
 import subprocess
 import shlex
 import sys
+import os
 
-DOCKER_IMAGE = os.environ.get("DOCKER_IMAGE", "PLEASE-SET-DOCKER_IMG_HASG")
+DOCKER_IMAGE = os.environ.get("DOCKER_IMAGE", "10c3cd4d4526")
 
 
 # List here all the SUTs
