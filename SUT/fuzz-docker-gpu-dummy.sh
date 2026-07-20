@@ -31,7 +31,8 @@ echo "Container $DOCKER_CONTAINER is running"
 python3 ../blackbox.py -i $inseed -o $out -c $crash \
         --executor docker_executor \
         --executor-args "python3 /fuzz_workspace/forkserver.py" \
-        --mutators none \
+        --generator sort_generator_legal \
+        --mutators shuffle_items dup_item_end add_item_end chop_item flip_item_sign none \
         --observers entropy_sliding_window_observer \
         --oracles entropy_oracle \
         --iterations $itr

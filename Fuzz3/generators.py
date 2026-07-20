@@ -192,12 +192,13 @@ def sort_generator_legal(seedsno: int, outputfolder: Path) -> int:
         seed_path.write_text(payload, encoding="utf-8")
         total += 1
 
-        for lat in range(4): 
+        for lat in range(4):
             shuffled = values.copy()
             random.shuffle(shuffled)
             payload = ",".join(str(value) for value in shuffled)
             seed_path = outputfolder / f"fuzz3_sort_legal_{total}.seed"
-            seed_path.write_text(payload, encoding="utf-8") 
+            seed_path.write_text(payload, encoding="utf-8")
             total += 1
-            
+            print(payload) # debug
+
     return total
