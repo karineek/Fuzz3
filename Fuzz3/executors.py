@@ -4,6 +4,7 @@ import subprocess
 import shlex
 import sys
 import os
+import json
 
 DOCKER_CONTAINER = os.environ.get("DOCKER_CONTAINER", "10c3cd4d4526")
 
@@ -76,7 +77,9 @@ def docker_executor(
             timeout=timeout,
         )
         print (result.stdout.strip()) # Debug
-        return input_data, result.returncode, result.stdout.strip(), result.stderr.strip()
+        
+        parsed = json.loads(result.stdout.strip())
+        return input_data, result.returncode or parsed["return_code"], parsed["output"], result.stderr.strip()
 
     except subprocess.TimeoutExpired as e:
         return input_data, 124, (e.stdout or "").strip(), (e.stderr or "timeout").strip()
