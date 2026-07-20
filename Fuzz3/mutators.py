@@ -437,3 +437,49 @@ def olc_neighbour(seed: Path) -> str | None:
     return data[:pos] + new_ch + data[pos + 1:]
 
 ## End of Decoder Specific Mutators.
+
+## GPU util mutators: shuffle_items dup_item_end add_item_end chop_item flip_item_sign
+def shuffle_items(seed: Path) -> str | None:
+    items = seed.read_text(errors="ignore").strip().split(",")
+    if not items or items == [""]:
+        return None
+
+    random.shuffle(items)
+    return ",".join(items)
+
+
+def dup_item_end(seed: Path) -> str | None:
+    items = seed.read_text(errors="ignore").strip().split(",")
+    if not items or items == [""]:
+        return None
+
+    items.append(random.choice(items))
+    return ",".join(items)
+
+def add_item_end(seed: Path) -> str | None:
+    items = seed.read_text(errors="ignore").strip().split(",")
+    if not items or items == [""]:
+        return None
+
+    items.append(str(round(random.uniform(-500.0, 500.0), 4)))
+    return ",".join(items)
+
+
+def chop_item(seed: Path) -> str | None:
+    items = seed.read_text(errors="ignore").strip().split(",")
+    if not items or items == [""]:
+        return None
+
+    i = random.randrange(len(items))
+    items[i] = f"{int(float(items[i]))}.0"
+    return ",".join(items)
+
+
+def flip_item_sign(seed: Path) -> str | None:
+    items = seed.read_text(errors="ignore").strip().split(",")
+    if not items or items == [""]:
+        return None
+
+    i = random.randrange(len(items))
+    items[i] = str(-float(items[i]))
+    return ",".join(items)
