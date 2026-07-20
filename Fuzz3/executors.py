@@ -3,6 +3,10 @@ from pathlib import Path
 import subprocess
 import shlex
 import sys
+import os
+
+DOCKER_IMAGE = os.environ.get("DOCKER_IMAGE", "10c3cd4d4526")
+
 
 # List here all the SUTs
 
@@ -20,8 +24,8 @@ def script_executor(
 ) -> tuple[str, int, str, str]:
     try:
         #WBL 1 May 2026
-        #code_in = seed.read_text(encoding="utf-8")
-        code_in = seed.read_bytes().decode(encoding="utf-8")
+        #input_data = seed.read_text(encoding="utf-8")
+        input_data = seed.read_bytes().decode(encoding="utf-8")
     except Exception as e:
         print(f'Execption {e} seed {seed} Invalid (Fuzz3)')
         return "", 300, "", "Invalid (Fuzz3)"
@@ -35,14 +39,45 @@ def script_executor(
             text=True,
             timeout=timeout,
         )
-        return code_in, result.returncode, result.stdout.strip(), result.stderr.strip()
+        return input_data, result.returncode, result.stdout.strip(), result.stderr.strip()
 
     except subprocess.TimeoutExpired as e:
-        return code_in, 124, (e.stdout or "").strip(), (e.stderr or "timeout").strip()
+        return input_data, 124, (e.stdout or "").strip(), (e.stderr or "timeout").strip()
 
     except Exception as e:
-        return code_in, 123, "", f"Execution System Error: {str(e)}"
+        return input_data, 123, "", f"Execution System Error: {str(e)}"
 
+
+## General executor of a script in a docker
+def docker_executor(
+    arguments: str, seed: Path, timeout: float
+) -> tuple[str, int, str, str]:
+    try:
+        input_data = seed.read_bytes().decode(encoding="utf-8")
+    except Exception as e:
+        print(f'Execption {e} seed {seed} Invalid (Fuzz3)')
+        return "", 300, "", "Invalid (Fuzz3)"
+
+    arg_parsed = shlex.split(arguments)
+    shell_command = shlex.join([*arg_parsed, str(seed)])
+    cmd = ["docker", "exec", "-it", DOCKER_IMAGE, "sh", "-lc", shell_command]
+    ## E.g. docker exec -it 10c3cd4d4526 sh -lc 'python3 /opt/test_ollama.py'
+    try:
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+        return input_data, result.returncode, result.stdout.strip(), result.stderr.strip()
+
+    except subprocess.TimeoutExpired as e:
+        return input_data, 124, (e.stdout or "").strip(), (e.stderr or "timeout").strip()
+
+    except Exception as e:
+        return input_data, 123, "", f"Execution System Error: {str(e)}"
+
+# For SUT == httpcore
 def httpcore_executor(
     arguments: str, seed: Path, timeout: float
 ) -> tuple[str, int, str, str]:

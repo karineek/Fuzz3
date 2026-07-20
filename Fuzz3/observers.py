@@ -1,6 +1,19 @@
 import os
 from collections import deque
 
+# dummy observer: no observation on output  diversity; we can only check regular input diversification.
+def null_observer(input: str, sample: tuple[int, str, str]) -> list[str]: 
+    # Use the function name itself to store the attribute
+    if not hasattr(entropy_observer, "inputs"): 
+        entropy_observer.inputs = []
+    if not hasattr(entropy_observer, "outputs"): 
+        entropy_observer.outputs = []
+
+    # store data
+    entropy_observer.inputs.append(input)
+    entropy_observer.outputs.append("null")
+    return entropy_observer.inputs, entropy_observer.outputs
+    
 # Simple observer, just record the results for the third oracle
 def entropy_observer(input: str, sample: tuple[int, str, str]) -> list[str]: 
     # Use the function name itself to store the attribute
