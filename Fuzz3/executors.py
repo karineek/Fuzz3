@@ -58,7 +58,7 @@ def docker_executor(
         return "", 300, "", "Invalid (Fuzz3)"
 
     arg_parsed = shlex.split(arguments)
-    cmd = ["docker", "exec", "-it", DOCKER_IMAGE, "sh -lc", "'", *arg_parsed, str(seed), "'"]
+    cmd = ["docker", "exec", "-it", DOCKER_IMAGE, "sh", "-lc", "'", *arg_parsed, str(seed), "'"]
     ## E.g. docker exec -it 10c3cd4d4526 sh -lc 'python3 /opt/test_ollama.py'
     try:
         result = subprocess.run(
