@@ -4,7 +4,7 @@ out=$2    # out
 crash=$3  # crashes
 itr=$4    # 10000
 
-export DOCKER_CONTAINER=4e615220dfad
+export DOCKER_CONTAINER=94b5f443c3bc
 
 if ! docker inspect "$DOCKER_CONTAINER" >/dev/null 2>&1; then
     echo "ERROR: Container $DOCKER_CONTAINER does not exist"
@@ -31,3 +31,5 @@ python3 ../blackbox.py -i $inseed -o $out -c $crash \
         --oracles entropy_oracle \
         --iterations $itr
 
+
+cp do-in/* $inseed/
