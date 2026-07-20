@@ -6,10 +6,24 @@ itr=$4    # 10000
 
 export DOCKER_CONTAINER=e5e647c5cfb4
 
-if [ "$(docker inspect -f '{{.State.Running}}' "$DOCKER_CONTAINER" 2>/dev/null)" != "true" ]; then
-    echo "Docker container $DOCKER_CONTAINER is not running"
+export DOCKER_CONTAINER=e5e647c5cfb4
+
+if ! docker inspect "$DOCKER_CONTAINER" >/dev/null 2>&1; then
+    echo "ERROR: Container $DOCKER_CONTAINER does not exist"
     exit 1
 fi
+
+docker start "$DOCKER_CONTAINER" >/dev/null 2>&1 || true
+
+if ! docker exec "$DOCKER_CONTAINER" sh -lc ':' >/dev/null 2>&1; then
+    echo "ERROR: Container $DOCKER_CONTAINER is not running"
+    echo "Status: $(docker inspect -f '{{.State.Status}}' "$DOCKER_CONTAINER")"
+    echo "Exit code: $(docker inspect -f '{{.State.ExitCode}}' "$DOCKER_CONTAINER")"
+    docker logs --tail 20 "$DOCKER_CONTAINER"
+    exit 1
+fi
+
+echo "Container $DOCKER_CONTAINER is running"
 
 python3 ../blackbox.py -i $inseed -o $out -c $crash \
         --executor docker_executor \
