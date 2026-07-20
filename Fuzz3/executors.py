@@ -66,13 +66,16 @@ def docker_executor(
     )
     cmd = ["docker", "exec", "-it", DOCKER_CONTAINER, "sh", "-lc", shell_command]
     ## E.g. docker exec -it 10c3cd4d4526 sh -lc 'python3 /opt/test_ollama.py'
+
     try:
+        print (cmd) # debug
         result = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
             timeout=timeout,
         )
+        print (result.stdout.strip()) # Debug
         return input_data, result.returncode, result.stdout.strip(), result.stderr.strip()
 
     except subprocess.TimeoutExpired as e:

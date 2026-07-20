@@ -32,4 +32,4 @@ python3 ../blackbox.py -i $inseed -o $out -c $crash \
         --iterations $itr
 
 
-cp do-in/* $inseed/
+cp do-in/* $inseed/  # Debug
