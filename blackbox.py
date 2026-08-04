@@ -421,8 +421,8 @@ def main() -> int:
         # Oracles
         for oracle in oracles:
             results = oracle(tmp_path, results_map)
-            _why = ""
             if oracle.__name__ == "entropy_oracle":
+                _why = ""
                 if result_entropy_prev is not None:
                     _ein, _eout, _edist, _en = results
                     _prev_ein, _prev_eout, _prev_edist, _prev_en = result_entropy_prev
@@ -458,17 +458,15 @@ def main() -> int:
                             _why = "_interesting6"
             
                 result_entropy_prev = results
+                print(f"entropy {_} {results} {_why}")
             else:
                 if "interesting" not in name and "deadend" not in name:
                     if result == -1: # Oracle test failed
                         name += "_interesting"
-                        _why = "_interesting_other"
                     elif result == -2:
                         name = name + "_deadend"
-                        _why = "_deadend_other"
                         deads = deads + 1
                         # KEM: maybe we need to be more aggressive if it led to the oracle to crash
-            print(f"entropy {_} {results} {_why}")
 
         #################### ORACLE 1+2 #################### 
         ## In future work, this needs to be x2 observers and orcales
