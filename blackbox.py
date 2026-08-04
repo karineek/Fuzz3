@@ -456,8 +456,18 @@ def main() -> int:
                             _why = "_interesting5"
                         elif _eout > MAX_EOUT:
                             _why = "_interesting6"
-
+            
                 result_entropy_prev = results
+            else:
+                if "interesting" not in name and "deadend" not in name:
+                    if result == -1: # Oracle test failed
+                        name += "_interesting"
+                        _why = "_interesting_other"
+                    elif result == -2:
+                        name = name + "_deadend"
+                        _why = "_deadend_other"
+                        deads = deads + 1
+                        # KEM: maybe we need to be more aggressive if it led to the oracle to crash
             print(f"entropy {_} {results} {_why}")
 
         #################### ORACLE 1+2 #################### 
