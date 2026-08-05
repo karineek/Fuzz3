@@ -518,7 +518,7 @@ def main() -> int:
         print(" ")
 
         # Log seeds: selected SEED to mutate, MUTATION, resultant SEED
-        if mutation_log is not None and not mutation_log.exists():
+        if mutation_log is not None:
             seed_from = clean_seed_name(seed.name)
             mutation_name = mutator.__name__
             seed_to = clean_seed_name(name)
