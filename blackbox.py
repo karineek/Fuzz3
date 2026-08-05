@@ -50,6 +50,13 @@ def parse_args():
     parser.add_argument("--executor-args", default="")
 
     parser.add_argument(
+        "--mutation-log",
+        required=False,
+        default=None,
+        help="CSV file for mutation graph edges",
+    )
+
+    parser.add_argument(
         "-g",
         "--generators",
         nargs="+",
@@ -130,6 +137,12 @@ def confirm_overwrite(path: Path, name: str) -> bool:
 SKIP_SEED_SUFFIXES = {".zip", ".md"}
 def is_seed_file(path: Path) -> bool:
     return path.is_file() and path.suffix.lower() not in SKIP_SEED_SUFFIXES
+
+# Clear the seed name before logging.
+def clean_seed_name(name: str) -> str:
+    for postfix in ("_interesting", "_deadend", "_coldlist"):
+        name = name.replace(postfix, "")
+    return name
 
 # Call:  python3 blackbox.py   -i clang-format-seeds   -o out   -c crashes   --executor "clang_format_executor"   --executor-args="--dry-run"
 #  python3 blackbox.py   -i clang-format-seeds   -o out   -c crashes   --executor "clang_format_executor"   --executor-args "--dry-run --Werror"  --mutators bit_flip delete_line duplicate_line
@@ -331,6 +344,7 @@ def main() -> int:
     ######################
     # Phase 2: fuzz loop #
     ######################
+    mutation_log = Path(args.mutation_log) if args.mutation_log else None
     result_entropy_prev = None
     deads = 0
     counter = 0
@@ -502,6 +516,17 @@ def main() -> int:
         # Cleaning
         # tmp_path.unlink(missing_ok=True)
         print(" ")
+
+        # Log seeds: selected SEED to mutate, MUTATION, resultant SEED
+        if mutation_log is not None and not mutation_log.exists():
+            seed_from = clean_seed_name(seed.name)
+            mutation_name = mutator.__name__
+            seed_to = clean_seed_name(name)
+        
+            mutation_log.write_text(
+                "seed_from,mutation_name,seed_to\n",
+                encoding="utf-8",
+            )
 
         # Deduplication of seeds
         counter = counter + 1
