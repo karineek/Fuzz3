@@ -1,0 +1,9 @@
+README.md
+drivers/*/README.md
+seeds
+tests
+verify_worker.py
+view_docker.sh
+native_harness
+__pycache__
+*.pyc

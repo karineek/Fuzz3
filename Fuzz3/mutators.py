@@ -1,6 +1,7 @@
 #WBL 15 Jun 2026 add flip_case_char and olc_short
 #WBL 22 Apr 2026 bugfix delete_char
 #WBL 21 Mar 2026 for triangle add: add_one sub_one equilateral isosceles (and none debug)
+import json
 import random
 import re
 from pathlib import Path
@@ -437,49 +438,128 @@ def olc_neighbour(seed: Path) -> str | None:
     return data[:pos] + new_ch + data[pos + 1:]
 
 ## End of Decoder Specific Mutators.
+def _load_request(seed):
+    try:
+        request = json.loads(seed.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+        return None
+    if not isinstance(request, dict) or not isinstance(request.get("inputs"), dict):
+        return None
+    return request
 
-## GPU util mutators: shuffle_items dup_item_end add_item_end chop_item flip_item_sign
-def shuffle_items(seed: Path) -> str | None:
-    items = seed.read_text(errors="ignore").strip().split(",")
-    if not items or items == [""]:
+
+def _dump_request(request):
+    return json.dumps(request, sort_keys=True, separators=(",", ":"), allow_nan=False)
+
+
+def library_value_mutator(seed: Path) -> str | None:
+    request = _load_request(seed)
+    if request is None:
+        return None
+    candidates = []
+    for payload in request["inputs"].values():
+        if not isinstance(payload, dict):
+            continue
+        if payload.get("type") == "scalar" and isinstance(payload.get("value"), (bool, int, float)):
+            candidates.append((payload, "value", payload.get("dtype")))
+        data = payload.get("data")
+        if isinstance(data, list):
+            candidates.extend((data, index, payload.get("dtype")) for index in range(len(data)))
+    if not candidates:
         return None
 
-    random.shuffle(items)
-    return ",".join(items)
+    container, key, dtype = random.choice(candidates)
+    value = container[key]
+    if dtype == "bool" and isinstance(value, bool):
+        container[key] = not value
+    elif dtype in ("i32", "i64") and isinstance(value, (int, float)):
+        limits = (-2**31, 2**31 - 1) if dtype == "i32" else (-2**63, 2**63 - 1)
+        delta = random.choice((-1, 1))
+        candidate = int(value) + delta
+        if candidate < limits[0] or candidate > limits[1]:
+            candidate = int(value) - delta
+        container[key] = candidate
+    elif dtype in ("f32", "f64") and isinstance(value, (int, float)):
+        numeric = float(value)
+        container[key] = 1.0 if numeric == 0.0 else -numeric
+    else:
+        return None
+    return _dump_request(request)
 
 
-def dup_item_end(seed: Path) -> str | None:
-    items = seed.read_text(errors="ignore").strip().split(",")
-    if not items or items == [""]:
+def library_shuffle_mutator(seed: Path) -> str | None:
+    request = _load_request(seed)
+    if request is None:
+        return None
+    candidates = []
+    for payload in request["inputs"].values():
+        if not isinstance(payload, dict) or not isinstance(payload.get("data"), list):
+            continue
+        data = payload["data"]
+        if len(data) > 1 and any(value != data[0] for value in data[1:]):
+            candidates.append(data)
+    if not candidates:
+        return None
+    data = random.choice(candidates)
+    first = random.randrange(len(data))
+    different = [index for index, value in enumerate(data) if value != data[first]]
+    if not different:
+        return None
+    second = random.choice(different)
+    data[first], data[second] = data[second], data[first]
+    return _dump_request(request)
+
+
+def library_resize_mutator(seed: Path) -> str | None:
+    request = _load_request(seed)
+    if request is None:
+        return None
+    inputs = request["inputs"]
+    paired = {
+        "stable_sort_by_key": ("keys", "values"),
+        "reduce_by_key": ("keys", "values"),
+        "transform_axpby": ("x", "y"),
+    }.get(request.get("function"))
+    groups = [paired] if paired else [
+        (name,) for name, payload in inputs.items()
+        if isinstance(payload, dict) and payload.get("type") == "vector"
+    ]
+    eligible = []
+    for group in groups:
+        if not group or any(name not in inputs for name in group):
+            continue
+        payloads = [inputs[name] for name in group]
+        if all(
+            payload.get("type") == "vector"
+            and isinstance(payload.get("shape"), list)
+            and len(payload["shape"]) == 1
+            and isinstance(payload.get("data"), list)
+            and payload["shape"][0] == len(payload["data"])
+            and payload["data"]
+            for payload in payloads
+        ) and len({len(payload["data"]) for payload in payloads}) == 1:
+            eligible.append(payloads)
+    if not eligible:
         return None
 
-    items.append(random.choice(items))
-    return ",".join(items)
-
-def add_item_end(seed: Path) -> str | None:
-    items = seed.read_text(errors="ignore").strip().split(",")
-    if not items or items == [""]:
-        return None
-
-    items.append(str(round(random.uniform(-500.0, 500.0), 4)))
-    return ",".join(items)
-
-
-def chop_item(seed: Path) -> str | None:
-    items = seed.read_text(errors="ignore").strip().split(",")
-    if not items or items == [""]:
-        return None
-
-    i = random.randrange(len(items))
-    items[i] = f"{int(float(items[i]))}.0"
-    return ",".join(items)
+    payloads = random.choice(eligible)
+    size = len(payloads[0]["data"])
+    grow = size == 1 or random.choice((False, True))
+    index = random.randrange(size)
+    for payload in payloads:
+        if grow:
+            payload["data"].insert(index, payload["data"][index])
+        else:
+            payload["data"].pop(index)
+        payload["shape"][0] = len(payload["data"])
+    return _dump_request(request)
 
 
-def flip_item_sign(seed: Path) -> str | None:
-    items = seed.read_text(errors="ignore").strip().split(",")
-    if not items or items == [""]:
-        return None
-
-    i = random.randrange(len(items))
-    items[i] = str(-float(items[i]))
-    return ",".join(items)
+def library_worker_mutator(seed: Path) -> str | None:
+    mutators = [library_value_mutator, library_shuffle_mutator, library_resize_mutator]
+    random.shuffle(mutators)
+    for mutator in mutators:
+        result = mutator(seed)
+        if result is not None:
+            return result
+    return None

@@ -1,0 +1,1 @@
+{"schema_version":1,"library":"cutlass","function":"gemm_accumulate","inputs":{"a":{"type":"matrix","dtype":"f32","shape":[2,2],"data":[1,2,3,4]},"b":{"type":"matrix","dtype":"f32","shape":[2,2],"data":[5,6,7,8]},"c":{"type":"matrix","dtype":"f32","shape":[2,2],"data":[1,1,1,1]},"alpha":{"type":"scalar","dtype":"f32","value":0.5},"beta":{"type":"scalar","dtype":"f32","value":2}}}

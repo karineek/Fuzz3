@@ -1,0 +1,1 @@
+{"schema_version":1,"library":"arrayfire","function":"fft","inputs":{"values":{"type":"vector","dtype":"f32","shape":[8],"data":[1,0,-1,0,1,0,-1,0]}}}
