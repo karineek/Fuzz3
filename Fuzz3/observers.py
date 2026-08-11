@@ -85,7 +85,7 @@ def statistical_sliding_window_observer(input: str, sample: tuple[int, str, str]
     sample_data = sample[1].strip().splitlines()[-1] if sample[1] else None
 
     if sample_data is not None:
-        statistical_observer.inputs.append(input)
-        statistical_observer.outputs.append(sample_data)
+        statistical_sliding_window_observer.inputs.append(input)
+        statistical_sliding_window_observer.outputs.append(sample_data)
 
-    return statistical_observer.input, statistical_observer.outputs
+    return statistical_sliding_window_observer.input, statistical_sliding_window_observer.outputs
