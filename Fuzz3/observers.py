@@ -57,18 +57,18 @@ def entropy_sliding_window_observer(input: str, sample: tuple[int, str, str]) ->
 def statistical_observer(input: str, sample: tuple[int, str, str]) -> list[str]: 
     # Use the function name itself to store the attribute
     if not hasattr(statistical_observer, "inputs"):
-        statistical_test_observer.inputs = []
+        statistical_observer.inputs = []
     if not hasattr(statistical_observer, "outputs"):
-        statistical_test_observer.outputs = []
+        statistical_observer.outputs = []
 
     # Distribution is the last line of stdout; no need the stderr otherwise.
     sample_data = sample[1].strip().splitlines()[-1] if sample[1] else None
 
     if sample_data is not None:
-        statistical_test_observer.inputs.append(input)
-        statistical_test_observer.outputs.append(sample_data)
+        statistical_observer.inputs.append(input)
+        statistical_observer.outputs.append(sample_data)
 
-    return statistical_test_observer.input, statistical_test_observer.outputs
+    return statistical_observer.input, statistical_observer.outputs
 
 STAT_TEST_WINDOW_SIZE = int(os.environ.get("STATISTICAL_WINDOW_SIZE", "1024"))
 def statistical_sliding_window_observer(input: str, sample: tuple[int, str, str]) -> list[str]: 
@@ -85,7 +85,7 @@ def statistical_sliding_window_observer(input: str, sample: tuple[int, str, str]
     sample_data = sample[1].strip().splitlines()[-1] if sample[1] else None
 
     if sample_data is not None:
-        statistical_test_observer.inputs.append(input)
-        statistical_test_observer.outputs.append(sample_data)
+        statistical_observer.inputs.append(input)
+        statistical_observer.outputs.append(sample_data)
 
-    return statistical_test_observer.input, statistical_test_observer.outputs
+    return statistical_observer.input, statistical_observer.outputs
