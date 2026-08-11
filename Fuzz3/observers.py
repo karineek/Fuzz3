@@ -88,4 +88,4 @@ def statistical_sliding_window_observer(input: str, sample: tuple[int, str, str]
         statistical_sliding_window_observer.inputs.append(input)
         statistical_sliding_window_observer.outputs.append(sample_data)
 
-    return statistical_sliding_window_observer.input, statistical_sliding_window_observer.outputs
+    return statistical_sliding_window_observer.inputs, statistical_sliding_window_observer.outputs
