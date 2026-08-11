@@ -4,10 +4,18 @@ import subprocess
 import shlex
 import sys
 import os
+import resource
 
 DOCKER_IMAGE = os.environ.get("DOCKER_IMAGE", "10c3cd4d4526")
 
 
+def limit_memory():
+    max_memory = 4 * 1024 * 1024 * 1024  # 4 GB
+    resource.setrlimit(
+        resource.RLIMIT_AS,
+        (max_memory, max_memory),
+    )
+    
 # List here all the SUTs
 
 
@@ -38,6 +46,7 @@ def script_executor(
             capture_output=True,
             text=True,
             timeout=timeout,
+            preexec_fn=limit_memory,
         )
         return input_data, result.returncode, result.stdout.strip(), result.stderr.strip()
 
