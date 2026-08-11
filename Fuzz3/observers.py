@@ -53,4 +53,40 @@ def entropy_sliding_window_observer(input: str, sample: tuple[int, str, str]) ->
     return entropy_sliding_window_observer.inputs, entropy_sliding_window_observer.outputs
 
 
+# Statistical observer, used when the results are a distribution or are expected to be drawn from a distribution
+def statistical_test_observer(input: str, sample: tuple[int, str, str]) -> list[str]: 
+    # Use the function name itself to store the attribute
+    if not hasattr(statistical_test_observer, "inputs"):
+        statistical_test_observer.inputs = []
+    if not hasattr(statistical_test_observer, "outputs"):
+        statistical_test_observer.outputs = []
 
+    # Distribution is the last line of stdout; no need the stderr otherwise.
+    sample_data = sample[1].strip().splitlines()[-1] if sample[1] else None
+
+    if sample_data is not None:
+        statistical_test_observer.inputs.append(input)
+        statistical_test_observer.outputs.append(sample_data)
+
+    return statistical_test_observer.input, statistical_test_observer.outputs
+
+STAT_TEST_WINDOW_SIZE = int(os.environ.get("STATISTICAL_WINDOW_SIZE", "1024"))
+
+def statistical_test_sliding_window_observer(input: str, sample: tuple[int, str, str]) -> list[str]: 
+    if STAT_TEST_WINDOW_SIZE < 2:
+        raise ValueError("Window size must be at least 2")
+        
+    # Use the function name itself to store the attribute
+    if not hasattr(statistical_sliding_window_observer, "inputs"):
+        statistical_sliding_window_observer.inputs = deque(maxlen=STAT_TEST_WINDOW_SIZE)
+    if not hasattr(statistical_sliding_window_observer, "outputs"):
+        statistical_sliding_window_observer.outputs = deque(maxlen=STAT_TEST_WINDOW_SIZE)
+
+    # Distribution is the last line of stdout; no need the stderr otherwise.
+    sample_data = sample[1].strip().splitlines()[-1] if sample[1] else None
+
+    if sample_data is not None:
+        statistical_test_observer.inputs.append(input)
+        statistical_test_observer.outputs.append(sample_data)
+
+    return statistical_test_observer.input, statistical_test_observer.outputs
