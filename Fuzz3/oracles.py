@@ -59,21 +59,55 @@ def entropy_oracle(seed, results_map: dict[str, tuple[str, str]]):
 
 # Helper function
 def _align_distributions(before: str, after: str):
-    p = json.loads(before)
-    q = json.loads(after)
+    # 1. Already lists
+    if isinstance(before, list) and isinstance(after, list):
+        return before, after
 
-    if isinstance(p, dict) and isinstance(q, dict):
-        # Sort all possible states and fill missing entries with 0
-        states = sorted(set(p) | set(q))
+    # 2. JSON
+    try:
+        p = json.loads(before)
+        q = json.loads(after)
 
-        p = [p.get(state, 0) for state in states]
-        q = [q.get(state, 0) for state in states]
+        if isinstance(p, dict) and isinstance(q, dict):
+            # Sort all possible states and fill missing entries with 0
+            states = sorted(set(p) | set(q))
+  
+            p = [p.get(state, 0) for state in states]
+            q = [q.get(state, 0) for state in states]
 
-        return p, q
+            return p, q
 
-    if not isinstance(p, dict) and not isinstance(q, dict):
-        return p, q
+        if not isinstance(p, dict) and not isinstance(q, dict):
+            return p, q
 
+    except Exception:
+        pass
+
+    # 3. Python dict / Counter
+    try:
+        if before.startswith("Counter(") and before.endswith(")"):
+            before = before[len("Counter("):-1]
+    
+        if after.startswith("Counter(") and after.endswith(")"):
+            after = after[len("Counter("):-1]
+    
+        p = ast.literal_eval(before)
+        q = ast.literal_eval(after)
+    
+        if isinstance(p, dict) and isinstance(q, dict):
+            states = sorted(set(p) | set(q))
+    
+            p = [p.get(state, 0) for state in states]
+            q = [q.get(state, 0) for state in states]
+    
+            return p, q
+    
+        if isinstance(p, list) and isinstance(q, list):
+            return p, q
+    
+    except Exception:
+        pass
+        
     return None, None
     
 # Helper function
