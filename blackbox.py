@@ -475,12 +475,16 @@ def main() -> int:
                 print(f"entropy {_} {results} {_why}")
             else:
                 if "interesting" not in name and "deadend" not in name:
-                    if result == -1: # Oracle test failed
+                    if result == 1: # Oracle test failed
                         name += "_interesting"
-                    elif result == -2:
+                    elif result == -1:
                         name = name + "_deadend"
                         deads = deads + 1
-                        # KEM: maybe we need to be more aggressive if it led to the oracle to crash
+                    
+                    # KEM: maybe we need to be more aggressive if it led to the oracle crashing
+                    elif result == -2:
+                        print(f">> {oracle.__name__} crashed due to recource unavilble. Removing this seed.")
+                        _rc = -2 # To avoid the whole fuzzer slowing down
 
         #################### ORACLE 1+2 #################### 
         ## In future work, this needs to be x2 observers and orcales
