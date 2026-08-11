@@ -112,10 +112,14 @@ def _statistical_oracle(seed, results_map: dict[str, tuple[str, str]], func):
 
     return output_before, output_after, stat_test_res, n
 
+STATISTICAL_CONFIDENCE = float(os.environ.get("STATISTICAL_CONFIDENCE_PARAM", "0.05"))
+
 # chi2_contingency(table) - statistical test
 def _chi_square(p, q):
     result = chi2_contingency([p, q])
-    return 0 if result.pvalue >= 0.01 else 1
+
+    conf = STATISTICAL_CONFIDENCE if 0 < STATISTICAL_CONFIDENCE < 1 else 0.01
+    return 0 if result.pvalue >= conf else 1
 
 def statistical_oracle_chi_square(seed, results_map: dict[str, tuple[str, str]]):
     return _statistical_oracle(seed, results_map, _chi_square)
@@ -124,7 +128,9 @@ def statistical_oracle_chi_square(seed, results_map: dict[str, tuple[str, str]])
 # entropy(p, q) - KL divergence
 def _KL(p, q):
     divergence = entropy(p, q)
-    return 0 if divergence <= 0.01 else 1
+
+    conf = STATISTICAL_CONFIDENCE if 0 < STATISTICAL_CONFIDENCE < 1 else 0.01
+    return 0 if divergence <= conf else 1
 
 def statistical_oracle_KL(seed, results_map: dict[str, tuple[str, str]]):
     return _statistical_oracle(seed, results_map, _KL)
@@ -133,7 +139,9 @@ def statistical_oracle_KL(seed, results_map: dict[str, tuple[str, str]]):
 # jensenshannon(p, q) - JS distance
 def _jensenshannon(p, q):
     distance = jensenshannon(p, q)
-    return 0 if distance <= 0.01 else 1
+
+    conf = STATISTICAL_CONFIDENCE if 0 < STATISTICAL_CONFIDENCE < 1 else 0.01
+    return 0 if distance <= conf else 1
 
 def statistical_oracle_jensenshannon(seed, results_map: dict[str, tuple[str, str]]):
     return _statistical_oracle(seed, results_map, _jensenshannon)
