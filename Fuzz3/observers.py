@@ -54,7 +54,7 @@ def entropy_sliding_window_observer(input: str, sample: tuple[int, str, str]) ->
 
 
 # Statistical observer, used when the results are a distribution or are expected to be drawn from a distribution
-def statistical_test_observer(input: str, sample: tuple[int, str, str]) -> list[str]: 
+def statistical_observer(input: str, sample: tuple[int, str, str]) -> list[str]: 
     # Use the function name itself to store the attribute
     if not hasattr(statistical_test_observer, "inputs"):
         statistical_test_observer.inputs = []
@@ -71,8 +71,7 @@ def statistical_test_observer(input: str, sample: tuple[int, str, str]) -> list[
     return statistical_test_observer.input, statistical_test_observer.outputs
 
 STAT_TEST_WINDOW_SIZE = int(os.environ.get("STATISTICAL_WINDOW_SIZE", "1024"))
-
-def statistical_test_sliding_window_observer(input: str, sample: tuple[int, str, str]) -> list[str]: 
+def statistical_sliding_window_observer(input: str, sample: tuple[int, str, str]) -> list[str]: 
     if STAT_TEST_WINDOW_SIZE < 2:
         raise ValueError("Window size must be at least 2")
         
