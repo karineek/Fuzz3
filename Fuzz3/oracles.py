@@ -2,6 +2,10 @@ from pathlib import Path
 from collections import Counter
 import math
 
+# For statistical test oracles
+from scipy.stats import chi2_contingency
+from scipy.spatial.distance import jensenshannon
+from scipy.stats import entropy
 
 def dummy_oracle(seed, results_map: dict[str, list[str]]):
     for func_name, outputs in results_map.items():
@@ -49,24 +53,37 @@ def entropy_oracle(seed, results_map: dict[str, tuple[str, str]]):
     entropy_input = sum(entropy_prob_inputs)
     return -entropy_input, -entropy_output, len(distribution), n
 
-
-def statistical_oracle(seed, results_map: dict[str, tuple[str, str]]):
-    # Check which observer we used.
+# Helper function
+def _statistical_oracle(seed, results_map: dict[str, tuple[str, str]], func):
     if "statistical_observer" in results_map:
-        data = results_map["entropy_observer"]
+        data = results_map["statistical_observer"]
     elif "statistical_sliding_window_observer" in results_map:
-        data = results_map["entropy_sliding_window_observer"]
+        data = results_map["statistical_sliding_window_observer"]
     else:
-        raise ValueError("No entropy observer data found")
+        raise ValueError("No statistical observer data found")
 
     inputs = data[0]
     outputs = data[1]
     n = len(inputs)
+
     if n != len(outputs):
         return 0, 0, 0, 0
 
-   # Then get the seed before and the seed after
+    code_in = seed.read_text(encoding="utf-8")
+    output_before = None
+    for i in range(len(inputs) - 1, -1, -1):
+        if inputs[i] == code_in:
+            output_before = outputs[i]
+            break
+    if output_before is None:
+        return 0, 0, 0, n
 
-   # Use a specific function to compute the test
+    # Newly executed mutant
+    output_after = outputs[-1]
 
-   # Return
+    stat_test_res = func(output_before, output_after)
+    return output_before, output_after, stat_test_res, n
+
+def statistical_oracle_chi_square(seed, results_map: dict[str, tuple[str, str]]):
+    return _statistical_oracle(seed, results_map, chi2_contingency)
+
