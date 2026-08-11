@@ -434,7 +434,7 @@ def main() -> int:
 
         # Oracles
         for oracle in oracles:
-            results = oracle(tmp_path, results_map)
+            results = oracle(seed, results_map)
             if oracle.__name__ == "entropy_oracle":
                 _why = ""
                 if result_entropy_prev is not None:
