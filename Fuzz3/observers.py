@@ -56,9 +56,9 @@ def entropy_sliding_window_observer(input: str, sample: tuple[int, str, str]) ->
 # Statistical observer, used when the results are a distribution or are expected to be drawn from a distribution
 def statistical_observer(input: str, sample: tuple[int, str, str]) -> list[str]: 
     # Use the function name itself to store the attribute
-    if not hasattr(statistical_test_observer, "inputs"):
+    if not hasattr(statistical_observer, "inputs"):
         statistical_test_observer.inputs = []
-    if not hasattr(statistical_test_observer, "outputs"):
+    if not hasattr(statistical_observer, "outputs"):
         statistical_test_observer.outputs = []
 
     # Distribution is the last line of stdout; no need the stderr otherwise.
