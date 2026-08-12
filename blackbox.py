@@ -100,6 +100,12 @@ def parse_args():
         default=[],
         help="List of enabled executor arguments to diff-testing should be paired with the replay-executors target in the replay option",
     )
+
+    parser.add_argument(
+        "--statistical-oracle-prefix",
+        default="statistical_oracle_",
+        help="Prefix for seeds flagged by statistical oracles",
+    )
     
     return parser.parse_args()
 
@@ -248,6 +254,10 @@ def main() -> int:
     output_dir_end = Path(args.output_dir).with_name(
         Path(args.output_dir).name + "_end"
     )  # TO keep the queue not huge!
+    stat_oracle_name = args.statistical_oracle_prefix
+    if (stat_oracle_name is None or len(stat_oracle_name) > 4):
+        print(f">> (Fuzz3:ERROR) --statistical-oracle-prefix {stat_oracle_name} must have a length greater than 4.  If you are unsure what this argument is, please remove it from the fuzzing invocation call.")
+        return 1
 
     # ================================================================
     #                        ---> REPLAY <---
@@ -528,7 +538,7 @@ def main() -> int:
                     "statistical_oracle_KL",
                     "statistical_oracle_chi_square",
                     "statistical_oracle_jensenshannon",
-                }:
+                } or oracle.__name__.startswith(stat_oracle_name):
                 name, deads, _rc = _process_result_statistical_oracle(name, deads, _rc, results)
             else:
                 # All the rest of the regular oracles:
