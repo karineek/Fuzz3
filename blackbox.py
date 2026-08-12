@@ -50,6 +50,13 @@ def parse_args():
     parser.add_argument("--executor-args", default="")
 
     parser.add_argument(
+        "--mutation-log",
+        required=False,
+        default=None,
+        help="CSV file for mutation graph edges",
+    )
+
+    parser.add_argument(
         "-g",
         "--generators",
         nargs="+",
@@ -130,6 +137,12 @@ def confirm_overwrite(path: Path, name: str) -> bool:
 SKIP_SEED_SUFFIXES = {".zip", ".md"}
 def is_seed_file(path: Path) -> bool:
     return path.is_file() and path.suffix.lower() not in SKIP_SEED_SUFFIXES
+
+# Clear the seed name before logging.
+def clean_seed_name(name: str) -> str:
+    for postfix in ("_interesting", "_deadend", "_coldlist"):
+        name = name.replace(postfix, "")
+    return name
 
 # Call:  python3 blackbox.py   -i clang-format-seeds   -o out   -c crashes   --executor "clang_format_executor"   --executor-args="--dry-run"
 #  python3 blackbox.py   -i clang-format-seeds   -o out   -c crashes   --executor "clang_format_executor"   --executor-args "--dry-run --Werror"  --mutators bit_flip delete_line duplicate_line
@@ -331,6 +344,7 @@ def main() -> int:
     ######################
     # Phase 2: fuzz loop #
     ######################
+    mutation_log = Path(args.mutation_log) if args.mutation_log else None
     result_entropy_prev = None
     deads = 0
     counter = 0
@@ -420,9 +434,9 @@ def main() -> int:
 
         # Oracles
         for oracle in oracles:
-            results = oracle(tmp_path, results_map)
-            _why = ""
+            results = oracle(seed, results_map)
             if oracle.__name__ == "entropy_oracle":
+                _why = ""
                 if result_entropy_prev is not None:
                     _ein, _eout, _edist, _en = results
                     _prev_ein, _prev_eout, _prev_edist, _prev_en = result_entropy_prev
@@ -456,9 +470,21 @@ def main() -> int:
                             _why = "_interesting5"
                         elif _eout > MAX_EOUT:
                             _why = "_interesting6"
-
+            
                 result_entropy_prev = results
-            print(f"entropy {_} {results} {_why}")
+                print(f"entropy {_} {results} {_why}")
+            else:
+                if "interesting" not in name and "deadend" not in name:
+                    if result == 1: # Oracle test failed
+                        name += "_interesting"
+                    elif result == -1:
+                        name = name + "_deadend"
+                        deads = deads + 1
+                    
+                    # KEM: maybe we need to be more aggressive if it led to the oracle crashing
+                    elif result == -2:
+                        print(f">> {oracle.__name__} crashed due to recource unavilble. Removing this seed.")
+                        _rc = -2 # To avoid the whole fuzzer slowing down
 
         #################### ORACLE 1+2 #################### 
         ## In future work, this needs to be x2 observers and orcales
@@ -494,6 +520,14 @@ def main() -> int:
         # Cleaning
         # tmp_path.unlink(missing_ok=True)
         print(" ")
+
+        # Log seeds: selected SEED to mutate, MUTATION, resultant SEED
+        if mutation_log is not None:
+            seed_from = clean_seed_name(seed.name)
+            mutation_name = mutator.__name__
+            seed_to = clean_seed_name(name)
+            with mutation_log.open("a", encoding="utf-8") as log:
+                log.write(f"{seed_from},{mutation_name},{seed_to}\n")
 
         # Deduplication of seeds
         counter = counter + 1
