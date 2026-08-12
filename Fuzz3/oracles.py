@@ -7,7 +7,7 @@ import os
 # For statistical test oracles
 from scipy.stats import chi2_contingency
 from scipy.spatial.distance import jensenshannon
-from scipy.stats import entropy
+from scipy.stats import entropy, ks_2samp, chisquare, wilcoxon
 
 def dummy_oracle(seed, results_map: dict[str, list[str]]):
     for func_name, outputs in results_map.items():
@@ -181,3 +181,43 @@ def _jensenshannon(p, q):
 def jensenshannon_statistical_oracle(seed, results_map: dict[str, tuple[str, str]]):
     return _statistical_oracle(seed, results_map, _jensenshannon)
 
+
+# The code below is ChatGPT-generated based on the KL_statistical_oracle above (August 12, 2026, 17:17)
+def _chi_square(p, q):
+    result = chisquare(f_obs=q, f_exp=p)
+
+    conf = STATISTICAL_CONFIDENCE if 0 < STATISTICAL_CONFIDENCE < 1 else 0.01
+    return 0 if result.pvalue >= conf else 1
+
+def chi_square_statistical_oracle(seed, results_map: dict[str, tuple[str, str]]):
+    return _statistical_oracle(seed, results_map, _chi_square)
+
+def _wilcoxon(p, q):
+    if p == q:
+        return 0
+
+    result = wilcoxon(p, q)
+
+    conf = STATISTICAL_CONFIDENCE if 0 < STATISTICAL_CONFIDENCE < 1 else 0.01
+    return 0 if result.pvalue >= conf else 1
+
+def wilcoxon_statistical_oracle(seed, results_map: dict[str, tuple[str, str]]):
+    return _statistical_oracle(seed, results_map, _wilcoxon)
+
+def _KS(p, q):
+    p_samples = []
+    q_samples = []
+
+    for state, count in enumerate(p):
+        p_samples += [state] * int(count)
+
+    for state, count in enumerate(q):
+        q_samples += [state] * int(count)
+
+    result = ks_2samp(p_samples, q_samples)
+
+    conf = STATISTICAL_CONFIDENCE if 0 < STATISTICAL_CONFIDENCE < 1 else 0.01
+    return 0 if result.pvalue >= conf else 1
+
+def KS_statistical_oracle(seed, results_map: dict[str, tuple[str, str]]):
+    return _statistical_oracle(seed, results_map, _KS)
