@@ -102,8 +102,8 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--statistical-oracle-prefix",
-        default="statistical_oracle_",
+        "--statistical-oracle-postfix",
+        default="_statistical_oracle",
         help="Prefix for seeds flagged by statistical oracles",
     )
     
@@ -254,9 +254,9 @@ def main() -> int:
     output_dir_end = Path(args.output_dir).with_name(
         Path(args.output_dir).name + "_end"
     )  # TO keep the queue not huge!
-    stat_oracle_name = args.statistical_oracle_prefix
-    if (stat_oracle_name is None or len(stat_oracle_name) > 4):
-        print(f">> (Fuzz3:ERROR) --statistical-oracle-prefix {stat_oracle_name} must have a length greater than 4.  If you are unsure what this argument is, please remove it from the fuzzing invocation call.")
+    postfix_oracle_name = args.statistical_oracle_postfix
+    if (postfix_oracle_name is None or len(postfix_oracle_name) > 4):
+        print(f">> (Fuzz3:ERROR) --statistical-oracle-prefix {postfix_oracle_name} must have a length greater than 4.  If you are unsure what this argument is, please remove it from the fuzzing invocation call.")
         return 1
 
     # ================================================================
@@ -535,10 +535,10 @@ def main() -> int:
                 if result_entropy_prev is not None:
                     name, _why, deads, result_entropy_prev = _process_result_entropy_oracle(name, deads, results, result_entropy_prev)
             elif oracle.__name__ in {
-                    "statistical_oracle_KL",
-                    "statistical_oracle_chi_square",
-                    "statistical_oracle_jensenshannon",
-                } or oracle.__name__.startswith(stat_oracle_name):
+                    "KL_statistical_oracle",
+                    "chi_square_statistical_oracle",
+                    "jensenshannon_statistical_oracle",
+                } or oracle.__name__.endswith(postfix_oracle_name):
                 name, deads, _rc = _process_result_statistical_oracle(name, deads, _rc, results)
             else:
                 # All the rest of the regular oracles:
