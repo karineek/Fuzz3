@@ -155,7 +155,7 @@ def _chi_square(p, q):
     conf = STATISTICAL_CONFIDENCE if 0 < STATISTICAL_CONFIDENCE < 1 else 0.01
     return 0 if result.pvalue >= conf else 1
 
-def statistical_oracle_chi_square(seed, results_map: dict[str, tuple[str, str]]):
+def chi_square_statistical_oracle(seed, results_map: dict[str, tuple[str, str]]):
     return _statistical_oracle(seed, results_map, _chi_square)
 
 
@@ -166,7 +166,7 @@ def _KL(p, q):
     conf = STATISTICAL_CONFIDENCE if 0 < STATISTICAL_CONFIDENCE < 1 else 0.01
     return 0 if divergence <= conf else 1
 
-def statistical_oracle_KL(seed, results_map: dict[str, tuple[str, str]]):
+def KL_statistical_oracle(seed, results_map: dict[str, tuple[str, str]]):
     return _statistical_oracle(seed, results_map, _KL)
 
 
@@ -177,6 +177,6 @@ def _jensenshannon(p, q):
     conf = STATISTICAL_CONFIDENCE if 0 < STATISTICAL_CONFIDENCE < 1 else 0.01
     return 0 if distance <= conf else 1
 
-def statistical_oracle_jensenshannon(seed, results_map: dict[str, tuple[str, str]]):
+def jensenshannon_statistical_oracle(seed, results_map: dict[str, tuple[str, str]]):
     return _statistical_oracle(seed, results_map, _jensenshannon)
 
