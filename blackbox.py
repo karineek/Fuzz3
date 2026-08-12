@@ -530,19 +530,21 @@ def main() -> int:
 
         # Oracles
         for oracle in oracles:
-            results = oracle(seed, results_map)
-            if oracle.__name__ == "entropy_oracle":
-                if result_entropy_prev is not None:
-                    name, _why, deads, result_entropy_prev = _process_result_entropy_oracle(name, deads, results, result_entropy_prev)
-            elif oracle.__name__ in {
-                    "KL_statistical_oracle",
-                    "chi_square_statistical_oracle",
-                    "jensenshannon_statistical_oracle",
-                } or oracle.__name__.endswith(postfix_oracle_name):
-                name, deads, _rc = _process_result_statistical_oracle(name, deads, _rc, results)
-            else:
-                # All the rest of the regular oracles:
-                if "interesting" not in name and "deadend" not in name:
+            # If we already know it is an interesting one, no need to continue.
+            # TODO: in the future we can compute a weighted score of how interesting the seed is.
+            if "interesting" not in name and "deadend" not in name:
+                results = oracle(seed, results_map)
+                if oracle.__name__ == "entropy_oracle":
+                    if result_entropy_prev is not None:
+                        name, _why, deads, result_entropy_prev = _process_result_entropy_oracle(name, deads, results, result_entropy_prev)
+                elif oracle.__name__ in {
+                        "KL_statistical_oracle",
+                        "chi_square_statistical_oracle",
+                        "jensenshannon_statistical_oracle",
+                    } or oracle.__name__.endswith(postfix_oracle_name):
+                    name, deads, _rc = _process_result_statistical_oracle(name, deads, _rc, results)
+                else:
+                    # All the rest of the regular oracles:
                     if result == 1: # Oracle test failed
                         name += "_interesting"
                     elif result == -1:
@@ -555,7 +557,7 @@ def main() -> int:
                         _rc = -2 # To avoid the whole fuzzer slowing down
 
         #################### ORACLE 1+2 #################### 
-        ## In future work, this needs to be x2 observers and orcales
+        ## In future work, this needs to be x2 observers and oracles
         ## CRASH+HANGS ORACLES ##
         # Now check where the seed needs to go
         if _rc == 0:
