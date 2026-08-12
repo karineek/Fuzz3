@@ -32,7 +32,8 @@ if NUMBER_OUT > 0 :
 else:
     MAX_EOUT = float("inf")
 
-def parse_args():
+######################################################################################################################################################################### _parse_args method
+def _parse_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-i", "--input-dir", required=True)
@@ -100,10 +101,12 @@ def parse_args():
         help="List of enabled executor arguments to diff-testing should be paired with the replay-executors target in the replay option",
     )
     
-    return parser.parse_args()
+    return parser._parse_args()
 
+
+######################################################################################################################################################################### _dedup_seeds method
 # This code is taken from a different project on ECU fuzzing of Karine. It should work here as is. 29/04/2026
-def dedup_seeds(folder: Path) -> int:
+def _dedup_seeds(folder: Path) -> int:
     """Remove duplicate seed files. Returns number of duplicates removed."""
     result = subprocess.run(
         ["fdupes", "-r", "-N", str(folder)],
@@ -115,15 +118,19 @@ def dedup_seeds(folder: Path) -> int:
         return 0
     # count removed files from output
     removed = result.stdout.count("\n")
-    print(f">> {time_str()} dedup: removed {removed} duplicate seeds")
+    print(f">> {_time_str()} dedup: removed {removed} duplicate seeds")
     return removed
 
+
+######################################################################################################################################################################### _time_str method
 # This code is taken from a different project on ECU fuzzing of Karine. It should work here as is. 29/04/2026
-def time_str() -> str:
+def _time_str() -> str:
     now = time.strftime("%H:%M:%S")
     return f"[{now}]"
 
-def confirm_overwrite(path: Path, name: str) -> bool:
+
+######################################################################################################################################################################### _confirm_overwrite method
+def _confirm_overwrite(path: Path, name: str) -> bool:
     if not path.exists():
         return True
 
@@ -133,17 +140,96 @@ def confirm_overwrite(path: Path, name: str) -> bool:
 
     return resp in ("y", "yes", "")
 
+
+######################################################################################################################################################################### _is_seed_file method
 # instead of checking if a file, check we do not include common files in repos:
 SKIP_SEED_SUFFIXES = {".zip", ".md"}
-def is_seed_file(path: Path) -> bool:
+def _is_seed_file(path: Path) -> bool:
     return path.is_file() and path.suffix.lower() not in SKIP_SEED_SUFFIXES
 
+
+######################################################################################################################################################################### _clean_seed_name method
 # Clear the seed name before logging.
-def clean_seed_name(name: str) -> str:
+def _clean_seed_name(name: str) -> str:
     for postfix in ("_interesting", "_deadend", "_coldlist"):
         name = name.replace(postfix, "")
     return name
 
+
+######################################################################################################################################################################### _process_result_entropy_oracle method
+def _process_result_entropy_oracle(name, deads, results, result_entropy_prev):
+    _why = ""
+    _ein, _eout, _edist, _en = results
+    if (_ein == 0 and _eout == 0 and _edist == 0 and _en == 0):
+        return name, _why, deads, result_entropy_prev
+
+    _prev_ein, _prev_eout, _prev_edist, _prev_en = result_entropy_prev
+    if _en == _prev_en:  # only if stable
+        if (_ein - _eout) > (MAX_CAPACITY - 10 * EPSILON):
+            name = name + "_deadend"
+            _why = "_deadend1"
+            deads = deads + 1
+        elif _ein < EPSILON and _eout < EPSILON:
+            name = name + "_deadend"
+            _why = "_deadend2"
+            deads = deads + 1
+        elif _eout == 0 or _eout < EPSILON:
+            name = name + "_interesting"
+            _why = "_interesting1"
+            deads = 0
+        elif _ein > _prev_ein:
+            name = name + "_interesting"
+            _why = "_interesting2"
+            deads = 0
+        elif _eout > _prev_eout:
+            name = name + "_interesting"
+            _why = "_interesting3"
+            deads = 0
+        elif _en > _prev_en:
+            name = name + "_interesting"
+            _why = "_interesting4"
+            deads = 0
+
+        if _ein < _prev_ein:
+            _why = "_interesting5"
+        elif _eout > MAX_EOUT:
+            _why = "_interesting6"
+
+    result_entropy_prev = results
+    print(f"entropy {_} {results} {_why}")
+    return name, _why, deads, results
+
+######################################################################################################################################################################### _process_result_statistical_oracle method
+def _process_result_statistical_oracle(name, deads, _rc, results):
+    if results is None:
+        return name, deads, _rc
+    res_test = results[2]
+    if res_test is None or res_test == 0:
+        return name, deads, _rc
+
+    _why=""
+    if res_test == 1:
+        name += "_interesting"
+        _why = "stat_1"
+        deads = 0
+
+    elif res_test == -1:
+        name += "_deadend"
+        _why = "stat_-1:deadend"
+        deads += 1
+
+    elif res_test == -2:
+        print(">> Statistical oracle crashed due to resource unavailable. Removing this seed.")
+        _why = "stat_-2:oraclefailed"
+        _rc = -2
+
+    else:
+        raise ValueError(f"Unexpected statistical oracle result: {res_test}")
+
+    print(f"statistical {results} {_why}")
+    return name, deads, _rc
+
+######################################################################################################################################################################### MAIN method
 # Call:  python3 blackbox.py   -i clang-format-seeds   -o out   -c crashes   --executor "clang_format_executor"   --executor-args="--dry-run"
 #  python3 blackbox.py   -i clang-format-seeds   -o out   -c crashes   --executor "clang_format_executor"   --executor-args "--dry-run --Werror"  --mutators bit_flip delete_line duplicate_line
 # Main of the blackbox fuzzer
@@ -152,8 +238,8 @@ def main() -> int:
     #                        ---> ARGS <---
     # ================================================================
 
-    print(f">> {time_str()} (Fuzz3) Parsing input arguments")
-    args = parse_args()
+    print(f">> {_time_str()} (Fuzz3) Parsing input arguments")
+    args = _parse_args()
 
     print(">> (Fuzz3) Start")
     input_dir = Path(args.input_dir)
@@ -200,7 +286,7 @@ def main() -> int:
             p for d in all_dirs
                 if d.exists()
                 for p in d.glob("*")
-                if is_seed_file(p)
+                if _is_seed_file(p)
         ]
 
         for seed in files:
@@ -225,15 +311,15 @@ def main() -> int:
     if args.replay_executors or args.replay_executors_args:
         print(f">> (Fuzz3:WARNING) 'replay-executors' option is valid only during REPLAY. Not in Fuzzing. Ignoring this list of arguments.")
 
-    if not confirm_overwrite(crash_dir, args.crash_dir):
+    if not _confirm_overwrite(crash_dir, args.crash_dir):
         print(f">> (Fuzz3:ERROR) Crash folder '{crash_dir.name}' is already exists. Please Save Old Fuzzing Results and remove the folder. Exiting.")
         return 1
 
-    if not confirm_overwrite(output_dir, args.output_dir):
+    if not _confirm_overwrite(output_dir, args.output_dir):
         print(f">> (Fuzz3:ERROR) Output folder '{output_dir.name}' is already exists. Please Save Old Fuzzing Results and remove the folder. Exiting.")
         return 1
 
-    if not confirm_overwrite(output_dir_end, args.output_dir + "_end"):
+    if not _confirm_overwrite(output_dir_end, args.output_dir + "_end"):
         print(f">> (Fuzz3:ERROR) Output END folder '{output_dir_end.name}' is already exists. Please Save Old Fuzzing Results and remove the folder. Exiting.")
         return 1
 
@@ -266,7 +352,7 @@ def main() -> int:
         print(f">> (Fuzz3) No Generator was found.")
 
     print(">> (Fuzz3) Copy good seeds into output folder")
-    files = [p for p in input_dir.glob("*") if is_seed_file(p)]
+    files = [p for p in input_dir.glob("*") if _is_seed_file(p)]
     if not files:
         print(f">> (Fuzz3) No Seeds found in {input_dir}/ folder. Exiting.")
         return 1
@@ -349,15 +435,15 @@ def main() -> int:
     deads = 0
     counter = 0
     recent_active = deque(maxlen=WINDOW_SIZE)  # In case we stall, we
-    print(f">> {time_str()} (Fuzz3) Start Fuzzing {args.iterations}")
-    files = [f for f in output_dir.iterdir() if is_seed_file(f)] # Read first here, and every 1000 files
+    print(f">> {_time_str()} (Fuzz3) Start Fuzzing {args.iterations}")
+    files = [f for f in output_dir.iterdir() if _is_seed_file(f)] # Read first here, and every 1000 files
     for _ in range(args.iterations):
 
         # Clean a bit if the deaths counter is high!
         if deads > 2 * MAX_CAPACITY:
             print(f">> (Fuzz3) Shaking the seeds after {deads} no interesting seeds.")
             # move 10% of files from output_dir to output_dir_end
-            files = [f for f in output_dir.iterdir() if is_seed_file(f)]
+            files = [f for f in output_dir.iterdir() if _is_seed_file(f)]
             n_to_move = max(1, math.ceil(0.1 * len(files)))  # at least 1 file
             selected = random.sample(files, n_to_move)
             for f in selected:
@@ -370,11 +456,11 @@ def main() -> int:
                 if f.name not in recent_active:
                     new_name = f.with_name(f.name.replace("_coldlist", ""))
                     f.rename(new_name)
-                    print(f">> {time_str()} (Fuzz3) Restored: {f.name} → {new_name.name}")
+                    print(f">> {_time_str()} (Fuzz3) Restored: {f.name} → {new_name.name}")
         ## END reducing the queue
 
         # After reducing the queue, continue with the next iteration of fuzzing
-        files = [p for p in output_dir.glob("*") if is_seed_file(p)]
+        files = [p for p in output_dir.glob("*") if _is_seed_file(p)]
 
         # Now we have a proper search
         weights = [
@@ -390,7 +476,7 @@ def main() -> int:
         seed = random.choices(files, weights=weights, k=1)[0]
         recent_active.append(seed.name)
 
-        print(f">> {time_str()} (Fuzz3) Fuzzing seed: {seed} {_}")
+        print(f">> {_time_str()} (Fuzz3) Fuzzing seed: {seed} {_}")
 
         # Mutate
         mutator = random.choice(mutators)
@@ -436,44 +522,16 @@ def main() -> int:
         for oracle in oracles:
             results = oracle(seed, results_map)
             if oracle.__name__ == "entropy_oracle":
-                _why = ""
                 if result_entropy_prev is not None:
-                    _ein, _eout, _edist, _en = results
-                    _prev_ein, _prev_eout, _prev_edist, _prev_en = result_entropy_prev
-                    if _en == _prev_en:  # only if stable
-                        if (_ein - _eout) > (MAX_CAPACITY - 10 * EPSILON):
-                            name = name + "_deadend"
-                            _why = "_deadend1"
-                            deads = deads + 1
-                        elif _ein < EPSILON and _eout < EPSILON:
-                            name = name + "_deadend"
-                            _why = "_deadend2"
-                            deads = deads + 1
-                        elif _eout == 0 or _eout < EPSILON:
-                            name = name + "_interesting"
-                            _why = "_interesting1"
-                            deads = 0
-                        elif _ein > _prev_ein:
-                            name = name + "_interesting"
-                            _why = "_interesting2"
-                            deads = 0
-                        elif _eout > _prev_eout:
-                            name = name + "_interesting"
-                            _why = "_interesting3"
-                            deads = 0
-                        elif _en > _prev_en:
-                            name = name + "_interesting"
-                            _why = "_interesting4"
-                            deads = 0
-
-                        if _ein < _prev_ein:
-                            _why = "_interesting5"
-                        elif _eout > MAX_EOUT:
-                            _why = "_interesting6"
-            
-                result_entropy_prev = results
-                print(f"entropy {_} {results} {_why}")
+                    name, _why, deads, result_entropy_prev = _process_result_entropy_oracle(name, deads, results, result_entropy_prev)
+            elif oracle.__name__ in {
+                    "statistical_oracle_KL",
+                    "statistical_oracle_chi_square",
+                    "statistical_oracle_jensenshannon",
+                }:
+                name, deads, _rc = _process_result_statistical_oracle(name, deads, _rc, results)
             else:
+                # All the rest of the regular oracles:
                 if "interesting" not in name and "deadend" not in name:
                     if result == 1: # Oracle test failed
                         name += "_interesting"
@@ -491,7 +549,7 @@ def main() -> int:
         ## CRASH+HANGS ORACLES ##
         # Now check where the seed needs to go
         if _rc == 0:
-            print(f">> {time_str()} (Fuzz3) Writing to output dir {name}")
+            print(f">> {_time_str()} (Fuzz3) Writing to output dir {name}")
             out_path = output_dir / name
             shutil.move(tmp_path, out_path)
             files.append(out_path)
@@ -523,18 +581,18 @@ def main() -> int:
 
         # Log seeds: selected SEED to mutate, MUTATION, resultant SEED
         if mutation_log is not None:
-            seed_from = clean_seed_name(seed.name)
+            seed_from = _clean_seed_name(seed.name)
             mutation_name = mutator.__name__
-            seed_to = clean_seed_name(name)
+            seed_to = _clean_seed_name(name)
             with mutation_log.open("a", encoding="utf-8") as log:
                 log.write(f"{seed_from},{mutation_name},{seed_to}\n")
 
         # Deduplication of seeds
         counter = counter + 1
         if counter > 1000:
-            dedup_seeds(output_dir)
-            dedup_seeds(crash_dir)
-            files = [f for f in output_dir.iterdir() if is_seed_file(f)]
+            _dedup_seeds(output_dir)
+            _dedup_seeds(crash_dir)
+            files = [f for f in output_dir.iterdir() if _is_seed_file(f)]
             counter = 0
 
 if __name__ == "__main__":
