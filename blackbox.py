@@ -32,8 +32,8 @@ if NUMBER_OUT > 0 :
 else:
     MAX_EOUT = float("inf")
 
-######################################################################################################################################################################### _parse_args method
-def _parse_args():
+######################################################################################################################################################################### parse_args method
+def parse_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-i", "--input-dir", required=True)
@@ -101,7 +101,7 @@ def _parse_args():
         help="List of enabled executor arguments to diff-testing should be paired with the replay-executors target in the replay option",
     )
     
-    return parser._parse_args()
+    return parser.parse_args()
 
 
 ######################################################################################################################################################################### _dedup_seeds method
@@ -239,7 +239,7 @@ def main() -> int:
     # ================================================================
 
     print(f">> {_time_str()} (Fuzz3) Parsing input arguments")
-    args = _parse_args()
+    args = parse_args()
 
     print(">> (Fuzz3) Start")
     input_dir = Path(args.input_dir)
