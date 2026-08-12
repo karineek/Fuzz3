@@ -255,8 +255,8 @@ def main() -> int:
         Path(args.output_dir).name + "_end"
     )  # TO keep the queue not huge!
     postfix_oracle_name = args.statistical_oracle_postfix
-    if (postfix_oracle_name is None or len(postfix_oracle_name) > 4):
-        print(f">> (Fuzz3:ERROR) --statistical-oracle-prefix {postfix_oracle_name} must have a length greater than 4.  If you are unsure what this argument is, please remove it from the fuzzing invocation call.")
+    if (postfix_oracle_name is None or len(postfix_oracle_name) < 5):
+        print(f">> (Fuzz3:ERROR) --statistical-oracle-postfix {postfix_oracle_name} must have a length greater than 4.  If you are unsure what this argument is, please remove it from the fuzzing invocation call.")
         return 1
 
     # ================================================================
