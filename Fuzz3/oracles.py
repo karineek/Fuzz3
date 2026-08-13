@@ -56,7 +56,8 @@ def entropy_oracle(seed, results_map: dict[str, tuple[str, str]]):
     return -entropy_input, -entropy_output, len(distribution), n
 
 
-
+################################################################
+# Debugging of the statistical oracles: https://colab.research.google.com/drive/1Wwwht85zu_HHAsIbhhjjIA1O55BCvLsz?usp=sharing
 
 # Helper function
 def _align_distributions(before: str, after: str):
@@ -119,7 +120,7 @@ def _align_distributions(before: str, after: str):
         pass
         
     return None, None
-    
+
 # Helper function
 def _statistical_oracle(seed, results_map: dict[str, tuple[str, str]], func):
     if "statistical_observer" in results_map:
