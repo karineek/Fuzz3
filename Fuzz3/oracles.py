@@ -64,7 +64,16 @@ def _align_distributions(before: str, after: str):
     if isinstance(before, list) and isinstance(after, list):
         return before, after
 
-    # 2. JSON
+    # 2. Already dictionaries
+    if isinstance(before, dict) and isinstance(after, dict):
+        states = sorted(set(before) | set(after))
+
+        p = [before.get(state, 0) for state in states]
+        q = [after.get(state, 0) for state in states]
+
+        return p, q
+        
+    # 3. JSON
     try:
         p = json.loads(before)
         q = json.loads(after)
@@ -84,7 +93,7 @@ def _align_distributions(before: str, after: str):
     except Exception:
         pass
 
-    # 3. Python dict / Counter
+    # 4. Python dict / Counter
     try:
         if before.startswith("Counter(") and before.endswith(")"):
             before = before[len("Counter("):-1]
@@ -122,11 +131,6 @@ def _statistical_oracle(seed, results_map: dict[str, tuple[str, str]], func):
 
     inputs = data[0]
     outputs = data[1]
-    n = len(inputs)
-
-    if n != len(outputs):
-        return 0, 0, 0, 0
-
     code_in = seed.read_text(encoding="utf-8")
     output_before = None
     for i in range(len(inputs) - 1, -1, -1):
@@ -134,19 +138,22 @@ def _statistical_oracle(seed, results_map: dict[str, tuple[str, str]], func):
             output_before = outputs[i]
             break
     if output_before is None:
-        return 0, 0, 0, n
+        return 0, 0, 0, 0
 
     # Newly executed mutant
     output_after = outputs[-1]
 
     p, q = _align_distributions(output_before, output_after)
     if p is None or q is None:
-        return output_before, output_after, -1, n
+        return output_before, output_after, -1, 0
 
-    stat_test_res = func(p, q)
+    if (len(p) == len(q)):
+        stat_test_res = func(p, q)
+        return output_before, output_after, stat_test_res, len(p)
+    else:
+        return output_before, output_after, -1, len(p) 
 
-    return output_before, output_after, stat_test_res, n
-
+        
 STATISTICAL_CONFIDENCE = float(os.environ.get("STATISTICAL_CONFIDENCE_PARAM", "0.05"))
 
 # chi2_contingency(table) - statistical test
