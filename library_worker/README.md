@@ -57,6 +57,8 @@ Run the build script from the repository root:
 ./library_worker/build-docker.sh gpu cutlass
 ```
 
+Some systems will require running it with a flag before it: ``` DOCKER_BUILDKIT=1 ./library_worker/build-docker.sh cpu arrayfire```
+
 Default image names use `fuzz3-worker:<library>-<backend>`. Pass a third argument
 to choose another name:
 
