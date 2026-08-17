@@ -4,9 +4,9 @@
   <img src="https://github.com/user-attachments/assets/cbe6a03d-58b2-4d00-a020-3db2fa291fb0" width="400" align="right" />
 </p>
 
-**Fuzz3 is a fuzzer extension that uses entropy on the input/output of a SUT to guide exploration.
+Fuzz3 is a language-agnostic black-box fuzzing framework that uses entropy on the input/output of a SUT to guide exploration as an additional test oracle alongside crashes and timeouts. Currently, Fuzz3 supports the fuzzing of six different systems. We list below instructions on how to add new SuTs.
 
-Currently, Fuzz3 supports the fuzzing of six different systems. We list below instructions on how to add new SuTs.**
+The numerical-library extension enables Fuzz3 to test Thrust, ArrayFire, and CUTLASS in containerised CPU and GPU environments. See the [modular library worker](library_worker/README.md) for supported operations, request formats, and build instructions.
 
 Abstract. Fuzz testing finds security issues and improves robustness; however, it has only two implicit test oracles: timeout and crash. 
 Information theory gives a third: entropy, which is generic, low-cost and widely applicable. 

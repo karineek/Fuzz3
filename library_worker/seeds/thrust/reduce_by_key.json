@@ -1,0 +1,1 @@
+{"schema_version":1,"library":"thrust","function":"reduce_by_key","inputs":{"keys":{"type":"vector","dtype":"i32","shape":[7],"data":[1,1,2,2,2,1,1]},"values":{"type":"vector","dtype":"f32","shape":[7],"data":[1,2,3,4,5,6,7]}}}

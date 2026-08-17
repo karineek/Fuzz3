@@ -1,0 +1,1 @@
+{"schema_version":1,"library":"thrust","function":"stable_sort_by_key","inputs":{"keys":{"type":"vector","dtype":"i32","shape":[6],"data":[2,1,2,1,3,2]},"values":{"type":"vector","dtype":"f32","shape":[6],"data":[20,10,21,11,30,22]}}}

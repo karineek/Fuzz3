@@ -1,0 +1,1 @@
+{"schema_version":1,"library":"cutlass","function":"batched_gemm","inputs":{"a":{"type":"tensor","dtype":"f32","shape":[2,2,2],"data":[1,2,3,4,2,0,0,2]},"b":{"type":"tensor","dtype":"f32","shape":[2,2,2],"data":[5,6,7,8,1,2,3,4]}}}
