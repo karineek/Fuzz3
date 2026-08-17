@@ -47,6 +47,8 @@ def parse_args():
     parser.add_argument("-t", "--timeout", type=float, default=50)
     parser.add_argument("-n", "--iterations", type=int, default=50)
 
+    parser.add_argument("-v", "--verbose", type=int, default=0)
+    
     parser.add_argument("--executor", required=True)
     parser.add_argument("--executor-args", default="")
 
@@ -403,6 +405,10 @@ def main() -> int:
     init_stage_results = None
     for seed in files:
         _input, _rc, _out, _err = executor(arguments, seed, args.timeout)
+        if args.verbose:
+            print("Initial stage results")
+            print(_input, _rc, _out, _err)
+            
         if _rc == 300:
             shutil.move(seed, crash_dir / seed.name) # Should have never reach the input folder!
             continue # Not a real bug, skip this
