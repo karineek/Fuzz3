@@ -17,4 +17,7 @@ groups $(whoami)
 sudo chmod 666 /var/run/docker.sock
 docker run hello-world
 
+# Needed for the parameterised dockers
+sudo apt-get install -y docker-buildx
+
 echo ">> To build image run: docker build -t dockerfuzzer ."
