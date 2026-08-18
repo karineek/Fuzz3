@@ -1,3 +1,5 @@
+# Tested on many CPUs
+# GPUs: c4130
 sudo apt-get update
 
 # Fix the users
