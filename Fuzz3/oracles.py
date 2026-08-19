@@ -235,7 +235,7 @@ def _KS(p: list[float], q: list[float]) -> int:
     for state, count in enumerate(q):
         q_samples += [state] * int(count)
 
-    result = ks_2samp(p_samples, q_samples)
+    result = ks_2samp(p_samples, q_samples) # two-sample Kolmogorov–Smirnov test
 
     conf = STATISTICAL_CONFIDENCE if 0 < STATISTICAL_CONFIDENCE < 1 else 0.01
     return 0 if result.pvalue >= conf else 1
