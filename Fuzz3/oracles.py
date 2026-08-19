@@ -158,7 +158,10 @@ def _statistical_oracle(seed, results_map: dict[str, tuple[str, str]], func):
 STATISTICAL_CONFIDENCE = float(os.environ.get("STATISTICAL_CONFIDENCE_PARAM", "0.05"))
 
 # chi2_contingency(table) - statistical test
-def _chi_square(p, q):
+def _chi_square(p: list[float], q: list[float]) -> int:
+    if p == q:
+        return 0
+        
     result = chi2_contingency([p, q])
 
     conf = STATISTICAL_CONFIDENCE if 0 < STATISTICAL_CONFIDENCE < 1 else 0.01
@@ -169,7 +172,10 @@ def chi_square_statistical_oracle(seed, results_map: dict[str, tuple[str, str]])
 
 
 # entropy(p, q) - KL divergence
-def _KL(p, q):
+def _KL(p: list[float], q: list[float]) -> int:
+    if p == q:
+        return 0
+        
     divergence = entropy(p, q)
 
     conf = STATISTICAL_CONFIDENCE if 0 < STATISTICAL_CONFIDENCE < 1 else 0.01
@@ -180,7 +186,10 @@ def KL_statistical_oracle(seed, results_map: dict[str, tuple[str, str]]):
 
 
 # jensenshannon(p, q) - JS distance
-def _jensenshannon(p, q):
+def _jensenshannon(p: list[float], q: list[float]) -> int:
+    if p == q:
+        return 0
+        
     distance = jensenshannon(p, q)
 
     conf = STATISTICAL_CONFIDENCE if 0 < STATISTICAL_CONFIDENCE < 1 else 0.01
@@ -191,16 +200,17 @@ def jensenshannon_statistical_oracle(seed, results_map: dict[str, tuple[str, str
 
 
 # The code below is ChatGPT-generated based on the KL_statistical_oracle above (August 12, 2026, 17:17)
-def _chi_square(p, q):
-    result = chisquare(f_obs=q, f_exp=p)
+#def _chi_square(p, q):
+#    result = chisquare(f_obs=q, f_exp=p)
+#
+#    conf = STATISTICAL_CONFIDENCE if 0 < STATISTICAL_CONFIDENCE < 1 else 0.01
+#    return 0 if result.pvalue >= conf else 1
+#
+#def chi_square_statistical_oracle(seed, results_map: dict[str, tuple[str, str]]):
+#    return _statistical_oracle(seed, results_map, _chi_square)
+### Removed this as this is not relevant here. But if ever this version is needed, I am happy to add this back.
 
-    conf = STATISTICAL_CONFIDENCE if 0 < STATISTICAL_CONFIDENCE < 1 else 0.01
-    return 0 if result.pvalue >= conf else 1
-
-def chi_square_statistical_oracle(seed, results_map: dict[str, tuple[str, str]]):
-    return _statistical_oracle(seed, results_map, _chi_square)
-
-def _wilcoxon(p, q):
+def _wilcoxon(p: list[float], q: list[float]) -> int:
     if p == q:
         return 0
 
@@ -212,7 +222,10 @@ def _wilcoxon(p, q):
 def wilcoxon_statistical_oracle(seed, results_map: dict[str, tuple[str, str]]):
     return _statistical_oracle(seed, results_map, _wilcoxon)
 
-def _KS(p, q):
+def _KS(p: list[float], q: list[float]) -> int:
+    if p == q:
+        return 0
+        
     p_samples = []
     q_samples = []
 
