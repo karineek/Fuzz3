@@ -43,7 +43,7 @@ def script_executor(
     #cmd = [*arg_parsed, str(seed)]
     if IS_UNIX == "1":
         use_shell = True
-        cmd = (f"ulimit -v {MEMORY_LIMIT_KB}; "
+        cmd = (f"ulimit -t {timeout} ulimit -v {MEMORY_LIMIT_KB}; "
                f"{shlex.join([*arg_parsed, str(seed)])}")
     else:
         use_shell = False
