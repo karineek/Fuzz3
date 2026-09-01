@@ -67,29 +67,37 @@ std::string driver_name() {
 }
 
 json driver_manifest() {
-    return {
-        {"schema_version", 1},
-        {"library", "thrust"},
+    const char* backend =
 #ifdef FUZZ3_GPU
-        {"backend", "gpu"},
+        "gpu";
 #else
-        {"backend", "cpu"},
+        "cpu";
 #endif
-        {"functions",
-         {
-             {"sort", {{"values", "vector<f32|f64|i32|i64>"},
-                       {"descending", "scalar<bool>, optional"}}},
-             {"reduce_sum", {{"values", "vector<f32>"}}},
-             {"exclusive_scan", {{"values", "vector<i32>"}}},
-             {"stable_sort_by_key", {{"keys", "vector<i32>"},
-                                    {"values", "vector<f32>"}}},
-             {"reduce_by_key", {{"keys", "vector<i32>"},
-                               {"values", "vector<f32>"}}},
-             {"transform_axpby", {{"x", "vector<f32>"}, {"y", "vector<f32>"},
-                                 {"alpha", "scalar<f32>"},
-                                 {"beta", "scalar<f32>"}}},
-         }},
-    };
+    return make_manifest("thrust", backend, json::parse(R"json(
+{
+  "sort": {
+    "inputs": {"values": "vector<f32|f64|i32|i64>[n]", "descending": "scalar<bool>?"},
+    "outputs": {"result": "same(values)"}
+  },
+  "reduce_sum": {"inputs": {"values": "vector<f32>[n]"}, "outputs": {"result": "scalar<f32>"}},
+  "exclusive_scan": {"inputs": {"values": "vector<i32>[n]"}, "outputs": {"result": "same(values)"}},
+  "stable_sort_by_key": {
+    "inputs": {"keys": "vector<i32>[n]", "values": "vector<f32>[n]"},
+    "outputs": {"keys": "same(keys)", "values": "same(values)"}
+  },
+  "reduce_by_key": {
+    "inputs": {"keys": "vector<i32>[n]", "values": "vector<f32>[n]"},
+    "outputs": {"keys": "vector<i32>[?]", "values": "vector<f32>[?]"}
+  },
+  "transform_axpby": {
+    "inputs": {
+      "x": "vector<f32>[n]", "y": "vector<f32>[n]",
+      "alpha": "scalar<f32>", "beta": "scalar<f32>"
+    },
+    "outputs": {"result": "same(x)"}
+  }
+}
+)json"));
 }
 
 json run(const Request& request) {

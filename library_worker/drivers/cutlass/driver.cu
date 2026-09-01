@@ -150,26 +150,35 @@ std::string driver_name() {
 }
 
 json driver_manifest() {
-    return {
-        {"schema_version", 1},
-        {"library", "cutlass"},
+    const char* backend =
 #ifdef FUZZ3_GPU
-        {"backend", "gpu"},
+        "gpu";
 #else
-        {"backend", "cpu-reference"},
+        "cpu-reference";
 #endif
-        {"functions",
-         {
-             {"gemm", {{"a", "matrix<f32>"}, {"b", "matrix<f32>"}}},
-             {"gemm_accumulate", {{"a", "matrix<f32>"}, {"b", "matrix<f32>"},
-                                  {"c", "matrix<f32>"}, {"alpha", "scalar<f32>"},
-                                  {"beta", "scalar<f32>"}}},
-             {"batched_gemm", {{"a", "tensor<f32>[batch,m,k]"},
-                               {"b", "tensor<f32>[batch,k,n]"}}},
-             {"gemm_chain", {{"a", "matrix<f32>"}, {"b", "matrix<f32>"},
-                             {"c", "matrix<f32>"}}},
-         }},
-    };
+    return make_manifest("cutlass", backend, json::parse(R"json(
+{
+  "gemm": {
+    "inputs": {"a": "matrix<f32>[m,k]", "b": "matrix<f32>[k,n]"},
+    "outputs": {"result": "matrix<f32>[m,n]"}
+  },
+  "gemm_accumulate": {
+    "inputs": {
+      "a": "matrix<f32>[m,k]", "b": "matrix<f32>[k,n]", "c": "matrix<f32>[m,n]",
+      "alpha": "scalar<f32>", "beta": "scalar<f32>"
+    },
+    "outputs": {"result": "matrix<f32>[m,n]"}
+  },
+  "batched_gemm": {
+    "inputs": {"a": "tensor<f32>[batch,m,k]", "b": "tensor<f32>[batch,k,n]"},
+    "outputs": {"result": "tensor<f32>[batch,m,n]"}
+  },
+  "gemm_chain": {
+    "inputs": {"a": "matrix<f32>[m,k]", "b": "matrix<f32>[k,n]", "c": "matrix<f32>[n,p]"},
+    "outputs": {"result": "matrix<f32>[m,p]"}
+  }
+}
+)json"));
 }
 
 json run(const Request& request) {

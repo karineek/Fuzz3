@@ -92,6 +92,21 @@ equal the product of `shape`. Scalars use `value` instead of `shape` and `data`:
 {"type":"scalar","dtype":"f32","value":0.5}
 ```
 
+Schema version 2 chains calls. An input can reference an earlier result by id;
+`path` selects a member of a multi-output operation:
+
+```json
+{"schema_version":2,"library":"thrust","operations":[{"id":"op0","function":"sort","inputs":{"values":{"type":"vector","dtype":"f32","shape":[7],"data":[3,1,4,1,5,9,2]}}},{"id":"op1","function":"reduce_sum","inputs":{"values":{"ref":"op0"}}}]}
+```
+
+The response includes intermediate results and exposes the final value as
+top-level `result`. `FUZZ3_MAX_CHAIN_DEPTH` limits generated and executed
+programs (default 4, maximum 64). Version 1 requests remain valid. Driver
+manifests expose symbolic dtype/shape rules under `functions`; matching typed
+declarations in `Fuzz3/library_grammar.py` drive generation and mutation.
+Repeated dimension names must match, a trailing `?` marks an optional input,
+`[?]` is runtime-sized, and `same(values)` preserves an input's type and shape.
+
 Optional controls request repeated executions for nondeterminism measurement:
 
 ```json
@@ -161,8 +176,9 @@ The same launcher supports both backends:
 The final function argument may be `all` to generate requests for every function
 implemented by the selected driver. The launcher uses `library_worker_generator`
 to create structured seeds and `library_worker_mutator` to preserve JSON, dtypes,
-shapes, and paired-vector constraints. Set `FUZZ3_SEEDS` to change the default 200
-generated seeds.
+shapes, references, and cross-input constraints. Shape mutations target
+power-of-two-adjacent dimensions, and float mutations include one-or-all-value
+subnormals. Set `FUZZ3_SEEDS` to change the default 200 generated seeds.
 
 `docker_executor` sends each request through `docker exec -i`; it does not allocate
 a TTY or construct a shell pipeline. Application return code 300 remains an

@@ -16,6 +16,7 @@ DEFAULT_TIMEOUT = float(os.environ.get("HARNESS_TIMEOUT_SEC", "5"))
 MAX_TIMEOUT = float(os.environ.get("HARNESS_MAX_TIMEOUT_SEC", "30"))
 MAX_REPETITIONS = int(os.environ.get("HARNESS_MAX_REPETITIONS", "64"))
 MAX_REQUEST_BYTES = int(os.environ.get("HARNESS_MAX_REQUEST_BYTES", str(1 << 20)))
+MAX_CHAIN_DEPTH = int(os.environ.get("FUZZ3_MAX_CHAIN_DEPTH", "4"))
 
 
 class InvalidRequest(ValueError):
@@ -35,6 +36,28 @@ def shannon_entropy(histogram, total):
     return entropy if entropy else 0.0
 
 
+def validate_program(request):
+    if "operations" not in request:
+        if not isinstance(request.get("function"), str):
+            raise InvalidRequest("function must be a string")
+        if not isinstance(request.get("inputs"), dict):
+            raise InvalidRequest("inputs must be an object")
+        return
+
+    operations = request["operations"]
+    if not isinstance(operations, list) or not operations:
+        raise InvalidRequest("operations must be a non-empty array")
+    if len(operations) > MAX_CHAIN_DEPTH:
+        raise InvalidRequest(f"operations cannot exceed {MAX_CHAIN_DEPTH}")
+    if any(
+        not isinstance(operation, dict)
+        or not isinstance(operation.get("function"), str)
+        or not isinstance(operation.get("inputs"), dict)
+        for operation in operations
+    ):
+        raise InvalidRequest("each operation needs a function and inputs object")
+
+
 def parse_request(payload):
     if len(payload.encode("utf-8")) > MAX_REQUEST_BYTES:
         raise InvalidRequest("request exceeds the byte limit")
@@ -46,10 +69,7 @@ def parse_request(payload):
         raise InvalidRequest("request must be an object")
     if request.get("command") == "describe":
         return request, 1, DEFAULT_TIMEOUT, True
-    if not isinstance(request.get("function"), str):
-        raise InvalidRequest("function must be a string")
-    if not isinstance(request.get("inputs"), dict):
-        raise InvalidRequest("inputs must be an object")
+    validate_program(request)
 
     controls = request.get("controls", {})
     if not isinstance(controls, dict):

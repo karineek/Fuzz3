@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <string>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 #include <nlohmann/json.hpp>
@@ -151,6 +152,18 @@ json dense_result(const std::string& type, const std::string& dtype,
 template <typename T>
 json scalar_result(const std::string& dtype, T value) {
     return {{"type", "scalar"}, {"dtype", dtype}, {"value", value}};
+}
+
+inline json make_manifest(const std::string& library, const std::string& backend,
+                          json functions) {
+    return {
+        {"schema_version", 2},
+        {"library", library},
+        {"backend", backend},
+        {"functions", std::move(functions)},
+        {"pipeline", {{"reference", "{ref: operation id, path?: [output names]}"},
+                      {"max_depth_env", "FUZZ3_MAX_CHAIN_DEPTH"}}},
+    };
 }
 
 std::string driver_name();

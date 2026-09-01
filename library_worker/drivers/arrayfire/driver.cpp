@@ -95,24 +95,28 @@ std::string driver_name() {
 }
 
 json driver_manifest() {
-    return {
-        {"schema_version", 1},
-        {"library", "arrayfire"},
+    const char* backend =
 #ifdef FUZZ3_GPU
-        {"backend", "gpu"},
+        "gpu";
 #else
-        {"backend", "cpu"},
+        "cpu";
 #endif
-        {"functions",
-         {
-             {"sort", {{"values", "vector<f32>"}}},
-             {"reduce_sum", {{"values", "vector<f32>"}}},
-             {"matmul", {{"a", "matrix<f32>"}, {"b", "matrix<f32>"}}},
-             {"transpose", {{"matrix", "matrix<f32>"}}},
-             {"fft", {{"values", "vector<f32>"}}},
-             {"convolve1", {{"signal", "vector<f32>"}, {"kernel", "vector<f32>"}}},
-         }},
-    };
+    return make_manifest("arrayfire", backend, json::parse(R"json(
+{
+  "sort": {"inputs": {"values": "vector<f32>[n]"}, "outputs": {"result": "same(values)"}},
+  "reduce_sum": {"inputs": {"values": "vector<f32>[n]"}, "outputs": {"result": "scalar<f64>"}},
+  "matmul": {
+    "inputs": {"a": "matrix<f32>[m,k]", "b": "matrix<f32>[k,n]"},
+    "outputs": {"result": "matrix<f32>[m,n]"}
+  },
+  "transpose": {"inputs": {"matrix": "matrix<f32>[m,n]"}, "outputs": {"result": "matrix<f32>[n,m]"}},
+  "fft": {"inputs": {"values": "vector<f32>[n]"}, "outputs": {"real": "same(values)", "imag": "same(values)"}},
+  "convolve1": {
+    "inputs": {"signal": "vector<f32>[n]", "kernel": "vector<f32>[k]"},
+    "outputs": {"result": "vector<f32>[n+k-1]"}
+  }
+}
+)json"));
 }
 
 json run(const Request& request) {
