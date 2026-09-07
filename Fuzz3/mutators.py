@@ -1,6 +1,8 @@
 #WBL 15 Jun 2026 add flip_case_char and olc_short
 #WBL 22 Apr 2026 bugfix delete_char
 #WBL 21 Mar 2026 for triangle add: add_one sub_one equilateral isosceles (and none debug)
+import copy
+import json
 import random
 import re
 from pathlib import Path
@@ -10,6 +12,14 @@ import subprocess
 from pathlib import Path
 import os
 import string
+
+from Fuzz3.library_grammar import (
+    GRAMMARS,
+    generate_program,
+    max_chain_depth,
+    operations,
+    validate_program,
+)
 
 GRAYC_PATH = os.getenv("GRAYC", "~/GrayC/build/bin/grayc")
 GRAYC = os.path.expanduser(GRAYC_PATH)
@@ -437,3 +447,229 @@ def olc_neighbour(seed: Path) -> str | None:
     return data[:pos] + new_ch + data[pos + 1:]
 
 ## End of Decoder Specific Mutators.
+LIBRARY_REGENERATION_ATTEMPTS = 20
+
+
+def _load_request(seed):
+    try:
+        request = json.loads(seed.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+        return None
+    request_operations = operations(request) if isinstance(request, dict) else []
+    if not request_operations or any(
+        not isinstance(operation, dict) or not isinstance(operation.get("inputs"), dict)
+        for operation in request_operations
+    ):
+        return None
+    return request
+
+
+def _dump_request(request):
+    return json.dumps(request, sort_keys=True, separators=(",", ":"), allow_nan=False)
+
+
+def _dump_valid_request(request):
+    return _dump_request(request) if validate_program(request) else None
+
+
+def _payloads(request):
+    for operation in operations(request):
+        yield from operation["inputs"].values()
+
+
+def library_value_mutator(seed: Path) -> str | None:
+    request = _load_request(seed)
+    if request is None:
+        return None
+    candidates = []
+    for payload in _payloads(request):
+        if not isinstance(payload, dict):
+            continue
+        if payload.get("type") == "scalar" and isinstance(
+            payload.get("value"), (bool, int, float)
+        ):
+            candidates.append((payload, "value", payload.get("dtype")))
+        data = payload.get("data")
+        if isinstance(data, list):
+            candidates.extend(
+                (data, index, payload.get("dtype")) for index in range(len(data))
+            )
+    if not candidates:
+        return None
+
+    container, key, dtype = random.choice(candidates)
+    value = container[key]
+    if dtype == "bool" and isinstance(value, bool):
+        container[key] = not value
+    elif dtype in ("i32", "i64") and isinstance(value, (int, float)):
+        limits = (-2**31, 2**31 - 1) if dtype == "i32" else (-2**63, 2**63 - 1)
+        delta = random.choice((-1, 1))
+        candidate = int(value) + delta
+        if candidate < limits[0] or candidate > limits[1]:
+            candidate = int(value) - delta
+        container[key] = candidate
+    elif dtype in ("f32", "f64") and isinstance(value, (int, float)):
+        numeric = float(value)
+        container[key] = 1.0 if numeric == 0.0 else -numeric
+    else:
+        return None
+    return _dump_request(request)
+
+
+def library_shuffle_mutator(seed: Path) -> str | None:
+    request = _load_request(seed)
+    if request is None:
+        return None
+    candidates = []
+    for payload in _payloads(request):
+        if not isinstance(payload, dict) or not isinstance(payload.get("data"), list):
+            continue
+        data = payload["data"]
+        if len(data) > 1 and any(value != data[0] for value in data[1:]):
+            candidates.append(data)
+    if not candidates:
+        return None
+    data = random.choice(candidates)
+    first = random.randrange(len(data))
+    different = [index for index, value in enumerate(data) if value != data[first]]
+    if not different:
+        return None
+    second = random.choice(different)
+    data[first], data[second] = data[second], data[first]
+    return _dump_request(request)
+
+
+def library_resize_mutator(seed: Path) -> str | None:
+    request = _load_request(seed)
+    if request is None:
+        return None
+    indexes = list(range(len(operations(request))))
+    random.shuffle(indexes)
+    for index in indexes:
+        candidate = copy.deepcopy(request)
+        operation = operations(candidate)[index]
+        result = _resize_operation(candidate, operation)
+        if result is not None:
+            return result
+    return None
+
+
+def _resize_operation(request, operation):
+    inputs = operation["inputs"]
+    library = request.get("library")
+    function = operation.get("function")
+    if library not in GRAMMARS or function not in GRAMMARS[library]:
+        return None
+
+    groups = {}
+    for name, input_spec in GRAMMARS[library][function].inputs.items():
+        payload = inputs.get(name)
+        if (
+            input_spec.kind == "vector"
+            and isinstance(payload, dict)
+            and payload.get("type") == "vector"
+            and isinstance(payload.get("data"), list)
+            and payload.get("shape") == [len(payload["data"])]
+            and payload["data"]
+        ):
+            groups.setdefault(input_spec.shape, []).append(payload)
+
+    eligible = list(groups.values())
+    if not eligible:
+        return None
+
+    payloads = random.choice(eligible)
+    size = len(payloads[0]["data"])
+    grow = size == 1 or random.choice((False, True))
+    index = random.randrange(size)
+    for payload in payloads:
+        if grow:
+            payload["data"].insert(index, payload["data"][index])
+        else:
+            payload["data"].pop(index)
+        payload["shape"][0] = len(payload["data"])
+    return _dump_valid_request(request)
+
+
+def library_subnormal_mutator(seed: Path) -> str | None:
+    """Replace one or all floating-point literals with positive subnormals."""
+    request = _load_request(seed)
+    if request is None:
+        return None
+    candidates = []
+    for payload in _payloads(request):
+        if not isinstance(payload, dict) or payload.get("dtype") not in ("f32", "f64"):
+            continue
+        if isinstance(payload.get("data"), list) and payload["data"]:
+            candidates.append((payload["data"], payload["dtype"]))
+        elif isinstance(payload.get("value"), (int, float)):
+            candidates.append((payload, payload["dtype"]))
+    if not candidates:
+        return None
+    container, dtype = random.choice(candidates)
+    value = {"f32": 2.0**-149, "f64": 2.0**-1074}[dtype]
+    if isinstance(container, list):
+        indexes = (
+            range(len(container))
+            if random.choice((False, True))
+            else [random.randrange(len(container))]
+        )
+        for index in indexes:
+            container[index] = value
+    else:
+        container["value"] = value
+    return _dump_valid_request(request)
+
+
+def library_weird_shape_mutator(seed: Path) -> str | None:
+    """Regenerate the same valid call chain with power-of-two-adjacent extents."""
+    request = _load_request(seed)
+    if request is None or request.get("library") not in GRAMMARS:
+        return None
+    sequence = [operation["function"] for operation in operations(request)]
+    for _ in range(LIBRARY_REGENERATION_ATTEMPTS):
+        mutated = generate_program(
+            request["library"], max_depth=len(sequence), sequence=sequence, weird=True
+        )
+        if len(operations(mutated)) == len(sequence):
+            result = _dump_valid_request(mutated)
+            if result is not None:
+                return result
+    return None
+
+
+def library_chain_mutator(seed: Path) -> str | None:
+    """Add, remove, or replace operations while retaining a valid typed chain."""
+    request = _load_request(seed)
+    library = request.get("library") if request else None
+    if library not in GRAMMARS:
+        return None
+    try:
+        maximum = max_chain_depth()
+    except ValueError:
+        return None
+    current_depth = len(operations(request))
+    depths = [depth for depth in range(1, maximum + 1) if depth != current_depth]
+    depth = random.choice(depths) if depths else current_depth
+    first = random.choice(tuple(GRAMMARS[library]))
+    mutated = generate_program(
+        library, tuple(GRAMMARS[library]), depth, sequence=[first]
+    )
+    return _dump_valid_request(mutated)
+
+
+def library_worker_mutator(seed: Path) -> str | None:
+    mutators = [
+        library_value_mutator,
+        library_shuffle_mutator,
+        library_resize_mutator,
+        library_subnormal_mutator,
+        library_weird_shape_mutator,
+        library_chain_mutator,
+    ]
+    random.shuffle(mutators)
+    for mutator in mutators:
+        result = mutator(seed)
+        if result is not None:
+            return result
+    return None

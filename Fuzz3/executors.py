@@ -1,4 +1,5 @@
 # WBL 22 March 2026 merge triangle_executor
+import json
 from pathlib import Path
 import subprocess
 import shlex
@@ -9,13 +10,6 @@ import resource
 DOCKER_IMAGE = os.environ.get("DOCKER_IMAGE", "10c3cd4d4526")
 MEMORY_LIMIT_KB = 4 * 1024 * 1024  # 4 GiB
 IS_UNIX = os.environ.get("IS_UNIX", "1")
-
-#def limit_memory():
-#    max_memory = 4 * 1024 * 1024 * 1024  # 4 GB
-#    resource.setrlimit(
-#        resource.RLIMIT_AS,
-#        (max_memory, max_memory),
-#    )
     
 # List here all the SUTs
 
@@ -66,35 +60,61 @@ def script_executor(
     except Exception as e:
         return input_data, 123, "", f"Execution System Error: {str(e)}"
 
-
-## General executor of a script in a docker
+DEFAULT_DOCKER_COMMAND = ["python3", "-u", "/fuzz_workspace/forkserver.py"]
 def docker_executor(
     arguments: str, seed: Path, timeout: float
 ) -> tuple[str, int, str, str]:
     try:
-        input_data = seed.read_bytes().decode(encoding="utf-8")
-    except Exception as e:
-        print(f'Execption {e} seed {seed} Invalid (Fuzz3)')
-        return "", 300, "", "Invalid (Fuzz3)"
+        input_data = seed.read_bytes().decode("utf-8")
+    except (OSError, UnicodeDecodeError) as error:
+        return "", 300, "", f"Invalid seed: {error}"
 
-    arg_parsed = shlex.split(arguments)
-    shell_command = shlex.join([*arg_parsed, str(seed)])
-    cmd = ["docker", "exec", "-it", DOCKER_IMAGE, "sh", "-lc", shell_command]
-    ## E.g. docker exec -it 10c3cd4d4526 sh -lc 'python3 /opt/test_ollama.py'
+    command = shlex.split(arguments) if arguments else DEFAULT_DOCKER_COMMAND
+    container = os.environ.get("DOCKER_CONTAINER", "fuzz3-worker")
+    docker_command = ["docker", "exec", "-i"]
+    if "FUZZ3_MAX_CHAIN_DEPTH" in os.environ:
+        docker_command.extend(
+            ["-e", f"FUZZ3_MAX_CHAIN_DEPTH={os.environ['FUZZ3_MAX_CHAIN_DEPTH']}"]
+        )
+    docker_command.extend([container, *command])
     try:
         result = subprocess.run(
-            cmd,
+            docker_command,
+            input=input_data.rstrip("\n") + "\n",
             capture_output=True,
             text=True,
             timeout=timeout,
         )
-        return input_data, result.returncode, result.stdout.strip(), result.stderr.strip()
+    except subprocess.TimeoutExpired as error:
+        return (
+            input_data,
+            124,
+            (error.stdout or "").strip(),
+            (error.stderr or "timeout").strip(),
+        )
+    except OSError as error:
+        return input_data, 123, "", f"Docker execution error: {error}"
 
-    except subprocess.TimeoutExpired as e:
-        return input_data, 124, (e.stdout or "").strip(), (e.stderr or "timeout").strip()
+    stdout = result.stdout.strip()
+    if result.returncode != 0 and not stdout:
+        return input_data, result.returncode, "", result.stderr.strip()
+    try:
+        response = json.loads(stdout)
+        return_code = response["return_code"]
+        if not isinstance(return_code, int):
+            raise TypeError("return_code must be an integer")
+        output = response.get("output", "")
+        if not isinstance(output, str):
+            output = json.dumps(output, sort_keys=True, separators=(",", ":"))
+    except (json.JSONDecodeError, KeyError, TypeError) as error:
+        return input_data, 123, "", f"Invalid worker response: {error}"
 
-    except Exception as e:
-        return input_data, 123, "", f"Execution System Error: {str(e)}"
+    return (
+        input_data,
+        result.returncode or return_code,
+        output,
+        result.stderr.strip(),
+    )
 
 # For SUT == httpcore
 def httpcore_executor(

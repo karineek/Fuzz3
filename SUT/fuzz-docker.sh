@@ -1,5 +1,5 @@
 #!/bin/bash
-inseed=$1 # clang-format-seeds
+inseed=$1 # docker-in
 out=$2    # out
 crash=$3  # crashes
 itr=$4    # 10000

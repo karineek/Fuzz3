@@ -1,9 +1,19 @@
 #WBL 15 Jun 2026 add olc_decoder_generator_corner
 
+import json
+import os
 from pathlib import Path
 import random
 import subprocess
 import sys
+
+from Fuzz3.library_grammar import (
+    DEFAULT_FUNCTION,
+    GRAMMARS,
+    generate_program,
+    max_chain_depth,
+    operations,
+)
 
 
 ################################ Target: OLC #################################
@@ -170,5 +180,42 @@ def h3_decoder_generator(seedsno: int, outputfolder: Path) -> tuple[int, int]:
         total += 1
 
     return total
+LIBRARY_FUNCTIONS = {library: tuple(grammar) for library, grammar in GRAMMARS.items()}
 
 
+
+def _selected_functions(library):
+    selected = os.environ.get("FUZZ3_FUNCTION", DEFAULT_FUNCTION[library]).strip()
+    functions = LIBRARY_FUNCTIONS[library] if selected == "all" else tuple(
+        item.strip() for item in selected.split(",") if item.strip()
+    )
+    unknown = set(functions) - set(LIBRARY_FUNCTIONS[library])
+    if not functions or unknown:
+        raise ValueError(f"unsupported {library} functions: {sorted(unknown)}")
+    return functions
+
+
+def _generate_requests(seedsno, outputfolder, library, functions, max_depth=None):
+    outputfolder.mkdir(parents=True, exist_ok=True)
+    depth = max_chain_depth(max_depth)
+    for index in range(max(0, seedsno)):
+        first = functions[index % len(functions)]
+        request = generate_program(library, functions, depth, sequence=[first])
+        label = operations(request)[0]["function"]
+        path = outputfolder / f"fuzz3_{library}_{label}_{index}.json"
+        path.write_text(
+            json.dumps(request, sort_keys=True, separators=(",", ":"), allow_nan=False),
+            encoding="utf-8",
+        )
+    return max(0, seedsno)
+
+
+def library_worker_generator(seedsno: int, outputfolder: Path) -> int:
+    library = os.environ.get("FUZZ3_LIBRARY", "thrust").strip().lower()
+    if library not in LIBRARY_FUNCTIONS:
+        raise ValueError(f"unsupported library: {library}")
+    return _generate_requests(seedsno, outputfolder, library, _selected_functions(library))
+
+
+def sort_generator_legal(seedsno: int, outputfolder: Path) -> int:
+    return _generate_requests(seedsno, outputfolder, "thrust", ("sort",), max_depth=1)

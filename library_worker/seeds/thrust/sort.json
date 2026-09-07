@@ -1,0 +1,1 @@
+{"schema_version":1,"library":"thrust","function":"sort","inputs":{"values":{"type":"vector","dtype":"f32","shape":[5],"data":[10.5,2.3,99.1,0.05,43.2]},"descending":{"type":"scalar","dtype":"bool","value":false}}}
