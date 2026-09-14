@@ -603,7 +603,8 @@ def main() -> int:
             mutation_name = mutator.__name__
             seed_to = _clean_seed_name(name)
             with mutation_log.open("a", encoding="utf-8") as log:
-                log.write(f"{seed_from},{mutation_name},{seed_to}\n")
+                #log.write(f"{seed_from},{mutation_name},{seed_to}\n")
+                log.write(f"\"{seed_from}\",{mutation_name},\"{seed_to}\"\n")
 
         # Deduplication of seeds
         counter = counter + 1
