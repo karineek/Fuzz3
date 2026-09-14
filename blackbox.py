@@ -24,7 +24,7 @@ import Fuzz3.oracles
 import Fuzz3.generators
 
 WINDOW_SIZE = int(os.environ.get("ENTROPY_WINDOW_SIZE", "1024"))
-EPSILON = float(os.environ.get("EPSILON_SIZE", "0.05"))
+EPSILON = float(os.environ.get("EPSILON_SIZE", "0.1"))
 NUMBER_OUT = float(os.environ.get("NUMBER_OUT", "-1.0"))
 MAX_CAPACITY = math.log2(WINDOW_SIZE)
 if NUMBER_OUT > 0 :
@@ -234,7 +234,7 @@ def _process_result_statistical_oracle(name, deads, _rc, results):
     else:
         raise ValueError(f"Unexpected statistical oracle result: {res_test}")
 
-    print(f"statistical {results} {_why}")
+    # print(f"statistical {results} {_why}")
     return name, deads, _rc
 
 ######################################################################################################################################################################### MAIN method
@@ -538,6 +538,7 @@ def main() -> int:
         for oracle in oracles:
             # If we already know it is an interesting one, no need to continue.
             # TODO: in the future we can compute a weighted score of how interesting the seed is.
+            print(f">> {_time_str()} (Fuzz3) {oracle.__name__} invoked!")
             if "interesting" not in name and "deadend" not in name:
                 results = oracle(seed, results_map)
                 if oracle.__name__ == "entropy_oracle":
@@ -566,6 +567,8 @@ def main() -> int:
         ## In future work, this needs to be x2 observers and oracles
         ## CRASH+HANGS ORACLES ##
         # Now check where the seed needs to go
+        print(">> (Fuzz3) Finish all Oracles calls")
+
         if _rc == 0:
             print(f">> {_time_str()} (Fuzz3) Writing to output dir {name}")
             out_path = output_dir / name
@@ -603,7 +606,8 @@ def main() -> int:
             mutation_name = mutator.__name__
             seed_to = _clean_seed_name(name)
             with mutation_log.open("a", encoding="utf-8") as log:
-                log.write(f"{seed_from},{mutation_name},{seed_to}\n")
+                #log.write(f"{seed_from},{mutation_name},{seed_to}\n")
+                log.write(f"\"{seed_from}\",{mutation_name},\"{seed_to}\"\n")
 
         # Deduplication of seeds
         counter = counter + 1
