@@ -7,14 +7,9 @@ import sys
 import os
 import resource
 
-
-
-def limit_memory():
-    max_memory = 4 * 1024 * 1024 * 1024  # 4 GB
-    resource.setrlimit(
-        resource.RLIMIT_AS,
-        (max_memory, max_memory),
-    )
+DOCKER_IMAGE = os.environ.get("DOCKER_IMAGE", "10c3cd4d4526")
+MEMORY_LIMIT_KB = 4 * 1024 * 1024  # 4 GiB
+IS_UNIX = os.environ.get("IS_UNIX", "1")
     
 # List here all the SUTs
 
@@ -39,14 +34,23 @@ def script_executor(
         return "", 300, "", "Invalid (Fuzz3)"
 
     arg_parsed = shlex.split(arguments)
-    cmd = [*arg_parsed, str(seed)]
+    #cmd = [*arg_parsed, str(seed)]
+    if IS_UNIX == "1":
+        use_shell = True
+        cmd = (f"ulimit -t {int(timeout)}; ulimit -v {MEMORY_LIMIT_KB}; "
+               f"{shlex.join([*arg_parsed, str(seed)])}")
+    else:
+        use_shell = False
+        cmd = [*arg_parsed, str(seed)]
+    
     try:
         result = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
             timeout=timeout,
-            preexec_fn=limit_memory,
+            shell=use_shell,
+            # preexec_fn=limit_memory,
         )
         return input_data, result.returncode, result.stdout.strip(), result.stderr.strip()
 
