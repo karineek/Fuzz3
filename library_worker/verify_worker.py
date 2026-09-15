@@ -6,7 +6,7 @@ import sys
 
 
 CASES = {
-    "thrust": {
+    "thrust_sort": {
         "schema_version": 1,
         "library": "thrust",
         "function": "sort",
@@ -17,6 +17,41 @@ CASES = {
                 "shape": [5],
                 "data": [10.5, 2.3, 99.1, 0.05, 43.2],
             }
+        },
+        "controls": {"repetitions": 3},
+    },
+    "thrust_reduce": {
+        "schema_version": 1,
+        "library": "thrust",
+        "function": "reduce",
+        "inputs": {
+            "values": {
+                "type": "vector",
+                "dtype": "f32",
+                "shape": [5],
+                "data": [10.5, 2.3, 99.1, 0.05, 43.2],
+            }
+        },
+        "controls": {"repetitions": 3},
+    },
+    "thrust_merge": {
+        #According to issue in the library's GH repo this function errors with large inputs
+        "schema_version": 1,
+        "library": "thrust",
+        "function": "merge",
+        "inputs": {
+            "a": {
+                "type": "vector",
+                "dtype": "f32",
+                "shape": [5],
+                "data": [5,3,6,2,3],
+            },
+            "b": {
+                "type": "vector",
+                "dtype": "f32",
+                "shape": [5],
+                "data": [1.1,5.2,4.3,8.9,8.7],
+            },
         },
         "controls": {"repetitions": 3},
     },

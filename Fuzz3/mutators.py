@@ -673,3 +673,114 @@ def library_worker_mutator(seed: Path) -> str | None:
         if result is not None:
             return result
     return None
+
+####Floating point mutators for CUDA libraries 
+
+def library_float_configuration_mutator(seed: Path) -> str | None:
+    """Change the configuration of floating points"""
+    request = _load_request(seed)
+    if request is None:
+        return None
+    candidates = []
+    for payload in _payloads(request):
+        if not isinstance(payload, dict) or payload.get("dtype") not in ("f32", "f64"):
+            continue
+        if isinstance(payload.get("data"), list) and payload["data"]:
+            candidates.append((payload["data"], payload["dtype"]))
+        elif isinstance(payload.get("value"), (int, float)):
+            candidates.append((payload, payload["dtype"]))
+    if not candidates:
+        return None
+    container, dtype = random.choice(candidates)
+    new_config = {"f32": ".1f", "f64": ".2f"}[dtype]
+    if isinstance(container, list):
+        indexes = (
+            range(len(container)) if random.choice((False, True)) else [random.randrange(len(container))]
+        )
+        for index in indexes:
+            container[index] = format(container[index],new_config)
+    else:
+        container["value"] = format(container["value"],new_config)
+    return _dump_valid_request(request)
+
+def library_float_nan_mutator(seed: Path) -> str | None:
+    """Change the configuration of floating points"""
+    request = _load_request(seed)
+    if request is None:
+        return None
+    candidates = []
+    for payload in _payloads(request):
+        if not isinstance(payload, dict) or payload.get("dtype") not in ("f32", "f64"):
+            continue
+        if isinstance(payload.get("data"), list) and payload["data"]:
+            candidates.append((payload["data"], payload["dtype"]))
+        elif isinstance(payload.get("value"), (int, float)):
+            candidates.append((payload, payload["dtype"]))
+    if not candidates:
+        return None
+    container, dtype = random.choice(candidates)
+    value = float("NaN")
+    if isinstance(container, list):
+        indexes = (
+            range(len(container)) if random.choice((False, True)) else [random.randrange(len(container))]
+        )
+        for index in indexes:
+            container[index] = value
+    else:
+        container["value"] = value
+    return _dump_valid_request(request)
+
+def library_float_pos_inf_mutator(seed: Path) -> str | None:
+    """Change the configuration of floating points"""
+    request = _load_request(seed)
+    if request is None:
+        return None
+    candidates = []
+    for payload in _payloads(request):
+        if not isinstance(payload, dict) or payload.get("dtype") not in ("f32", "f64"):
+            continue
+        if isinstance(payload.get("data"), list) and payload["data"]:
+            candidates.append((payload["data"], payload["dtype"]))
+        elif isinstance(payload.get("value"), (int, float)):
+            candidates.append((payload, payload["dtype"]))
+    if not candidates:
+        return None
+    container, dtype = random.choice(candidates)
+    value = float("Inf")
+    if isinstance(container, list):
+        indexes = (
+            range(len(container)) if random.choice((False, True)) else [random.randrange(len(container))]
+        )
+        for index in indexes:
+            container[index] = value
+    else:
+        container["value"] = value
+    return _dump_valid_request(request)
+
+def library_float_neg_inf_mutator(seed: Path) -> str | None:
+    """Change the configuration of floating points"""
+    request = _load_request(seed)
+    if request is None:
+        return None
+    candidates = []
+    for payload in _payloads(request):
+        if not isinstance(payload, dict) or payload.get("dtype") not in ("f32", "f64"):
+            continue
+        if isinstance(payload.get("data"), list) and payload["data"]:
+            candidates.append((payload["data"], payload["dtype"]))
+        elif isinstance(payload.get("value"), (int, float)):
+            candidates.append((payload, payload["dtype"]))
+    if not candidates:
+        return None
+    container, dtype = random.choice(candidates)
+    value = float("-Inf")
+    if isinstance(container, list):
+        indexes = (
+            range(len(container)) if random.choice((False, True)) else [random.randrange(len(container))]
+        )
+        for index in indexes:
+            container[index] = value
+    else:
+        container["value"] = value
+    return _dump_valid_request(request)
+
