@@ -1,8 +1,164 @@
 CPU:
 ====
+git clone https://github.com/karineek/Fuzz3.git
+cd Fuzz3/
+git checkout gpu_target
+chmod 777 *.sh
+./install.sh 
+./install-docker-cloudlab.sh
 
 
 
 
 GPU:
 ====
+git clone https://github.com/karineek/Fuzz3.git
+cd Fuzz3/
+git checkout gpu_target
+chmod 777 *.sh
+./install.sh 
+./install-docker-cloudlab.sh
+./install-gpu-cloudlab.sh 
+
+./library_worker/build-docker.sh gpu thrust
+./library_worker/build-docker.sh gpu cutlass
+---> ./library_worker/build-docker.sh gpu arrayfire <--- CURRENT ERROR
+
+```
+user43@node0:~/Fuzz3$ ./library_worker/build-docker.sh gpu thrust
+[+] Building 305.8s (16/16) FINISHED                                                                                                                                                              docker:default
+ => [internal] load build definition from Dockerfile                                                                                                                                                        0.0s
+ => => transferring dockerfile: 1.41kB                                                                                                                                                                      0.0s
+ => [internal] load metadata for docker.io/nvidia/cuda:12.4.1-devel-ubuntu22.04                                                                                                                             0.7s
+ => [internal] load .dockerignore                                                                                                                                                                           0.0s
+ => => transferring context: 147B                                                                                                                                                                           0.0s
+ => [internal] load build context                                                                                                                                                                           0.0s
+ => => transferring context: 27.16kB                                                                                                                                                                        0.0s
+ => [dependencies 1/4] FROM docker.io/nvidia/cuda:12.4.1-devel-ubuntu22.04@sha256:da6791294b0b04d7e65d87b7451d6f2390b4d36225ab0701ee7dfec5769829f5                                                        148.9s
+ => => resolve docker.io/nvidia/cuda:12.4.1-devel-ubuntu22.04@sha256:da6791294b0b04d7e65d87b7451d6f2390b4d36225ab0701ee7dfec5769829f5                                                                       0.0s
+ => => sha256:312a542960e3345001fc709156a5139ff8a1d8cc21a51a50f83e87ec2982f579 88.86kB / 88.86kB                                                                                                            0.1s
+ => => sha256:83525caeeb359731f869f1ee87a32acdfdd5efb8af4cab06d8f4fdcf1f317daa 1.52kB / 1.52kB                                                                                                              0.1s
+ => => sha256:fd9cc1ad8dee47ca559003714d462f4eb79cb6315a2708927c240b84d022b55f 1.68kB / 1.68kB                                                                                                              0.1s
+ => => sha256:47b8539d532f561cac6d7fb8ee2f46c902b66e4a60b103d19701829742a0d11e 64.05kB / 64.05kB                                                                                                            0.1s
+ => => sha256:8e79813a7b9d5784bb880ca2909887465549de5183411b24f6de72fab0802bcd 2.65GB / 2.65GB                                                                                                             53.6s
+ => => sha256:56dc8550293751a1604e97ac949cfae82ba20cb2a28e034737bafd7382559609 6.89kB / 6.89kB                                                                                                              0.0s
+ => => sha256:b71b637b97c5efb435b9965058ad414f07afa99d320cf05e89f10441ec1becf4 185B / 185B                                                                                                                  0.0s
+ => => sha256:ec6d5f6c9ed94d2ee2eeaf048d90242af638325f57696909f1737b3158d838cf 1.37GB / 1.37GB                                                                                                             27.6s
+ => => sha256:0a7674e3e8fe69dcd7f1424fa29aa033b32c42269aab46cbe9818f8dd7154754 57.59MB / 57.59MB                                                                                                            1.6s
+ => => sha256:0d6448aff88945ea46a37cfe4330bdb0ada228268b80da6258a0fec63086f404 4.62MB / 4.62MB                                                                                                              0.3s
+ => => sha256:3c645031de2917ade93ec54b118d5d3e45de72ef580b8f419a8cdc41e01d042c 29.53MB / 29.53MB                                                                                                            1.2s
+ => => extracting sha256:3c645031de2917ade93ec54b118d5d3e45de72ef580b8f419a8cdc41e01d042c                                                                                                                   3.8s
+ => => extracting sha256:0d6448aff88945ea46a37cfe4330bdb0ada228268b80da6258a0fec63086f404                                                                                                                   0.9s
+ => => extracting sha256:0a7674e3e8fe69dcd7f1424fa29aa033b32c42269aab46cbe9818f8dd7154754                                                                                                                   4.2s
+ => => extracting sha256:b71b637b97c5efb435b9965058ad414f07afa99d320cf05e89f10441ec1becf4                                                                                                                   0.2s
+ => => extracting sha256:56dc8550293751a1604e97ac949cfae82ba20cb2a28e034737bafd7382559609                                                                                                                   0.1s
+ => => extracting sha256:ec6d5f6c9ed94d2ee2eeaf048d90242af638325f57696909f1737b3158d838cf                                                                                                                  35.2s
+ => => extracting sha256:47b8539d532f561cac6d7fb8ee2f46c902b66e4a60b103d19701829742a0d11e                                                                                                                   0.0s
+ => => extracting sha256:fd9cc1ad8dee47ca559003714d462f4eb79cb6315a2708927c240b84d022b55f                                                                                                                   0.0s
+ => => extracting sha256:83525caeeb359731f869f1ee87a32acdfdd5efb8af4cab06d8f4fdcf1f317daa                                                                                                                   0.0s
+ => => extracting sha256:8e79813a7b9d5784bb880ca2909887465549de5183411b24f6de72fab0802bcd                                                                                                                  85.8s
+ => => extracting sha256:312a542960e3345001fc709156a5139ff8a1d8cc21a51a50f83e87ec2982f579                                                                                                                   0.0s
+ => [dependencies 2/4] RUN apt-get -o Acquire::Retries=3 -o Acquire::http::No-Cache=True update     && apt-get install -y --no-install-recommends         build-essential ca-certificates cmake git nlohm  26.4s
+ => [dependencies 3/4] COPY drivers/thrust/install.sh /tmp/driver-install.sh                                                                                                                                0.1s 
+ => [dependencies 4/4] RUN case "gpu" in cpu|gpu) ;; *) exit 2 ;; esac     && sh /tmp/driver-install.sh "gpu"     && rm /tmp/driver-install.sh                                                              0.5s 
+ => [driver-build 1/5] WORKDIR /fuzz_workspace                                                                                                                                                              0.0s 
+ => [driver-build 2/5] COPY common /fuzz_workspace/common                                                                                                                                                   0.0s 
+ => [driver-build 3/5] COPY drivers/thrust/build.sh /fuzz_workspace/driver/build.sh                                                                                                                         0.0s 
+ => [driver-build 4/5] COPY drivers/thrust/driver.* /fuzz_workspace/driver/                                                                                                                                 0.1s 
+ => [driver-build 5/5] RUN sh /fuzz_workspace/driver/build.sh "gpu"                                                                                                                                       110.9s
+ => [worker 2/3] COPY --from=driver-build /fuzz_workspace/native_harness /fuzz_workspace/native_harness                                                                                                     0.0s
+ => [worker 3/3] COPY forkserver.py /fuzz_workspace/forkserver.py                                                                                                                                           0.0s
+ => exporting to image                                                                                                                                                                                     17.9s
+ => => exporting layers                                                                                                                                                                                    13.4s
+ => => exporting manifest sha256:806386e65d06c89da01a42bf0bbed4f36c96cdcd5db3a29d829f2f0652491c97                                                                                                           0.0s
+ => => exporting config sha256:621532c60ced507ea7ec3170c2c1705af8920f33242af4ded2bb2be5f36db11a                                                                                                             0.0s
+ => => exporting attestation manifest sha256:05b2c1b9eb7247b68ee86670a38081108f082f6e736770476646b5bf046985b5                                                                                               0.0s
+ => => exporting manifest list sha256:31671e4d4fc249f00839ac4ff3444e1f8a73dc7011bd21a31ce2967ee1c05704                                                                                                      0.0s
+ => => naming to docker.io/library/fuzz3-worker:thrust-gpu                                                                                                                                                  0.0s
+ => => unpacking to docker.io/library/fuzz3-worker:thrust-gpu                                                                                                                                               4.3s
+Built fuzz3-worker:thrust-gpu with the thrust driver on the gpu backend
+user43@node0:~/Fuzz3$ ./library_worker/build-docker.sh gpu cutlass
+[+] Building 58.0s (16/16) FINISHED                                                                                                                                                               docker:default
+ => [internal] load build definition from Dockerfile                                                                                                                                                        0.0s
+ => => transferring dockerfile: 1.41kB                                                                                                                                                                      0.0s
+ => [internal] load metadata for docker.io/nvidia/cuda:12.4.1-devel-ubuntu22.04                                                                                                                             0.4s
+ => [internal] load .dockerignore                                                                                                                                                                           0.0s
+ => => transferring context: 147B                                                                                                                                                                           0.0s
+ => [internal] load build context                                                                                                                                                                           0.0s
+ => => transferring context: 9.92kB                                                                                                                                                                         0.0s
+ => [dependencies 1/4] FROM docker.io/nvidia/cuda:12.4.1-devel-ubuntu22.04@sha256:da6791294b0b04d7e65d87b7451d6f2390b4d36225ab0701ee7dfec5769829f5                                                          0.0s
+ => => resolve docker.io/nvidia/cuda:12.4.1-devel-ubuntu22.04@sha256:da6791294b0b04d7e65d87b7451d6f2390b4d36225ab0701ee7dfec5769829f5                                                                       0.0s
+ => CACHED [dependencies 2/4] RUN apt-get -o Acquire::Retries=3 -o Acquire::http::No-Cache=True update     && apt-get install -y --no-install-recommends         build-essential ca-certificates cmake git  0.0s
+ => [dependencies 3/4] COPY drivers/cutlass/install.sh /tmp/driver-install.sh                                                                                                                               0.0s
+ => [dependencies 4/4] RUN case "gpu" in cpu|gpu) ;; *) exit 2 ;; esac     && sh /tmp/driver-install.sh "gpu"     && rm /tmp/driver-install.sh                                                              3.8s
+ => [driver-build 1/5] WORKDIR /fuzz_workspace                                                                                                                                                              0.1s 
+ => [driver-build 2/5] COPY common /fuzz_workspace/common                                                                                                                                                   0.0s 
+ => [driver-build 3/5] COPY drivers/cutlass/build.sh /fuzz_workspace/driver/build.sh                                                                                                                        0.0s 
+ => [driver-build 4/5] COPY drivers/cutlass/driver.* /fuzz_workspace/driver/                                                                                                                                0.0s 
+ => [driver-build 5/5] RUN sh /fuzz_workspace/driver/build.sh "gpu"                                                                                                                                        37.3s 
+ => [worker 2/3] COPY --from=driver-build /fuzz_workspace/native_harness /fuzz_workspace/native_harness                                                                                                     0.0s 
+ => [worker 3/3] COPY forkserver.py /fuzz_workspace/forkserver.py                                                                                                                                           0.0s 
+ => exporting to image                                                                                                                                                                                     15.8s 
+ => => exporting layers                                                                                                                                                                                    10.5s 
+ => => exporting manifest sha256:64daec62cabc824219495d5e42c6558d6b8048d5b7aa14a5510f684824318aec                                                                                                           0.0s 
+ => => exporting config sha256:252276ca88cc9039c42cf4e15587ada813a618ad07f30e4d1189097ecf3e5d23                                                                                                             0.0s 
+ => => exporting attestation manifest sha256:a0cca3268ab523000145d2f192ee56b235f2851857b9e8d23242a8bf333d443a                                                                                               0.0s
+ => => exporting manifest list sha256:be9fae59055e175b2a4935ed984519a223e97033a427197bfe44f9eff22beab4                                                                                                      0.0s
+ => => naming to docker.io/library/fuzz3-worker:cutlass-gpu                                                                                                                                                 0.0s
+ => => unpacking to docker.io/library/fuzz3-worker:cutlass-gpu                                                                                                                                              5.1s
+Built fuzz3-worker:cutlass-gpu with the cutlass driver on the gpu backend
+user43@node0:~/Fuzz3$ 
+user43@node0:~/Fuzz3$ ./library_worker/build-docker.sh gpu arrayfire
+[+] Building 10035.3s (13/15)                                                                                                                                                                     docker:default
+ => [internal] load build definition from Dockerfile                                                                                                                                                        0.0s
+ => => transferring dockerfile: 1.41kB                                                                                                                                                                      0.0s
+ => [internal] load metadata for docker.io/nvidia/cuda:12.4.1-devel-ubuntu22.04                                                                                                                             0.3s
+ => [internal] load .dockerignore                                                                                                                                                                           0.0s
+ => => transferring context: 147B                                                                                                                                                                           0.0s
+ => [internal] load build context                                                                                                                                                                           0.0s
+ => => transferring context: 8.07kB                                                                                                                                                                         0.0s
+ => [dependencies 1/4] FROM docker.io/nvidia/cuda:12.4.1-devel-ubuntu22.04@sha256:da6791294b0b04d7e65d87b7451d6f2390b4d36225ab0701ee7dfec5769829f5                                                          0.0s
+ => => resolve docker.io/nvidia/cuda:12.4.1-devel-ubuntu22.04@sha256:da6791294b0b04d7e65d87b7451d6f2390b4d36225ab0701ee7dfec5769829f5                                                                       0.0s
+ => CACHED [dependencies 2/4] RUN apt-get -o Acquire::Retries=3 -o Acquire::http::No-Cache=True update     && apt-get install -y --no-install-recommends         build-essential ca-certificates cmake git  0.0s
+ => [dependencies 3/4] COPY drivers/arrayfire/install.sh /tmp/driver-install.sh                                                                                                                             0.0s
+ => [dependencies 4/4] RUN case "gpu" in cpu|gpu) ;; *) exit 2 ;; esac     && sh /tmp/driver-install.sh "gpu"     && rm /tmp/driver-install.sh                                                          10020.1s
+ => [driver-build 1/5] WORKDIR /fuzz_workspace                                                                                                                                                              0.2s 
+ => [driver-build 2/5] COPY common /fuzz_workspace/common                                                                                                                                                   0.0s 
+ => [driver-build 3/5] COPY drivers/arrayfire/build.sh /fuzz_workspace/driver/build.sh                                                                                                                      0.0s 
+ => [driver-build 4/5] COPY drivers/arrayfire/driver.* /fuzz_workspace/driver/                                                                                                                              0.0s 
+ => ERROR [driver-build 5/5] RUN sh /fuzz_workspace/driver/build.sh "gpu"                                                                                                                                  14.5s 
+------                                                                                                                                                                                                           
+ > [driver-build 5/5] RUN sh /fuzz_workspace/driver/build.sh "gpu":
+14.36 /usr/bin/ld: warning: libcuda.so.1, needed by /opt/arrayfire/lib/libafcuda.so, not found (try using -rpath or -rpath-link)
+14.42 /usr/bin/ld: /opt/arrayfire/lib/libafcuda.so: undefined reference to `cuEventCreate'
+14.42 /usr/bin/ld: /opt/arrayfire/lib/libafcuda.so: undefined reference to `cuLaunchKernel'
+14.42 /usr/bin/ld: /opt/arrayfire/lib/libafcuda.so: undefined reference to `cuStreamSynchronize'
+14.42 /usr/bin/ld: /opt/arrayfire/lib/libafcuda.so: undefined reference to `cuLinkComplete'
+14.42 /usr/bin/ld: /opt/arrayfire/lib/libafcuda.so: undefined reference to `cuStreamWaitEvent'
+14.42 /usr/bin/ld: /opt/arrayfire/lib/libafcuda.so: undefined reference to `cuEventSynchronize'
+14.42 /usr/bin/ld: /opt/arrayfire/lib/libafcuda.so: undefined reference to `cuModuleUnload'
+14.42 /usr/bin/ld: /opt/arrayfire/lib/libafcuda.so: undefined reference to `cuLinkDestroy'
+14.42 /usr/bin/ld: /opt/arrayfire/lib/libafcuda.so: undefined reference to `cuModuleLoadData'
+14.43 /usr/bin/ld: /opt/arrayfire/lib/libafcuda.so: undefined reference to `cuLinkCreate_v2'
+14.43 /usr/bin/ld: /opt/arrayfire/lib/libafcuda.so: undefined reference to `cuMemcpyDtoHAsync_v2'
+14.43 /usr/bin/ld: /opt/arrayfire/lib/libafcuda.so: undefined reference to `cuGetErrorName'
+14.43 /usr/bin/ld: /opt/arrayfire/lib/libafcuda.so: undefined reference to `cuModuleGetFunction'
+14.43 /usr/bin/ld: /opt/arrayfire/lib/libafcuda.so: undefined reference to `cuMemcpyHtoDAsync_v2'
+14.43 /usr/bin/ld: /opt/arrayfire/lib/libafcuda.so: undefined reference to `cuGetErrorString'
+14.43 /usr/bin/ld: /opt/arrayfire/lib/libafcuda.so: undefined reference to `cuEventRecord'
+14.43 /usr/bin/ld: /opt/arrayfire/lib/libafcuda.so: undefined reference to `cuLinkAddData_v2'
+14.43 /usr/bin/ld: /opt/arrayfire/lib/libafcuda.so: undefined reference to `cuModuleGetGlobal_v2'
+14.43 /usr/bin/ld: /opt/arrayfire/lib/libafcuda.so: undefined reference to `cuMemcpyDtoDAsync_v2'
+14.43 /usr/bin/ld: /opt/arrayfire/lib/libafcuda.so: undefined reference to `cuEventDestroy_v2'
+14.43 collect2: error: ld returned 1 exit status
+------
+Dockerfile:38
+--------------------
+  36 |     COPY drivers/${TARGET_LIBRARY}/driver.* /fuzz_workspace/driver/
+  37 |     
+  38 | >>> RUN sh /fuzz_workspace/driver/build.sh "$BACKEND"
+  39 |     
+  40 |     FROM dependencies AS worker
+--------------------
+ERROR: failed to build: failed to solve: process "/bin/sh -c sh /fuzz_workspace/driver/build.sh \"$BACKEND\"" did not complete successfully: exit code: 1
+```
