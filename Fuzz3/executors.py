@@ -72,10 +72,13 @@ def docker_executor(
     command = shlex.split(arguments) if arguments else DEFAULT_DOCKER_COMMAND
     container = os.environ.get("DOCKER_CONTAINER", "fuzz3-worker")
     docker_command = ["docker", "exec", "-i"]
-    if "FUZZ3_MAX_CHAIN_DEPTH" in os.environ:
-        docker_command.extend(
-            ["-e", f"FUZZ3_MAX_CHAIN_DEPTH={os.environ['FUZZ3_MAX_CHAIN_DEPTH']}"]
-        )
+    for name in (
+        "FUZZ3_MAX_CHAIN_DEPTH",
+        "HARNESS_TIMEOUT_SEC",
+        "HARNESS_MAX_TIMEOUT_SEC",
+    ):
+        if name in os.environ:
+            docker_command.extend(["-e", f"{name}={os.environ[name]}"])
     docker_command.extend([container, *command])
     try:
         result = subprocess.run(

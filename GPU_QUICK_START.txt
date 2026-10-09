@@ -1,0 +1,103 @@
+Fuzz3 CPU/GPU CloudLab quick start
+==================================
+
+For CloudLab node c240g5-110201.wisc.cloudlab.us:
+- GPU: Tesla P100-PCIE-12GB
+- Driver: NVIDIA 580.178.04
+- Worker CUDA base image: nvidia/cuda:12.4.1-devel-ubuntu22.04
+
+CPU setup
+=========
+
+git clone https://github.com/karineek/Fuzz3.git
+cd Fuzz3
+git checkout gpu_target
+chmod +x *.sh library_worker/*.sh library_worker/drivers/*/*.sh SUT/*.sh
+
+./install.sh
+source .venv/bin/activate
+
+./install-docker-cloudlab.sh
+
+docker run hello-world
+
+GPU setup
+=========
+
+git clone https://github.com/karineek/Fuzz3.git
+cd Fuzz3
+git checkout gpu_target
+chmod +x *.sh library_worker/*.sh library_worker/drivers/*/*.sh SUT/*.sh
+
+./install.sh
+source .venv/bin/activate
+
+./install-gpu-cloudlab.sh
+
+nvidia-smi
+docker run --rm --gpus all nvidia/cuda:12.4.1-base-ubuntu22.04 nvidia-smi
+
+CUDA/driver notes
+===========================
+
+Do not install nvidia-driver-470-server for this. The worker images use CUDA 12.4, so the host needs a modern NVIDIA driver that supports CUDA 12.x.
+The CloudLab node worked with driver 580.178.04.
+
+Build GPU worker images
+=======================
+
+Run these from the repository root:
+
+DOCKER_BUILDKIT=1 ./library_worker/build-docker.sh gpu thrust
+DOCKER_BUILDKIT=1 ./library_worker/build-docker.sh gpu cutlass
+DOCKER_BUILDKIT=1 BUILD_JOBS=4 CUDA_ARCHITECTURES=60 CUDA_ARCHITECTURE_TARGETS=6.0 \
+  ./library_worker/build-docker.sh gpu arrayfire
+
+ArrayFire details:
+
+- ArrayFire builds from source, so the first build is slow.
+- On Tesla P100, use CUDA_ARCHITECTURE_TARGETS=6.0.
+- CUDA_ARCHITECTURES=60 is also passed for CMake's CUDA architecture setting.
+- The harness build links against /usr/local/cuda/lib64/stubs/libcuda.so during
+  Docker build. At runtime it uses the real host driver through --gpus all.
+
+Smoke tests
+===========
+
+python3 library_worker/verify_worker.py fuzz3-worker:thrust-gpu --library thrust --gpu
+python3 library_worker/verify_worker.py fuzz3-worker:cutlass-gpu --library cutlass --gpu
+python3 library_worker/verify_worker.py fuzz3-worker:arrayfire-gpu --library arrayfire --gpu
+
+All three should exit 0 and print JSON with "status": "success" in the
+"execution" block.
+
+
+Create persistent GPU containers for fuzzing
+============================================
+
+docker create -i --gpus all --entrypoint python3 --name thrust-gpu \
+  fuzz3-worker:thrust-gpu -u /fuzz_workspace/forkserver.py
+
+docker create -i --gpus all --entrypoint python3 --name cutlass-gpu \
+  fuzz3-worker:cutlass-gpu -u /fuzz_workspace/forkserver.py
+
+docker create -i --gpus all --entrypoint python3 --name arrayfire-gpu \
+  fuzz3-worker:arrayfire-gpu -u /fuzz_workspace/forkserver.py
+
+Run generated fuzzing jobs
+==========================
+
+Use HARNESS_TIMEOUT_SEC=30 on the P100. Thrust can take longer than the old
+5 second default on first CUDA work.
+
+FUZZ3_SEEDS=200 FUZZ3_MAX_CHAIN_DEPTH=2 HARNESS_TIMEOUT_SEC=30 HARNESS_MAX_TIMEOUT_SEC=30 \
+  ./SUT/fuzz-library-worker.sh /tmp/thrust-seeds /tmp/thrust-out /tmp/thrust-crashes \
+  1000 thrust-gpu thrust all
+
+FUZZ3_SEEDS=200 FUZZ3_MAX_CHAIN_DEPTH=2 HARNESS_TIMEOUT_SEC=30 HARNESS_MAX_TIMEOUT_SEC=30 \
+  ./SUT/fuzz-library-worker.sh /tmp/cutlass-seeds /tmp/cutlass-out /tmp/cutlass-crashes \
+  1000 cutlass-gpu cutlass all
+
+FUZZ3_SEEDS=200 FUZZ3_MAX_CHAIN_DEPTH=2 HARNESS_TIMEOUT_SEC=30 HARNESS_MAX_TIMEOUT_SEC=30 \
+  ./SUT/fuzz-library-worker.sh /tmp/arrayfire-seeds /tmp/arrayfire-out /tmp/arrayfire-crashes \
+  1000 arrayfire-gpu arrayfire all

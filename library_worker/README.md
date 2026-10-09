@@ -51,7 +51,8 @@ Run the build script from the repository root:
 ./library_worker/build-docker.sh gpu thrust
 
 ./library_worker/build-docker.sh cpu arrayfire
-./library_worker/build-docker.sh gpu arrayfire
+DOCKER_BUILDKIT=1 BUILD_JOBS=4 CUDA_ARCHITECTURES=60 CUDA_ARCHITECTURE_TARGETS=6.0 \
+  ./library_worker/build-docker.sh gpu arrayfire
 
 ./library_worker/build-docker.sh cpu cutlass
 ./library_worker/build-docker.sh gpu cutlass
@@ -75,6 +76,20 @@ ARRAYFIRE_REF=v3.9.0 CUTLASS_REF=v3.5.1 BUILD_JOBS=4 \
 
 `CPU_BASE_IMAGE` and `GPU_BASE_IMAGE` can override the default Ubuntu 22.04 and
 CUDA 12.4.1 development images.
+
+For ArrayFire GPU builds, `CUDA_ARCHITECTURES` and
+`CUDA_ARCHITECTURE_TARGETS` restrict the CUDA architectures compiled into
+ArrayFire. The CloudLab Tesla P100 uses compute capability 6.0, so use:
+
+```sh
+DOCKER_BUILDKIT=1 BUILD_JOBS=4 CUDA_ARCHITECTURES=60 CUDA_ARCHITECTURE_TARGETS=6.0 \
+  ./library_worker/build-docker.sh gpu arrayfire
+```
+
+Without this, ArrayFire may compile a broad set of CUDA architectures and take
+hours on the CloudLab node. The GPU build links the native harness against the
+CUDA driver stub inside the container; at runtime the real host driver is
+provided by `docker run --gpus all` or `docker create --gpus all`.
 
 ## Request protocol
 
@@ -164,13 +179,23 @@ docker create -i --name thrust-cpu fuzz3-worker:thrust-cpu
 For a GPU worker, add the NVIDIA runtime option:
 
 ```sh
-docker create -i --gpus all --name thrust-gpu fuzz3-worker:thrust-gpu
+docker create -i --gpus all --entrypoint python3 --name thrust-gpu \
+  fuzz3-worker:thrust-gpu -u /fuzz_workspace/forkserver.py
 ```
 
 The same launcher supports both backends:
 
 ```sh
 ./SUT/fuzz-library-worker.sh /tmp/thrust-seeds /tmp/thrust-out /tmp/thrust-crashes 1000 thrust-cpu thrust sort
+```
+
+On the CloudLab P100, give native GPU executions more than the 5 second default
+because first CUDA work can be slow:
+
+```sh
+FUZZ3_SEEDS=200 FUZZ3_MAX_CHAIN_DEPTH=2 HARNESS_TIMEOUT_SEC=30 HARNESS_MAX_TIMEOUT_SEC=30 \
+  ./SUT/fuzz-library-worker.sh /tmp/thrust-seeds /tmp/thrust-out /tmp/thrust-crashes \
+  1000 thrust-gpu thrust all
 ```
 
 The final function argument may be `all` to generate requests for every function

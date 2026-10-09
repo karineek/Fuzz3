@@ -8,6 +8,9 @@ Fuzz3 is a language-agnostic black-box fuzzing framework that uses entropy on th
 
 The numerical-library extension enables Fuzz3 to test Thrust, ArrayFire, and CUTLASS in containerised CPU and GPU environments. See the [modular library worker](library_worker/README.md) for supported operations, request formats, and build instructions.
 
+For a command-by-command CloudLab setup, including the verified GPU worker build
+and smoke-test flow, see [GPU_QUICK_START.txt](GPU_QUICK_START.txt).
+
 Abstract. Fuzz testing finds security issues and improves robustness; however, it has only two implicit test oracles: timeout and crash. 
 Information theory gives a third: entropy, which is generic, low-cost and widely applicable. 
 Fuzz3 is programming language agnostic, treating software as a black box, searching its input space based on entropy distributions. 

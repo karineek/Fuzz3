@@ -13,6 +13,8 @@ if [ "$1" = "gpu" ]; then
     cmake -S /tmp/arrayfire -B /tmp/arrayfire/build \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=/opt/arrayfire \
+        -DCMAKE_CUDA_ARCHITECTURES="${CUDA_ARCHITECTURES:-60}" \
+        -DCUDA_architecture_build_targets="${CUDA_ARCHITECTURE_TARGETS:-6.0}" \
         -DAF_BUILD_CPU=OFF -DAF_BUILD_CUDA=ON \
         -DAF_BUILD_OPENCL=OFF -DAF_BUILD_ONEAPI=OFF \
         -DAF_BUILD_EXAMPLES=OFF -DAF_BUILD_FORGE=OFF -DBUILD_TESTING=OFF

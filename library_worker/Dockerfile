@@ -16,10 +16,14 @@ ARG TARGET_LIBRARY=thrust
 ARG CUTLASS_REF=v3.5.1
 ARG ARRAYFIRE_REF=v3.9.0
 ARG BUILD_JOBS=2
+ARG CUDA_ARCHITECTURES=60
+ARG CUDA_ARCHITECTURE_TARGETS=6.0
 
 ENV CUTLASS_REF=${CUTLASS_REF} \
     ARRAYFIRE_REF=${ARRAYFIRE_REF} \
-    BUILD_JOBS=${BUILD_JOBS}
+    BUILD_JOBS=${BUILD_JOBS} \
+    CUDA_ARCHITECTURES=${CUDA_ARCHITECTURES} \
+    CUDA_ARCHITECTURE_TARGETS=${CUDA_ARCHITECTURE_TARGETS}
 
 COPY drivers/${TARGET_LIBRARY}/install.sh /tmp/driver-install.sh
 
@@ -44,4 +48,5 @@ WORKDIR /fuzz_workspace
 COPY --from=driver-build /fuzz_workspace/native_harness /fuzz_workspace/native_harness
 COPY forkserver.py /fuzz_workspace/forkserver.py
 
+ENTRYPOINT []
 CMD ["python3", "-u", "/fuzz_workspace/forkserver.py"]

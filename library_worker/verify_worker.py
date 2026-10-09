@@ -18,7 +18,7 @@ CASES = {
                 "data": [10.5, 2.3, 99.1, 0.05, 43.2],
             }
         },
-        "controls": {"repetitions": 3},
+        "controls": {"repetitions": 3, "timeout_sec": 30},
     },
     "thrust_reduce": {
         "schema_version": 1,
@@ -112,10 +112,10 @@ def main():
     parser.add_argument("--gpu", action="store_true")
     args = parser.parse_args()
 
-    command = ["docker", "run", "--rm", "-i"]
+    command = ["docker", "run", "--rm", "-i", "--entrypoint", "python3"]
     if args.gpu:
         command.extend(["--gpus", "all"])
-    command.append(args.image)
+    command.extend([args.image, "-u", "/fuzz_workspace/forkserver.py"])
     worker = subprocess.Popen(
         command,
         stdin=subprocess.PIPE,

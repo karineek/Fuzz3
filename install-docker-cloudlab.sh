@@ -1,25 +1,24 @@
-# Tested on many CPUs
-# GPUs: c4130
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Tested on CloudLab CPU and GPU nodes.
 sudo apt-get update
 
-# Fix the users
-sudo groupadd docker
-sudo usermod -aG docker $(whoami)
-
 # Install docker
-sudo apt install apt-transport-https curl gnupg-agent ca-certificates software-properties-common -y
-sudo apt install docker.io
+sudo apt-get install -y apt-transport-https curl gnupg-agent ca-certificates software-properties-common
+sudo apt-get install -y docker.io docker-buildx
+
+sudo groupadd -f docker
+sudo usermod -aG docker "$(whoami)"
 sudo systemctl stop docker
 sudo systemctl stop docker.socket
 sudo systemctl stop containerd
 sudo systemctl start docker
 
 docker --version
-groups $(whoami)
+groups "$(whoami)"
 sudo chmod 666 /var/run/docker.sock
 docker run hello-world
 
-# Needed for the parameterised dockers
-sudo apt-get install -y docker-buildx
-
-echo ">> To build image run: docker build -t dockerfuzzer ."
+echo ">> Docker is ready. If docker access fails in a new shell, log out/in or rerun:"
+echo ">>   sudo chmod 666 /var/run/docker.sock"
