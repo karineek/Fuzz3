@@ -19,7 +19,50 @@ source .venv/bin/activate
 
 ./install-docker-cloudlab.sh
 
-docker run hello-world
+DOCKER_BUILDKIT=1 ./library_worker/build-docker.sh cpu thrust
+DOCKER_BUILDKIT=1 ./library_worker/build-docker.sh cpu cutlass
+DOCKER_BUILDKIT=1 BUILD_JOBS=4 CUDA_ARCHITECTURES=60 CUDA_ARCHITECTURE_TARGETS=6.0 \
+  ./library_worker/build-docker.sh cpu arrayfire
+
+python3 library_worker/verify_worker.py fuzz3-worker:thrust-cpu --library thrust_merge
+python3 library_worker/verify_worker.py fuzz3-worker:cutlass-cpu --library cutlass
+python3 library_worker/verify_worker.py fuzz3-worker:arrayfire-cpu --library arrayfire
+
+
+docker create -i --entrypoint python3 --name thrust-cpu \
+  fuzz3-worker:thrust-cpu -u /fuzz_workspace/forkserver.py
+
+docker create -i --entrypoint python3 --name cutlass-cpu \
+  fuzz3-worker:cutlass-cpu -u /fuzz_workspace/forkserver.py
+
+docker create -i --entrypoint python3 --name arrayfire-cpu \
+  fuzz3-worker:arrayfire-cpu -u /fuzz_workspace/forkserver.py
+
+FUZZ3_SEEDS=200 FUZZ3_MAX_CHAIN_DEPTH=2 HARNESS_TIMEOUT_SEC=30 HARNESS_MAX_TIMEOUT_SEC=30 \
+  ./SUT/fuzz-library-worker.sh /tmp/thrust-seeds /tmp/thrust-out /tmp/thrust-crashes \
+  1000 thrust-cpu thrust all
+
+Result:
+```
+(.venv) kevenmen@node0:~/Fuzz3$ FUZZ3_SEEDS=200 FUZZ3_MAX_CHAIN_DEPTH=2 HARNESS_TIMEOUT_SEC=30 HARNESS_MAX_TIMEOUT_SEC=30 \
+  ./SUT/fuzz-library-worker.sh /tmp/thrust-seeds /tmp/thrust-out /tmp/thrust-crashes \
+  1000 thrust-cpu thrust all
+>> [12:26:01] (Fuzz3) Parsing input arguments
+>> (Fuzz3) Start
+>> (Fuzz3) Generate 200 seeds into output folder
+>> (Fuzz3) Copy good seeds into output folder
+>> (Fuzz3) Init. seeds are not good. Entropy in 7.643856189774741 is near entropy out 7.613856189774741. Exiting.
+(.venv) kevenmen@node0:~/Fuzz3$ 
+```
+
+FUZZ3_SEEDS=200 FUZZ3_MAX_CHAIN_DEPTH=2 HARNESS_TIMEOUT_SEC=30 HARNESS_MAX_TIMEOUT_SEC=30 \
+  ./SUT/fuzz-library-worker.sh /tmp/cutlass-seeds /tmp/cutlass-out /tmp/cutlass-crashes \
+  1000 cutlass-cpu cutlass all
+
+
+
+
+
 
 GPU setup
 =========
