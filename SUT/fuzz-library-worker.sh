@@ -30,6 +30,8 @@ if ! docker exec "$DOCKER_CONTAINER" sh -lc ':' >/dev/null 2>&1; then
     exit 1
 fi
 
+echo >> ">> Runnng with Docker $DOCKER_CONTAINER. Was this the docker you wanted to run?"
+
 python3 "$script_dir/../blackbox.py" \
     -i "$inseed" -o "$out" -c "$crash" \
     --executor docker_executor \
