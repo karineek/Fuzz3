@@ -219,3 +219,51 @@ def library_worker_generator(seedsno: int, outputfolder: Path) -> int:
 
 def sort_generator_legal(seedsno: int, outputfolder: Path) -> int:
     return _generate_requests(seedsno, outputfolder, "thrust", ("sort",), max_depth=1)
+
+
+# another generator to avoid the error of entropy gap is too low
+def sort_generator_diverse(seedsno: int, outputfolder: Path) -> int:
+    outputfolder.mkdir(parents=True, exist_ok=True)
+
+    patterns = (
+        lambda n: [0.0] * n,
+        lambda n: list(range(n)),
+        lambda n: list(range(n, 0, -1)),
+        lambda n: [float(i % 4) for i in range(n)],
+        lambda n: [(-1.0) ** i for i in range(n)],
+    )
+
+    sizes = (1, 2, 8, 16, 32, 64, 128, 256)
+
+    for index in range(max(0, seedsno)):
+        size = sizes[index % len(sizes)]
+        pattern = patterns[(index // len(sizes)) % len(patterns)]
+
+        values = pattern(size)
+
+        request = {
+            "schema_version": 1,
+            "library": "thrust",
+            "function": "sort",
+            "inputs": {
+                "values": {
+                    "type": "vector",
+                    "dtype": "f32",
+                    "shape": [size],
+                    "data": values,
+                }
+            },
+        }
+
+        path = outputfolder / f"fuzz3_thrust_sort_diverse_{index}.json"
+        path.write_text(
+            json.dumps(
+                request,
+                sort_keys=True,
+                separators=(",", ":"),
+                allow_nan=False,
+            ),
+            encoding="utf-8",
+        )
+
+    return max(0, seedsno)
