@@ -56,6 +56,58 @@ def entropy_oracle(seed, results_map: dict[str, tuple[str, str]]):
     return -entropy_input, -entropy_output, len(distribution), n
 
 
+# Version 1: we calculate local entropy
+def local_entropy_oracle(seed, results_map: dict[str, tuple[str, str]]):
+    # Check which observer we used.
+    if "local_entropy_observer" in results_map:
+        data = results_map["local_entropy_observer"]
+    else:
+        raise ValueError("No entropy observer data found")
+
+    inputs = data[0]
+    outputs = data[1]
+    n = 0
+    for run_input in reversed(inputs):
+        if n == 1024 or run_input != inputs[-1]:
+            break
+        n += 1
+    if n > len(outputs):
+        return 0, 0, 0, 0
+    inputs = list(inputs)[len(inputs) - n:]
+    outputs = list(outputs)[len(outputs) - n:]
+
+    ####################################
+    # Then we compute entropy as before:
+    ####################################
+    
+    # Then the code as is!
+    distribution = Counter(outputs)
+    probabilities_output = []
+    entropy_prob_output = []
+
+    distribution_inputs = Counter(inputs)
+    probabilities_inputs = []
+    entropy_prob_inputs = []
+
+    for i in set(outputs):
+        count = distribution.get(i)
+        probability_i = count / n
+        probabilities_output.append(probability_i)
+        entropy_prob_output.append(probability_i * math.log2(probability_i))
+
+    for i in set(inputs):
+        count = distribution_inputs.get(i)
+        probability_j = count / n
+        probabilities_inputs.append(probability_j)
+        entropy_prob_inputs.append(probability_j * math.log2(probability_j))
+
+    entropy_output = sum(entropy_prob_output)
+    entropy_input = sum(entropy_prob_inputs)
+    return -entropy_input, -entropy_output, len(distribution), n
+
+# Version 2: we return statistical results 
+# TODO
+
 ################################################################
 # Debugging of the statistical oracles: https://colab.research.google.com/drive/1Wwwht85zu_HHAsIbhhjjIA1O55BCvLsz?usp=sharing
 
