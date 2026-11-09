@@ -62,7 +62,7 @@ def local_entropy_oracle(seed, results_map: dict[str, tuple[str, str]]):
     if "local_entropy_observer" in results_map:
         data = results_map["local_entropy_observer"]
     else:
-        raise ValueError("No entropy observer data found")
+        raise ValueError("No local entropy observer data found")
 
     inputs = data[0]
     outputs = data[1]
@@ -105,8 +105,33 @@ def local_entropy_oracle(seed, results_map: dict[str, tuple[str, str]]):
     entropy_input = sum(entropy_prob_inputs)
     return -entropy_input, -entropy_output, len(distribution), n
 
+
 # Version 2: we return statistical results 
-# TODO
+def local_majority_oracle(seed, results_map: dict[str, tuple[str, str]]):
+    # Check which observer we used.
+    if "local_entropy_observer" in results_map:
+        data = results_map["local_entropy_observer"]
+    else:
+        raise ValueError("No local entropy observer data found")
+
+    inputs = data[0]
+    outputs = data[1]
+    n = 0
+    for run_input in reversed(inputs):
+        if n == 1024 or run_input != inputs[-1]:
+            break
+        n += 1
+    if n > len(outputs):
+        return -1 # Dead-end case, something went wrong.
+
+    # Continue if all okay
+    outputs = list(outputs)[len(outputs) - n:]
+    if not outputs:
+        return -2 # Something went wrong internally.
+    values = [float(output) for output in outputs]
+    delta = math.exp(-4)
+    return 0 if math.isclose(min(values), max(values), rel_tol=delta) else 1
+
 
 ################################################################
 # Debugging of the statistical oracles: https://colab.research.google.com/drive/1Wwwht85zu_HHAsIbhhjjIA1O55BCvLsz?usp=sharing
