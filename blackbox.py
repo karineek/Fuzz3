@@ -116,7 +116,7 @@ def parse_args():
 ######################################################################################################################################################################### _dedup_seeds method
 # This code is taken from a different project on ECU fuzzing of Karine. It should work here as is. 29/04/2026
 def _dedup_seeds(folder: Path) -> int:
-    """Remove duplicate seed files. Returns number of duplicates removed."""
+    """Remove duplicate seed files. Returns the number of duplicates removed."""
     result = subprocess.run(
         ["fdupes", "-r", "-N", str(folder)],
         capture_output=True,
@@ -544,10 +544,14 @@ def main() -> int:
 
         # Observers
         for observer in observers:
-            _map_in, _map_out = observer(_input, (_rc, _out, _err))
-            results_map[observer.__name__] = (_map_in, _map_out)
-            #print(f"observer({_input}, ({_rc}, {_out}, {_err}) _map_in {_map_in}")
-            #print(f"observer({_input}, ({_rc}, {_out}, {_err}) _map_out {_map_out}")
+            if observer.__name__ == "local_entropy_observer":
+                for _input, _rc, _out, _err in runs:
+                    _map_in, _map_out = observer(_input, (_rc, _out, _err))
+            else:
+                _map_in, _map_out = observer(_input, (_rc, _out, _err))
+                results_map[observer.__name__] = (_map_in, _map_out)
+                #print(f"observer({_input}, ({_rc}, {_out}, {_err}) _map_in {_map_in}")
+                #print(f"observer({_input}, ({_rc}, {_out}, {_err}) _map_out {_map_out}")
 
         # Oracles
         for oracle in oracles:
@@ -557,14 +561,12 @@ def main() -> int:
                 results = oracle(seed, results_map)
                 if oracle.__name__ == "entropy_oracle":
                     if result_entropy_prev is not None:
-                        name, _why, deads, result_entropy_prev = _process_result_entropy_oracle(name, deads, results, result_entropy_prev)
-                #elif oracle._name__ == "local_entropy_oracle":
-                #    if runs is not None:
-                #        name, _why, deads, result_entropy_prev = _process_result_entropy_oracle(name, deads, results, runs)             
+                        name, _why, deads, result_entropy_prev = _process_result_entropy_oracle(name, deads, results, result_entropy_prev)          
                 elif oracle.__name__ in {
                         "KL_statistical_oracle",
                         "chi_square_statistical_oracle",
                         "jensenshannon_statistical_oracle",
+                        "local_entropy_oracle",
                     } or oracle.__name__.endswith(postfix_oracle_name):
                     name, deads, _rc = _process_result_statistical_oracle(name, deads, _rc, results)
                 else:
