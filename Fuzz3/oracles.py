@@ -128,9 +128,7 @@ def local_majority_oracle(seed, results_map: dict[str, tuple[str, str]]):
     outputs = list(outputs)[len(outputs) - n:]
     if not outputs:
         return -2 # Something went wrong internally.
-    values = [float(output) for output in outputs]
-    delta = math.exp(-4)
-    return 0 if math.isclose(min(values), max(values), rel_tol=delta) else 1
+    return 0 if all(output == outputs[0] for output in outputs) else 1
 
 
 ################################################################
