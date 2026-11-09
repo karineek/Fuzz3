@@ -40,6 +40,7 @@ python3 "$script_dir/../blackbox.py" \
     --mutators library_worker_mutator \
     --distribution-size 10 \
     --observers entropy_sliding_window_observer local_entropy_observer statistical_sliding_window_observer \
-    --oracles local_entropy_oracle jensenshannon_statistical_oracle entropy_oracle \
-              KL_statistical_oracle chi_square_statistical_oracle wilcoxon_statistical_oracle \
+    --oracles entropy_oracle \
+              local_majority_oracle local_entropy_oracle \
+              jensenshannon_statistical_oracle KL_statistical_oracle chi_square_statistical_oracle wilcoxon_statistical_oracle \
     --iterations "$iterations"
