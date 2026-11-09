@@ -51,7 +51,7 @@ def parse_args():
     
     parser.add_argument("--executor", required=True)
     parser.add_argument("--executor-args", default="")
-    parser.add_argument("--distribution-size", default=0, required=True)
+    parser.add_argument("--distribution-size", type=int, default=0, required=True)
 
     parser.add_argument(
         "--mutation-log",
