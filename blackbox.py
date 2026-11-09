@@ -51,6 +51,7 @@ def parse_args():
     
     parser.add_argument("--executor", required=True)
     parser.add_argument("--executor-args", default="")
+    parser.add_argument("--distribution-size", default=0, required=True)
 
     parser.add_argument(
         "--mutation-log",
@@ -261,6 +262,11 @@ def main() -> int:
         print(f">> (Fuzz3:ERROR) --statistical-oracle-postfix {postfix_oracle_name} must have a length greater than 4.  If you are unsure what this argument is, please remove it from the fuzzing invocation call.")
         return 1
 
+    distribution_size=args.distribution_size
+    if (distribution_size < 0):
+        print(f">> (Fuzz3:Info) --distribution-size is less than zero. Setting --distribution-size to zero.")
+        distribution_size=0
+        
     # ================================================================
     #                        ---> REPLAY <---
     # ================================================================
@@ -518,7 +524,16 @@ def main() -> int:
         tmp_path = Path(tmp.name)
         name = f"fuzz3_{int(time.time_ns())}"
 
-        _input, _rc, _out, _err = executor(arguments, tmp_path, args.timeout)
+        if (distribution_size < 1): # Run as normal, single execution.
+            _input, _rc, _out, _err = executor(arguments, tmp_path, args.timeout)
+        else:
+            runs = []
+            for _ in range(distribution_size):
+                _input, _rc, _out, _err = executor(arguments, tmp_path, args.timeout)
+                if _rc == 300:
+                    break
+                runs.append((_input, _rc, _out, _err))
+
         if _rc == 300: 
             tmp_path.unlink(missing_ok=True) # Should have never reached the output folder! + skip observer
             continue # Not a real bug, skip this
@@ -543,6 +558,9 @@ def main() -> int:
                 if oracle.__name__ == "entropy_oracle":
                     if result_entropy_prev is not None:
                         name, _why, deads, result_entropy_prev = _process_result_entropy_oracle(name, deads, results, result_entropy_prev)
+                #elif oracle._name__ == "local_entropy_oracle":
+                #    if runs is not None:
+                #        name, _why, deads, result_entropy_prev = _process_result_entropy_oracle(name, deads, results, runs)             
                 elif oracle.__name__ in {
                         "KL_statistical_oracle",
                         "chi_square_statistical_oracle",
