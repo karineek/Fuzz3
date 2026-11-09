@@ -52,6 +52,20 @@ def entropy_sliding_window_observer(input: str, sample: tuple[int, str, str]) ->
     #print(f">> (FUZZ3, Observer) data size is {len(entropy_sliding_window_observer.outputs)}")
     return entropy_sliding_window_observer.inputs, entropy_sliding_window_observer.outputs
 
+def local_entropy_observer(input: str, sample: tuple[int, str, str]) -> list[str]:
+    if WINDOW_SIZE < 2:
+        raise ValueError("Window size must be at least 2")
+    # Use the function name itself to store the attribute
+    if not hasattr(local_entropy_observer, "inputs"):
+        local_entropy_observer.inputs = deque(maxlen=WINDOW_SIZE)
+    if not hasattr(local_entropy_observer, "outputs"):
+        local_entropy_observer.outputs = deque(maxlen=WINDOW_SIZE)
+    # store data
+    local_entropy_observer.inputs.append(input)
+    # We just keep the valid answer, or if empty, the error!
+    sample_data = sample[1] if sample[1] else sample[2]
+    local_entropy_observer.outputs.append(sample_data)    
+    return local_entropy_observer.inputs, local_entropy_observer.outputs
 
 # Statistical observer, used when the results are a distribution or are expected to be drawn from a distribution
 def statistical_observer(input: str, sample: tuple[int, str, str]) -> list[str]: 
