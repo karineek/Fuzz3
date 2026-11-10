@@ -562,11 +562,16 @@ def main() -> int:
                 if oracle.__name__ == "entropy_oracle":
                     if result_entropy_prev is not None:
                         name, _why, deads, result_entropy_prev = _process_result_entropy_oracle(name, deads, results, result_entropy_prev)          
+                elif oracle.__name__ == "ocal_entropy_oracle":
+                   _, output_entropy, _, _ = results
+                   if _rc == 0 and output_entropy > 0.0:
+                       name += "_interesting"
+                       deads = 0  
                 elif oracle.__name__ in {
                         "KL_statistical_oracle",
                         "chi_square_statistical_oracle",
                         "jensenshannon_statistical_oracle",
-                        "local_entropy_oracle",
+                        "local_majority_oracle",
                     } or oracle.__name__.endswith(postfix_oracle_name):
                     name, deads, _rc = _process_result_statistical_oracle(name, deads, _rc, results)
                 else:
