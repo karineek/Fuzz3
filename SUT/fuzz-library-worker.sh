@@ -14,6 +14,7 @@ iterations=$4
 container=$5
 library=${6:-thrust}
 function=${7:-sort}
+extragen=$8 # e.g. sort_generator_diverse fpr thrust
 
 export DOCKER_CONTAINER="$container"
 export FUZZ3_LIBRARY="$library"
@@ -35,7 +36,7 @@ echo ">> Runnng with Docker $DOCKER_CONTAINER. Was this the docker you wanted to
 python3 "$script_dir/../blackbox.py" \
     -i "$inseed" -o "$out" -c "$crash" \
     --executor docker_executor \
-    --generators library_worker_generator \
+    --generators library_worker_generator $extragen \
     --seedsno "${FUZZ3_SEEDS:-200}" \
     --mutators library_worker_mutator \
     --distribution-size 10 \
