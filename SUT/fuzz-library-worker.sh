@@ -1,8 +1,8 @@
 #!/bin/sh
 set -eu
 
-if [ "$#" -lt 5 ] || [ "$#" -gt 7 ]; then
-    echo "Usage: $0 <seeds> <output> <crashes> <iterations> <container> [library] [function|all]" >&2
+if [ "$#" -lt 5 ] || [ "$#" -gt 8 ]; then
+    echo "Usage: $0 <seeds> <output> <crashes> <iterations> <container> [library] [function|all] [Extra Generators|None]" >&2
     exit 2
 fi
 
