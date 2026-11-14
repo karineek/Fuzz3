@@ -14,7 +14,7 @@ iterations=$4
 container=$5
 library=${6:-thrust}
 function=${7:-sort}
-extragen=$8 # e.g. sort_generator_diverse fpr thrust
+extragen=$8 # e.g. sort_generator_diverse, for thrust
 
 export DOCKER_CONTAINER="$container"
 export FUZZ3_LIBRARY="$library"
