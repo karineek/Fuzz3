@@ -55,9 +55,11 @@ Result:
 (.venv) kevenmen@node0:~/Fuzz3$ 
 ```
 
-FUZZ3_SEEDS=200 FUZZ3_MAX_CHAIN_DEPTH=2 HARNESS_TIMEOUT_SEC=30 HARNESS_MAX_TIMEOUT_SEC=30 \
-  ./SUT/fuzz-library-worker.sh /tmp/cutlass-seeds /tmp/cutlass-out /tmp/cutlass-crashes \
-  1000 cutlass-cpu cutlass all
+===== Othere Libraries on CPU ? ======
+
+TODO:
+
+
 
 
 
