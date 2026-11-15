@@ -208,6 +208,12 @@ def _statistical_oracle(seed, results_map: dict[str, tuple[str, str]], func):
     # Newly executed mutant
     output_after = outputs[-1]
 
+    # For GPU execution
+    if isinstance(output_before, dict) and "data" in output_before:
+        output_before = output_before["data"]
+    if isinstance(output_after, dict) and "data" in output_after:
+        output_after = output_after["data"]
+        
     p, q = _align_distributions(output_before, output_after)
     if p is None or q is None:
         return output_before, output_after, -1, 0
