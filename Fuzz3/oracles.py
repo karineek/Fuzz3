@@ -211,8 +211,13 @@ def _statistical_oracle(seed, results_map: dict[str, tuple[str, str]], func):
     # For GPU execution
     if isinstance(output_before, dict) and "data" in output_before:
         output_before = output_before["data"]
+    elif isinstance(output_before, dict) and "value" in output_before:
+        output_before = [output_before["value"]]
+        
     if isinstance(output_after, dict) and "data" in output_after:
         output_after = output_after["data"]
+    elif isinstance(output_after, dict) and "value" in output_after:
+        output_before = [output_after["value"]]
         
     p, q = _align_distributions(output_before, output_after)
     if p is None or q is None:
