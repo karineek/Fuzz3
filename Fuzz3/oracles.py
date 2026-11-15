@@ -211,7 +211,11 @@ def _statistical_oracle(seed, results_map: dict[str, tuple[str, str]], func):
     p, q = _align_distributions(output_before, output_after)
     if p is None or q is None:
         return output_before, output_after, -1, 0
-
+    ind_p=isinstance(p, list) and all(isinstance(x, float) for x in p)
+    ind_q=isinstance(q, list) and all(isinstance(x, float) for x in q)
+    if not ind_p or not ind_q:
+        return output_before, output_after, -1, 0
+    
     if (len(p) == len(q)):
         stat_test_res = func(p, q)
         return output_before, output_after, stat_test_res, len(p)
