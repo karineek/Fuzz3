@@ -203,6 +203,7 @@ def _statistical_oracle(seed, results_map: dict[str, tuple[str, str]], func):
             output_before = outputs[i]
             break
     if output_before is None:
+        print(">>> FAILED (first condition)")
         return 0, 0, 0, 0
 
     # Newly executed mutant
@@ -220,6 +221,7 @@ def _statistical_oracle(seed, results_map: dict[str, tuple[str, str]], func):
     if isinstance(output_before, str) or isinstance(output_after, str)
         p, q = _align_distributions(output_before, output_after)
         if p is None or q is None:
+            print(">>> FAILED (second condition)")
             return output_before, output_after, -1, 0
         
     # For GPU execution
@@ -241,6 +243,7 @@ def _statistical_oracle(seed, results_map: dict[str, tuple[str, str]], func):
     ind_p=isinstance(p, list) and all(isinstance(x, float) for x in p)
     ind_q=isinstance(q, list) and all(isinstance(x, float) for x in q)
     if not ind_p or not ind_q:
+        print(">>> FAILED (third condition)")
         return output_before, output_after, -1, 0
     
     if (len(p) == len(q)):
@@ -248,6 +251,7 @@ def _statistical_oracle(seed, results_map: dict[str, tuple[str, str]], func):
         print (f">>> ORACLE IS USED!!! {func}")  # Debug print - remove later
         return output_before, output_after, stat_test_res, len(p)
     else:
+        print(">>> FAILED (last condition)")
         return output_before, output_after, -1, len(p) 
 #######################################################################################
         
