@@ -217,8 +217,8 @@ def _statistical_oracle(seed, results_map: dict[str, tuple[str, str]], func):
     print(type(output_after))
     print(type(output_after[0]))
 
-    # If we get strings, we will try to parse it and align it
-    if isinstance(output_before, str) or isinstance(output_after, str)
+    # If we get strings, we will try to parse them and align them
+    if isinstance(output_before, str) or isinstance(output_after, str):
         p, q = _align_distributions(output_before, output_after)
         if p is None or q is None:
             print(">>> FAILED (second condition)")
