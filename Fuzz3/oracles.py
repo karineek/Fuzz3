@@ -208,6 +208,20 @@ def _statistical_oracle(seed, results_map: dict[str, tuple[str, str]], func):
     # Newly executed mutant
     output_after = outputs[-1]
 
+    # Debug prints - remove later
+    print("INFO: printing types!")
+    print(type(output_before))
+    print(type(output_before[0]))
+
+    print(type(output_after))
+    print(type(output_after[0]))
+
+    # If we get strings, we will try to parse it and align it
+    if isinstance(output_before, str) or isinstance(output_after, str)
+        p, q = _align_distributions(output_before, output_after)
+        if p is None or q is None:
+            return output_before, output_after, -1, 0
+        
     # For GPU execution
     if isinstance(output_before, dict) and "data" in output_before:
         output_before = output_before["data"]
@@ -222,10 +236,8 @@ def _statistical_oracle(seed, results_map: dict[str, tuple[str, str]], func):
         output_after = output_after["keys"]["data"] + output_after["values"]["data"]
     elif isinstance(output_after, dict) and "value" in output_after:
         output_after = [output_after["value"]]
-        
-    p, q = _align_distributions(output_before, output_after)
-    if p is None or q is None:
-        return output_before, output_after, -1, 0
+
+    # Hopefully, here we are already with the data we need!
     ind_p=isinstance(p, list) and all(isinstance(x, float) for x in p)
     ind_q=isinstance(q, list) and all(isinstance(x, float) for x in q)
     if not ind_p or not ind_q:
@@ -233,10 +245,11 @@ def _statistical_oracle(seed, results_map: dict[str, tuple[str, str]], func):
     
     if (len(p) == len(q)):
         stat_test_res = func(p, q)
+        print (f">>> ORACLE IS USED!!! {func}")  # Debug print - remove later
         return output_before, output_after, stat_test_res, len(p)
     else:
         return output_before, output_after, -1, len(p) 
-
+#######################################################################################
         
 STATISTICAL_CONFIDENCE = float(os.environ.get("STATISTICAL_CONFIDENCE_PARAM", "0.05"))
 
