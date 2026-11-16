@@ -167,7 +167,11 @@ def _align_distributions(before: str, after: str):
             elif (q.get("type") == "scalar" and "value" in q):
                 q = [q["value"]] 
                 ind_q = True
-
+                
+            if ind_p and ind_q:
+                print (p)
+                return p, q
+                
             # Generic state/value distribution, e.g. Qiskit
             
             # Sort all possible states and fill missing entries with 0
