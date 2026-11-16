@@ -223,22 +223,31 @@ def _statistical_oracle(seed, results_map: dict[str, tuple[str, str]], func):
         if p is None or q is None:
             print(">>> FAILED (second condition)")
             return output_before, output_after, -1, 0
+    else:  
+        # For GPU execution
+        if isinstance(output_before, dict) and "data" in output_before:
+            output_before = output_before["data"]
+        elif isinstance(output_before, dict) and "keys" in output_before and "values" in output_before:
+            output_before = output_before["keys"]["data"] + output_before["values"]["data"]
+        elif isinstance(output_before, dict) and "value" in output_before:
+            output_before = [output_before["value"]]
         
-    # For GPU execution
-    if isinstance(output_before, dict) and "data" in output_before:
-        output_before = output_before["data"]
-    elif isinstance(output_before, dict) and "keys" in output_before and "values" in output_before:
-        output_before = output_before["keys"]["data"] + output_before["values"]["data"]
-    elif isinstance(output_before, dict) and "value" in output_before:
-        output_before = [output_before["value"]]
-        
-    if isinstance(output_after, dict) and "data" in output_after:
-        output_after = output_after["data"]
-    elif isinstance(output_after, dict) and "keys" in output_after and "values" in output_after:
-        output_after = output_after["keys"]["data"] + output_after["values"]["data"]
-    elif isinstance(output_after, dict) and "value" in output_after:
-        output_after = [output_after["value"]]
+        if isinstance(output_after, dict) and "data" in output_after:
+            output_after = output_after["data"]
+        elif isinstance(output_after, dict) and "keys" in output_after and "values" in output_after:
+            output_after = output_after["keys"]["data"] + output_after["values"]["data"]
+        elif isinstance(output_after, dict) and "value" in output_after:
+            output_after = [output_after["value"]]
 
+        if isinstance(output_before, str) or isinstance(output_after, str):
+            p, q = _align_distributions(output_before, output_after)
+        else:
+            p = output_before
+            q = output_after
+        if p is None or q is None:
+            print(">>> FAILED (second condition)")
+            return output_before, output_after, -1, 0    
+    
     # Hopefully, here we are already with the data we need!
     ind_p=isinstance(p, list) and all(isinstance(x, float) for x in p)
     ind_q=isinstance(q, list) and all(isinstance(x, float) for x in q)
