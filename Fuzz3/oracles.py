@@ -290,7 +290,7 @@ def _statistical_oracle(seed, results_map: dict[str, tuple[str, str]], func):
         print (f">>> ORACLE IS USED!!! {func}")  # Debug print - remove later
         return output_before, output_after, stat_test_res, len(p)
     else:
-        #print(">>> FAILED (last condition)")
+        print(">>> FAILED (last condition)")
         return output_before, output_after, -1, len(p) 
 #######################################################################################
         
