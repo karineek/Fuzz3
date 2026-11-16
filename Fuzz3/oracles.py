@@ -145,11 +145,28 @@ def _align_distributions(before: str, after: str):
         q = json.loads(after)
 
         if isinstance(p, dict) and isinstance(q, dict):
-            # Thrust reduce_by_key style
-            if ("keys" in p and "values" in p and "keys" in q and "values" in q):
+           # Thrust reduce_by_key style
+            ind_p = False
+            ind_q = False
+            if ("keys" in p and "values" in p):
                 p = p["keys"]["data"] + p["values"]["data"]
+                ind_p = True
+            elif "data" in p:
+                p = p["data"]
+                ind_p = True
+            elif (p.get("type") == "scalar" and "value" in p):
+                p = [p["value"]] 
+                ind_p = True
+
+            if ("keys" in q and "values" in q):
                 q = q["keys"]["data"] + q["values"]["data"]
-                return p, q
+                ind_q = True
+            elif "data" in q:
+                q = q["data"]
+                ind_q = True
+            elif (q.get("type") == "scalar" and "value" in q):
+                q = [q["value"]] 
+                ind_q = True
 
             # Generic state/value distribution, e.g. Qiskit
             
