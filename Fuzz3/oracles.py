@@ -145,6 +145,14 @@ def _align_distributions(before: str, after: str):
         q = json.loads(after)
 
         if isinstance(p, dict) and isinstance(q, dict):
+            # Thrust reduce_by_key style
+            if ("keys" in p and "values" in p and "keys" in q and "values" in q):
+                p = p["keys"]["data"] + p["values"]["data"]
+                q = q["keys"]["data"] + q["values"]["data"]
+                return p, q
+
+            # Generic state/value distribution, e.g. Qiskit
+            
             # Sort all possible states and fill missing entries with 0
             states = sorted(set(p) | set(q))
   
@@ -204,25 +212,25 @@ def _statistical_oracle(seed, results_map: dict[str, tuple[str, str]], func):
             output_before = outputs[i]
             break
     if output_before is None:
-        print(">>> FAILED (first condition)")
+        #print(">>> FAILED (first condition)")
         return 0, 0, 0, 0
 
     # Newly executed mutant
     output_after = outputs[-1]
-
+    
     # Debug prints - remove later
-    print("INFO: printing types!")
-    print(type(output_before))
-    print(type(output_before[0]))
+    # print("INFO: printing types!")
+    # print(type(output_before))
+    # print(type(output_before[0]))
 
-    print(type(output_after))
-    print(type(output_after[0]))
+    #print(type(output_after[0]))
+    #print(type(output_after))
 
     # If we get strings, we will try to parse them and align them
     if isinstance(output_before, str) or isinstance(output_after, str):
         p, q = _align_distributions(output_before, output_after)
         if p is None or q is None:
-            print(">>> FAILED (second condition)")
+            #print(">>> FAILED (second condition)")
             return output_before, output_after, -1, 0
     else:  
         # For GPU execution
@@ -246,22 +254,26 @@ def _statistical_oracle(seed, results_map: dict[str, tuple[str, str]], func):
             p = output_before
             q = output_after
         if p is None or q is None:
-            print(">>> FAILED (second condition)")
+            #print(">>> FAILED (second condition)")
             return output_before, output_after, -1, 0    
     
     # Hopefully, here we are already with the data we need!
-    ind_p=isinstance(p, list) and all(isinstance(x, float) for x in p)
-    ind_q=isinstance(q, list) and all(isinstance(x, float) for x in q)
+    ind_p = isinstance(p, list) and all(isinstance(x, (int, float)) for x in p)
+    ind_q = isinstance(q, list) and all(isinstance(x, (int, float)) for x in q)
     if not ind_p or not ind_q:
         print(">>> FAILED (third condition)")
         return output_before, output_after, -1, 0
+
+    # Make sure all are floats
+    p = [float(x) for x in p]
+    q = [float(x) for x in q]
     
     if (len(p) == len(q)):
         stat_test_res = func(p, q)
         print (f">>> ORACLE IS USED!!! {func}")  # Debug print - remove later
         return output_before, output_after, stat_test_res, len(p)
     else:
-        print(">>> FAILED (last condition)")
+        #print(">>> FAILED (last condition)")
         return output_before, output_after, -1, len(p) 
 #######################################################################################
         
