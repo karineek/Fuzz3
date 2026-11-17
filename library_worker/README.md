@@ -91,6 +91,39 @@ hours on the CloudLab node. The GPU build links the native harness against the
 CUDA driver stub inside the container; at runtime the real host driver is
 provided by `docker run --gpus all` or `docker create --gpus all`.
 
+## Execution modes
+
+`EXEC_MODE` picks how the native harness runs. It sets a compile-time define
+in `common/main.cpp`, and the image's `FUZZ3_EXEC_MODE` env var tells
+`forkserver.py` which mode to use. Changing it rebuilds only the driver stage.
+
+| `EXEC_MODE` | Define | Behaviour |
+| --- | --- | --- |
+| `exec` (default) | none | New `native_harness` process for every execution. |
+| `forkserver` | `-DFUZZ3_FORKSERVER` | One long-lived parent forks a new child for each request. The parent never touches CUDA, because a CUDA context does not survive `fork`. |
+| `persistent` | `-DFUZZ3_PERSISTENT` | One process runs every request for the whole campaign, so GPU/library state carries over between inputs. |
+
+```sh
+EXEC_MODE=persistent ./library_worker/build-docker.sh gpu thrust fuzz3-worker:thrust-gpu-persistent
+EXEC_MODE=forkserver ./library_worker/build-docker.sh gpu thrust fuzz3-worker:thrust-gpu-forkserver
+```
+
+Containers are created and used exactly as before (`docker create ...
+forkserver.py`, `SUT/fuzz-library-worker.sh`). In the two server modes, the
+first request starts a supervisor (`forkserver.py --supervise`) inside the
+container. The supervisor runs `native_harness --serve` on the Unix socket
+`$FUZZ3_SOCKET` (default `/tmp/fuzz3-native.sock`) and keeps it running:
+
+- If a request crashes the server (persistent mode), that request is reported
+  as a crash and the supervisor restarts the server.
+- If a request hangs, the broker kills the server's process group after
+  `timeout_sec` and the supervisor restarts it.
+- Restarts and exit codes are logged to `/tmp/fuzz3-native.sock.log` in the
+  container (`docker exec <ctr> cat /tmp/fuzz3-native.sock.log`).
+
+Each container has exactly one supervisor (it holds a `flock`). It lives as
+long as the container, so `docker restart <ctr>` gives you a clean process.
+
 ## Request protocol
 
 The worker reads one JSON object per line. A request selects a function and

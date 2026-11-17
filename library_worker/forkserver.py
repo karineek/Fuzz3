@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
+import fcntl
 import json
 import math
 import os
+import signal
+import socket
 import subprocess
 import sys
 import time
@@ -17,6 +20,14 @@ MAX_TIMEOUT = float(os.environ.get("HARNESS_MAX_TIMEOUT_SEC", "30"))
 MAX_REPETITIONS = int(os.environ.get("HARNESS_MAX_REPETITIONS", "64"))
 MAX_REQUEST_BYTES = int(os.environ.get("HARNESS_MAX_REQUEST_BYTES", str(1 << 20)))
 MAX_CHAIN_DEPTH = int(os.environ.get("FUZZ3_MAX_CHAIN_DEPTH", "4"))
+# Must match how native_harness was compiled (set together by the Docker
+# EXEC_MODE build arg): exec | forkserver | persistent.
+EXEC_MODE = os.environ.get("FUZZ3_EXEC_MODE", "exec")
+SOCKET_PATH = os.environ.get("FUZZ3_SOCKET", "/tmp/fuzz3-native.sock")
+SERVER_PID_PATH = SOCKET_PATH + ".pid"
+SERVER_LOG_PATH = SOCKET_PATH + ".log"
+SUPERVISOR_LOCK_PATH = SOCKET_PATH + ".lock"
+SERVER_START_TIMEOUT = float(os.environ.get("FUZZ3_SERVER_START_TIMEOUT_SEC", "60"))
 
 
 class InvalidRequest(ValueError):
@@ -117,6 +128,130 @@ def native_error(stderr):
         return value
 
 
+def server_connect(timeout):
+    client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    client.settimeout(timeout)
+    try:
+        client.connect(SOCKET_PATH)
+    except OSError:
+        client.close()
+        raise
+    return client
+
+
+def supervise():
+    """Keep one `native_harness --serve` alive for the container's lifetime."""
+    lock = open(SUPERVISOR_LOCK_PATH, "a")
+    try:
+        # Held until this supervisor dies: guarantees a single supervisor.
+        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        sys.exit(0)
+    restarts = 0
+    with open(SERVER_LOG_PATH, "a", buffering=1) as log:
+        while True:
+            server = subprocess.Popen(
+                [HARNESS_PATH, "--serve"],
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=log,
+                start_new_session=True,  # own process group, so hangs can be killed
+            )
+            Path(SERVER_PID_PATH).write_text(str(server.pid))
+            code = server.wait()
+            restarts += 1
+            log.write(f"[{time.ctime()}] {EXEC_MODE} server exited {code}; restart #{restarts}\n")
+            time.sleep(0.1)
+
+
+def ensure_server():
+    """Start the supervisor if none is running, then wait for the socket."""
+    with open(SUPERVISOR_LOCK_PATH, "a") as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            pass  # a supervisor holds the lock; its server may be restarting
+        else:
+            fcntl.flock(lock, fcntl.LOCK_UN)
+            subprocess.Popen(
+                [sys.executable, "-u", str(Path(__file__).resolve()), "--supervise"],
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                start_new_session=True,
+            )
+    deadline = time.monotonic() + SERVER_START_TIMEOUT
+    while time.monotonic() < deadline:
+        try:
+            server_connect(1).close()
+            return
+        except OSError:
+            time.sleep(0.05)
+    raise OSError(f"native {EXEC_MODE} server did not start on {SOCKET_PATH}")
+
+
+def kill_server():
+    """Kill the server's process group; the supervisor restarts it."""
+    try:
+        os.killpg(int(Path(SERVER_PID_PATH).read_text()), signal.SIGKILL)
+    except (OSError, ValueError):
+        pass
+
+
+def run_native(payload, timeout):
+    if EXEC_MODE == "exec":
+        return subprocess.run(
+            [HARNESS_PATH],
+            input=payload,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+
+    # A reset/refused connection means the server never read this request
+    # (it is restarting, or a crashed one is still dumping core), so the input
+    # is not to blame: wait for the supervisor's replacement and retry.
+    deadline = time.monotonic() + SERVER_START_TIMEOUT
+    while True:
+        try:
+            with server_connect(timeout) as client:
+                client.sendall(payload.encode("utf-8") + b"\n")
+                data = b""
+                while True:
+                    chunk = client.recv(65536)
+                    if not chunk:
+                        break
+                    data += chunk
+            break
+        except socket.timeout:
+            kill_server()
+            raise subprocess.TimeoutExpired([HARNESS_PATH, "--serve"], timeout)
+        except (FileNotFoundError, ConnectionRefusedError):
+            if time.monotonic() > deadline:
+                raise
+            ensure_server()
+        except (ConnectionResetError, BrokenPipeError):
+            if time.monotonic() > deadline:
+                raise
+            time.sleep(0.05)
+
+    lines = [line for line in data.decode("utf-8", "replace").splitlines() if line]
+    if not lines:
+        # Persistent mode: the request took the whole server down.
+        return subprocess.CompletedProcess(
+            [], -signal.SIGKILL, "", "native server died during the request"
+        )
+    try:
+        envelope = json.loads(lines[-1])
+        return subprocess.CompletedProcess(
+            [], envelope["return_code"], envelope["stdout"], envelope["stderr"]
+        )
+    except (json.JSONDecodeError, KeyError, TypeError) as error:
+        return subprocess.CompletedProcess(
+            [], 1, "", f"invalid native server response: {error}"
+        )
+
+
 def process_payload(payload):
     started = time.perf_counter()
     try:
@@ -153,13 +288,7 @@ def process_payload(payload):
     native_results = []
     for _ in range(repetitions):
         try:
-            result = subprocess.run(
-                [HARNESS_PATH],
-                input=payload,
-                capture_output=True,
-                text=True,
-                timeout=timeout,
-            )
+            result = run_native(payload, timeout)
         except subprocess.TimeoutExpired:
             return failure("hang", -1, started, "TIMEOUT", observations)
         except OSError as error:
@@ -208,6 +337,8 @@ def process_payload(payload):
 
 
 def main():
+    if sys.argv[1:] == ["--supervise"]:
+        supervise()
     for line in sys.stdin:
         payload = line.strip()
         if payload:

@@ -31,6 +31,7 @@ docker build \
     --build-arg BASE_IMAGE="$base_image" \
     --build-arg TARGET_LIBRARY="$library" \
     --build-arg BACKEND="$backend" \
+    --build-arg EXEC_MODE="${EXEC_MODE:-exec}" \
     --build-arg ARRAYFIRE_REF="${ARRAYFIRE_REF:-v3.9.0}" \
     --build-arg CUTLASS_REF="${CUTLASS_REF:-v3.5.1}" \
     --build-arg BUILD_JOBS="${BUILD_JOBS:-2}" \
@@ -38,5 +39,5 @@ docker build \
     --build-arg CUDA_ARCHITECTURE_TARGETS="${CUDA_ARCHITECTURE_TARGETS:-6.0}" \
     -t "$image" "$script_dir"
 
-printf 'Built %s with the %s driver on the %s backend\n' \
-    "$image" "$library" "$backend"
+printf 'Built %s with the %s driver on the %s backend (%s mode)\n' \
+    "$image" "$library" "$backend" "${EXEC_MODE:-exec}"

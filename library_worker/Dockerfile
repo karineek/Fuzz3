@@ -33,15 +33,28 @@ RUN case "$BACKEND" in cpu|gpu) ;; *) exit 2 ;; esac \
 
 FROM dependencies AS driver-build
 
+# exec (default) | forkserver | persistent. Declared here, not in the
+# dependencies stage, so switching modes does not rebuild heavy libraries.
+ARG EXEC_MODE=exec
+
 WORKDIR /fuzz_workspace
 
 COPY common /fuzz_workspace/common
 COPY drivers/${TARGET_LIBRARY}/build.sh /fuzz_workspace/driver/build.sh
 COPY drivers/${TARGET_LIBRARY}/driver.* /fuzz_workspace/driver/
 
-RUN sh /fuzz_workspace/driver/build.sh "$BACKEND"
+RUN case "$EXEC_MODE" in \
+        exec) FUZZ3_EXEC_FLAGS= ;; \
+        forkserver) FUZZ3_EXEC_FLAGS=-DFUZZ3_FORKSERVER ;; \
+        persistent) FUZZ3_EXEC_FLAGS=-DFUZZ3_PERSISTENT ;; \
+        *) echo "EXEC_MODE must be exec, forkserver or persistent" >&2; exit 2 ;; \
+    esac \
+    && FUZZ3_EXEC_FLAGS="$FUZZ3_EXEC_FLAGS" sh /fuzz_workspace/driver/build.sh "$BACKEND"
 
 FROM dependencies AS worker
+
+ARG EXEC_MODE=exec
+ENV FUZZ3_EXEC_MODE=${EXEC_MODE}
 
 WORKDIR /fuzz_workspace
 

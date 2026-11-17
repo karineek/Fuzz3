@@ -11,7 +11,7 @@ else
     cuda_driver_flags=
 fi
 
-g++ -std=c++17 -O2 -D"$backend_macro" \
+g++ -std=c++17 -O2 -D"$backend_macro" ${FUZZ3_EXEC_FLAGS:-} \
     -I/fuzz_workspace/common -I/opt/arrayfire/include \
     /fuzz_workspace/common/main.cpp \
     /fuzz_workspace/driver/driver.cpp \
