@@ -126,7 +126,7 @@ def local_majority_oracle(seed, results_map: dict[str, tuple[str, str]]):
 
 # Helper function - plain
 def _align_distributions_plain(before, after):
-    if isinstance(output_before, str) or isinstance(output_after, str):
+    if isinstance(before, str) or isinstance(after, str):
         # 1. Already lists
         if isinstance(before, list) and isinstance(after, list):
             return before, after
