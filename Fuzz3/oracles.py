@@ -8,7 +8,7 @@ import ast
 # For statistical test oracles
 from scipy.stats import chi2_contingency
 from scipy.spatial.distance import jensenshannon
-from scipy.stats import entropy, ks_2samp, chisquare, wilcoxon
+from scipy.stats import entropy, ks_2samp, chisquare, wilcoxon, anderson_ksamp
 
 def dummy_oracle(seed, results_map: dict[str, list[str]]):
     for func_name, outputs in results_map.items():
@@ -373,6 +373,7 @@ def jensenshannon_statistical_oracle(seed, results_map: dict[str, tuple[str, str
 #    return _statistical_oracle(seed, results_map, _chi_square)
 ### Removed this as this is not relevant here. But if ever this version is needed, I am happy to add this back.
 
+# This is plain - GPU/ML style oracle, no states from {0,1}^n strings
 def _wilcoxon(p: list[float], q: list[float]) -> int:
     if p == q:
         return 0
@@ -384,6 +385,7 @@ def _wilcoxon(p: list[float], q: list[float]) -> int:
 
 def wilcoxon_statistical_oracle(seed, results_map: dict[str, tuple[str, str]]):
     return _statistical_oracle(seed, results_map, _wilcoxon, _align_distributions_plain)
+
 
 # This is Qiskit style oracle:
 def _KS(p: list[float], q: list[float]) -> int:
@@ -407,6 +409,7 @@ def _KS(p: list[float], q: list[float]) -> int:
 def KS_statistical_oracle(seed, results_map: dict[str, tuple[str, str]]):
     return _statistical_oracle(seed, results_map, _KS, _align_distributions)
 
+
 # This is plain - GPU/ML style oracle, no states from {0,1}^n strings
 def _KS_plain(p: list[float], q: list[float]) -> int:
     if p == q:
@@ -419,3 +422,17 @@ def _KS_plain(p: list[float], q: list[float]) -> int:
 
 def KS_plain_statistical_oracle(seed, results_map: dict[str, tuple[str, str]]):
     return _statistical_oracle(seed, results_map, _KS_plain, _align_distributions_plain)
+
+
+# This is plain - GPU/ML style oracle, no states from {0,1}^n strings
+def _anderson_plain(p: list[float], q: list[float]) -> int:
+    if p == q:
+        return 0
+
+    result = anderson_ksamp([p, q])
+
+    conf = STATISTICAL_CONFIDENCE if 0 < STATISTICAL_CONFIDENCE < 1 else 0.01
+    return 0 if result.pvalue >= conf else 1
+
+def anderson_plain_statistical_oracle(seed, results_map: dict[str, tuple[str, str]]):
+    return _statistical_oracle(seed, results_map, _anderson_plain, _align_distributions_plain)
