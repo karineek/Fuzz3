@@ -123,6 +123,7 @@ def local_majority_oracle(seed, results_map: dict[str, tuple[str, str]]):
 
 ################################################################
 # Debugging of the statistical oracles: https://colab.research.google.com/drive/1Wwwht85zu_HHAsIbhhjjIA1O55BCvLsz?usp=sharing
+# Debugging of the format alignment is here: https://colab.research.google.com/drive/19zVtC5FSKH60PkYUo8wgJC_659nwLZGc?usp=sharing
 
 # Helper function - plain
 def _align_distributions_plain(before, after):
