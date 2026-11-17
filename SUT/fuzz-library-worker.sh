@@ -43,5 +43,5 @@ python3 "$script_dir/../blackbox.py" \
     --observers entropy_sliding_window_observer local_entropy_observer statistical_sliding_window_observer \
     --oracles entropy_oracle \
               local_majority_oracle local_entropy_oracle \
-              KS_statistical_oracle wilcoxon_statistical_oracle \
+              KS_plain_statistical_oracle wilcoxon_statistical_oracle \
     --iterations "$iterations"
