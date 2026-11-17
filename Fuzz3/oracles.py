@@ -124,6 +124,78 @@ def local_majority_oracle(seed, results_map: dict[str, tuple[str, str]]):
 ################################################################
 # Debugging of the statistical oracles: https://colab.research.google.com/drive/1Wwwht85zu_HHAsIbhhjjIA1O55BCvLsz?usp=sharing
 
+# Helper function - plain
+def _align_distributions_plain(before, after):
+    if isinstance(output_before, str) or isinstance(output_after, str):
+        # 1. Already lists
+        if isinstance(before, list) and isinstance(after, list):
+            return before, after
+
+        # 3. JSON
+        try:
+            p = json.loads(before)
+            q = json.loads(after)
+
+            if isinstance(p, dict) and isinstance(q, dict):
+                # Thrust reduce_by_key style
+                ind_p = False
+                ind_q = False
+                if ("keys" in p and "values" in p):
+                    p = p["keys"]["data"] + p["values"]["data"]
+                    ind_p = True
+                elif "data" in p:
+                    p = p["data"]
+                    ind_p = True
+                elif (p.get("type") == "scalar" and "value" in p):
+                    p = [p["value"]] 
+                    ind_p = True
+
+                if ("keys" in q and "values" in q):
+                    q = q["keys"]["data"] + q["values"]["data"]
+                    ind_q = True
+                elif "data" in q:
+                    q = q["data"]
+                    ind_q = True
+                elif (q.get("type") == "scalar" and "value" in q):
+                    q = [q["value"]] 
+                    ind_q = True
+                
+                if ind_p and ind_q:
+                    #print (p)
+                    return p, q
+
+            if not isinstance(p, dict) and not isinstance(q, dict):
+                return p, q
+
+        except Exception:
+            pass
+
+        return None, None
+
+    else: # Not a string!
+        # For GPU execution
+        if isinstance(output_before, dict) and "data" in output_before:
+            output_before = output_before["data"]
+        elif isinstance(output_before, dict) and "keys" in output_before and "values" in output_before:
+            output_before = output_before["keys"]["data"] + output_before["values"]["data"]
+        elif isinstance(output_before, dict) and "value" in output_before:
+            output_before = [output_before["value"]]
+        
+        if isinstance(output_after, dict) and "data" in output_after:
+            output_after = output_after["data"]
+        elif isinstance(output_after, dict) and "keys" in output_after and "values" in output_after:
+            output_after = output_after["keys"]["data"] + output_after["values"]["data"]
+        elif isinstance(output_after, dict) and "value" in output_after:
+            output_after = [output_after["value"]]
+
+        if isinstance(output_before, str) or isinstance(output_after, str):
+            p, q = _align_distributions_plain(output_before, output_after) # a second call...
+        else:
+            p = output_before
+            q = output_after
+            
+        return p, q
+        
 # Helper function
 def _align_distributions(before: str, after: str):
     # 1. Already lists
@@ -144,34 +216,7 @@ def _align_distributions(before: str, after: str):
         p = json.loads(before)
         q = json.loads(after)
 
-        if isinstance(p, dict) and isinstance(q, dict):
-           # Thrust reduce_by_key style
-            ind_p = False
-            ind_q = False
-            if ("keys" in p and "values" in p):
-                p = p["keys"]["data"] + p["values"]["data"]
-                ind_p = True
-            elif "data" in p:
-                p = p["data"]
-                ind_p = True
-            elif (p.get("type") == "scalar" and "value" in p):
-                p = [p["value"]] 
-                ind_p = True
-
-            if ("keys" in q and "values" in q):
-                q = q["keys"]["data"] + q["values"]["data"]
-                ind_q = True
-            elif "data" in q:
-                q = q["data"]
-                ind_q = True
-            elif (q.get("type") == "scalar" and "value" in q):
-                q = [q["value"]] 
-                ind_q = True
-                
-            if ind_p and ind_q:
-                print (p)
-                return p, q
-                
+        if isinstance(p, dict) and isinstance(q, dict):     
             # Generic state/value distribution, e.g. Qiskit
             
             # Sort all possible states and fill missing entries with 0
@@ -216,7 +261,7 @@ def _align_distributions(before: str, after: str):
     return None, None
 
 # Helper function
-def _statistical_oracle(seed, results_map: dict[str, tuple[str, str]], func):
+def _statistical_oracle(seed, results_map: dict[str, tuple[str, str]], func, _align_dist_func):
     if "statistical_observer" in results_map:
         data = results_map["statistical_observer"]
     elif "statistical_sliding_window_observer" in results_map:
@@ -247,36 +292,11 @@ def _statistical_oracle(seed, results_map: dict[str, tuple[str, str]], func):
     #print(type(output_after[0]))
     #print(type(output_after))
 
-    # If we get strings, we will try to parse them and align them
-    if isinstance(output_before, str) or isinstance(output_after, str):
-        p, q = _align_distributions(output_before, output_after)
-        if p is None or q is None:
-            #print(">>> FAILED (second condition)")
-            return output_before, output_after, -1, 0
-    else:  
-        # For GPU execution
-        if isinstance(output_before, dict) and "data" in output_before:
-            output_before = output_before["data"]
-        elif isinstance(output_before, dict) and "keys" in output_before and "values" in output_before:
-            output_before = output_before["keys"]["data"] + output_before["values"]["data"]
-        elif isinstance(output_before, dict) and "value" in output_before:
-            output_before = [output_before["value"]]
-        
-        if isinstance(output_after, dict) and "data" in output_after:
-            output_after = output_after["data"]
-        elif isinstance(output_after, dict) and "keys" in output_after and "values" in output_after:
-            output_after = output_after["keys"]["data"] + output_after["values"]["data"]
-        elif isinstance(output_after, dict) and "value" in output_after:
-            output_after = [output_after["value"]]
-
-        if isinstance(output_before, str) or isinstance(output_after, str):
-            p, q = _align_distributions(output_before, output_after)
-        else:
-            p = output_before
-            q = output_after
-        if p is None or q is None:
-            #print(">>> FAILED (second condition)")
-            return output_before, output_after, -1, 0    
+    # We will try to parse these input/output and align them 
+    p, q = _align_dist_func(output_before, output_after)
+    if p is None or q is None:
+        #print(">>> FAILED (second condition)")
+        return output_before, output_after, -1, 0
     
     # Hopefully, here we are already with the data we need!
     ind_p = isinstance(p, list) and all(isinstance(x, (int, float)) for x in p)
@@ -311,7 +331,7 @@ def _chi_square(p: list[float], q: list[float]) -> int:
     return 0 if result.pvalue >= conf else 1
 
 def chi_square_statistical_oracle(seed, results_map: dict[str, tuple[str, str]]):
-    return _statistical_oracle(seed, results_map, _chi_square)
+    return _statistical_oracle(seed, results_map, _chi_square, _align_distributions)
 
 
 # entropy(p, q) - KL divergence
@@ -325,7 +345,7 @@ def _KL(p: list[float], q: list[float]) -> int:
     return 0 if divergence <= conf else 1
 
 def KL_statistical_oracle(seed, results_map: dict[str, tuple[str, str]]):
-    return _statistical_oracle(seed, results_map, _KL)
+    return _statistical_oracle(seed, results_map, _KL, _align_distributions)
 
 
 # jensenshannon(p, q) - JS distance
@@ -339,7 +359,7 @@ def _jensenshannon(p: list[float], q: list[float]) -> int:
     return 0 if distance <= conf else 1
 
 def jensenshannon_statistical_oracle(seed, results_map: dict[str, tuple[str, str]]):
-    return _statistical_oracle(seed, results_map, _jensenshannon)
+    return _statistical_oracle(seed, results_map, _jensenshannon, _align_distributions)
 
 
 # The code below is ChatGPT-generated based on the KL_statistical_oracle above (August 12, 2026, 17:17)
@@ -363,7 +383,7 @@ def _wilcoxon(p: list[float], q: list[float]) -> int:
     return 0 if result.pvalue >= conf else 1
 
 def wilcoxon_statistical_oracle(seed, results_map: dict[str, tuple[str, str]]):
-    return _statistical_oracle(seed, results_map, _wilcoxon)
+    return _statistical_oracle(seed, results_map, _wilcoxon, _align_distributions_plain)
 
 # This is Qiskit style oracle:
 def _KS(p: list[float], q: list[float]) -> int:
@@ -385,7 +405,7 @@ def _KS(p: list[float], q: list[float]) -> int:
     return 0 if result.pvalue >= conf else 1
 
 def KS_statistical_oracle(seed, results_map: dict[str, tuple[str, str]]):
-    return _statistical_oracle(seed, results_map, _KS)
+    return _statistical_oracle(seed, results_map, _KS, _align_distributions)
 
 # This is plain - GPU/ML style oracle, no states from {0,1}^n strings
 def _KS_plain(p: list[float], q: list[float]) -> int:
@@ -398,4 +418,4 @@ def _KS_plain(p: list[float], q: list[float]) -> int:
     return 0 if result.pvalue >= conf else 1
 
 def KS_plain_statistical_oracle(seed, results_map: dict[str, tuple[str, str]]):
-    return _statistical_oracle(seed, results_map, _KS)
+    return _statistical_oracle(seed, results_map, _KS_plain, _align_distributions_plain)
