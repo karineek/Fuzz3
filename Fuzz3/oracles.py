@@ -365,6 +365,7 @@ def _wilcoxon(p: list[float], q: list[float]) -> int:
 def wilcoxon_statistical_oracle(seed, results_map: dict[str, tuple[str, str]]):
     return _statistical_oracle(seed, results_map, _wilcoxon)
 
+# This is Qiskit style oracle:
 def _KS(p: list[float], q: list[float]) -> int:
     if p == q:
         return 0
@@ -384,4 +385,17 @@ def _KS(p: list[float], q: list[float]) -> int:
     return 0 if result.pvalue >= conf else 1
 
 def KS_statistical_oracle(seed, results_map: dict[str, tuple[str, str]]):
+    return _statistical_oracle(seed, results_map, _KS)
+
+# This is plain - GPU/ML style oracle, no states from {0,1}^n strings
+def _KS_plain(p: list[float], q: list[float]) -> int:
+    if p == q:
+        return 0
+
+    result = ks_2samp(p, q)
+
+    conf = STATISTICAL_CONFIDENCE if 0 < STATISTICAL_CONFIDENCE < 1 else 0.01
+    return 0 if result.pvalue >= conf else 1
+
+def KS_plain_statistical_oracle(seed, results_map: dict[str, tuple[str, str]]):
     return _statistical_oracle(seed, results_map, _KS)
