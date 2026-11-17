@@ -429,6 +429,9 @@ def _anderson_plain(p: list[float], q: list[float]) -> int:
     if p == q:
         return 0
 
+    if len(p) < 2 or len(q) < 2:
+        return 0
+        
     result = anderson_ksamp([p, q])
 
     conf = STATISTICAL_CONFIDENCE if 0 < STATISTICAL_CONFIDENCE < 1 else 0.01
