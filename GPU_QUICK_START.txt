@@ -55,7 +55,17 @@ Result:
 (.venv) kevenmen@node0:~/Fuzz3$ 
 ```
 
-===== Othere Libraries on CPU ? ======
+TODO: Test EXEC mode:
+=====================
+
+When building harness add: -DFUZZ3_PERSISTENT
+When running:
+ 
+EXEC_MODE=persistent FUZZ3_SEEDS=200 FUZZ3_MAX_CHAIN_DEPTH=2 HARNESS_TIMEOUT_SEC=30 HARNESS_MAX_TIMEOUT_SEC=30 \
+  ./SUT/fuzz-library-worker.sh /tmp/thrust-seeds /tmp/thrust-out /tmp/thrust-crashes \
+  1000 thrust-cpu thrust all
+
+===== Other Libraries on CPU? ======
 
 TODO:
 
