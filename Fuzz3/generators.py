@@ -221,7 +221,7 @@ def sort_generator_legal(seedsno: int, outputfolder: Path) -> int:
     return _generate_requests(seedsno, outputfolder, "thrust", ("sort",), max_depth=1)
 
 
-# another generator to avoid the error of entropy gap is too low
+# thrust sort: another generator to avoid the error of entropy gap being too low.
 def sort_generator_diverse(seedsno: int, outputfolder: Path) -> int:
     outputfolder.mkdir(parents=True, exist_ok=True)
 
@@ -263,6 +263,74 @@ def sort_generator_diverse(seedsno: int, outputfolder: Path) -> int:
                 separators=(",", ":"),
                 allow_nan=False,
             ),
+            encoding="utf-8",
+        )
+
+    return max(0, seedsno)
+
+def arrayfire_generator_diverse(seedsno: int, outputfolder: Path) -> int:
+    outputfolder.mkdir(parents=True, exist_ok=True)
+    functions = _selected_functions("arrayfire")
+
+    vector_sizes = (1, 2, 7, 8, 15, 16, 31, 33)
+    matrix_sizes = ((1, 1, 1), (1, 3, 5), (3, 1, 7), (5, 7, 1), (8, 8, 8))
+    convolution_sizes = ((1, 1), (1, 7), (7, 1), (8, 3), (31, 5))
+
+    for index in range(max(0, seedsno)):
+        function = functions[index % len(functions)]
+        case = index // len(functions)
+
+        if function == "convolve1":
+            signal_size, kernel_size = convolution_sizes[case % len(convolution_sizes)]
+            profiles = _VECTOR_PROFILES[function][1:]
+            profile_index = case // len(convolution_sizes)
+            vectors = {
+                "signal": (signal_size, profiles[profile_index % len(profiles)]),
+                "kernel": (kernel_size, profiles[(profile_index + 1) % len(profiles)]),
+            }
+        elif function in _VECTOR_PROFILES:
+            size = vector_sizes[case % len(vector_sizes)]
+            profiles = _VECTOR_PROFILES[function][1:]
+            profile = profiles[(case // len(vector_sizes)) % len(profiles)]
+            vectors = {"values": (size, profile)}
+        else:
+            vectors = {}
+
+        inputs = {
+            name: {
+                "type": "vector",
+                "dtype": "f32",
+                "shape": [size],
+                "data": _vector_values(profile, size),
+            }
+            for name, (size, profile) in vectors.items()
+        }
+
+        if function in ("matmul", "transpose"):
+            m, k, n = matrix_sizes[case % len(matrix_sizes)]
+            shapes = {"a": (m, k), "b": (k, n)} if function == "matmul" else {
+                "matrix": (m, k)
+            }
+            profile_index = case // len(matrix_sizes)
+            for offset, (name, (rows, columns)) in enumerate(shapes.items()):
+                profile = _MATRIX_PROFILES[(profile_index + offset) % len(_MATRIX_PROFILES)]
+                dense = [random.randint(-8, 8) for _ in range(rows * columns)]
+                inputs[name] = {
+                    "type": "matrix",
+                    "dtype": "f32",
+                    "shape": [rows, columns],
+                    "data": _matrix_values(profile, rows, columns, dense),
+                }
+
+        request = {
+            "schema_version": 1,
+            "library": "arrayfire",
+            "function": function,
+            "inputs": inputs,
+        }
+        path = outputfolder / f"fuzz3_arrayfire_{function}_diverse_{index}.json"
+        path.write_text(
+            json.dumps(request, sort_keys=True, separators=(",", ":"), allow_nan=False),
             encoding="utf-8",
         )
 
