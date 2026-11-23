@@ -75,7 +75,7 @@ TODO
 TODO: Test EXEC mode:
 =====================
 
-When building harness add: -DFUZZ3_PERSISTENT
+When building harness, add: -DFUZZ3_PERSISTENT
 When running:
  
 EXEC_MODE=persistent FUZZ3_SEEDS=200 FUZZ3_MAX_CHAIN_DEPTH=2 HARNESS_TIMEOUT_SEC=30 HARNESS_MAX_TIMEOUT_SEC=30 \
