@@ -40,7 +40,7 @@ docker create -i --entrypoint python3 --name arrayfire-cpu \
 
 FUZZ3_SEEDS=200 FUZZ3_MAX_CHAIN_DEPTH=2 HARNESS_TIMEOUT_SEC=30 HARNESS_MAX_TIMEOUT_SEC=30 \
   ./SUT/fuzz-library-worker.sh /tmp/thrust-seeds /tmp/thrust-out /tmp/thrust-crashes \
-  1000 thrust-cpu thrust all
+  1000 thrust-cpu thrust all sort_generator_diverse
 
 Result:
 ```
@@ -54,6 +54,23 @@ Result:
 >> (Fuzz3) Init. seeds are not good. Entropy in 7.643856189774741 is near entropy out 7.613856189774741. Exiting.
 (.venv) kevenmen@node0:~/Fuzz3$ 
 ```
+
+FUZZ3_SEEDS=200 FUZZ3_MAX_CHAIN_DEPTH=2 HARNESS_TIMEOUT_SEC=30 HARNESS_MAX_TIMEOUT_SEC=30 \
+./SUT/fuzz-library-worker.sh \
+  /tmp/cutlass-cpu-seeds /tmp/cutlass-cpu-out /tmp/cutlass-cpu-crashes \
+  1000 cutlass-cpu cutlass all ""
+```
+TODO
+```
+
+FUZZ3_SEEDS=200 FUZZ3_MAX_CHAIN_DEPTH=2 HARNESS_TIMEOUT_SEC=30 HARNESS_MAX_TIMEOUT_SEC=30 \
+./SUT/fuzz-library-worker.sh \
+  /tmp/arrayfire-cpu-seeds /tmp/arrayfire-cpu-out /tmp/arrayfire-cpu-crashes \
+  1000 arrayfire-cpu arrayfire all ""
+```
+TODO
+```
+
 
 TODO: Test EXEC mode:
 =====================
