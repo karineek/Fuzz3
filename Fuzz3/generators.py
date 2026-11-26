@@ -277,6 +277,54 @@ _VECTOR_PROFILES = {
 }
 _MATRIX_PROFILES = ("random", "diagonal", "sparse", "repeated", "checkerboard", "zero")
 
+def _vector_values(profile, size):
+    if profile == "ascending":
+        return list(range(size))
+    if profile == "descending":
+        return list(range(size, 0, -1))
+    if profile == "duplicates":
+        return [i % 4 for i in range(size)]
+    if profile == "positive":
+        return [1 + i % 7 for i in range(size)]
+    if profile == "alternating":
+        return [1 - 2 * (i % 2) for i in range(size)]
+    if profile == "cancellation":
+        return [32, -32] * (size // 2) + [0] * (size % 2)
+    if profile == "mixed":
+        return [1024 if i % 4 == 0 else 0.125 for i in range(size)]
+    if profile == "impulse":
+        return [1] + [0] * (size - 1)
+    if profile == "constant":
+        return [2] * size
+    if profile == "periodic":
+        return [(0, 1, 0, -1)[i % 4] for i in range(size)]
+    if profile == "zero":
+        return [0] * size
+    raise ValueError(f"Unknown vector profile: {profile}")
+
+def _matrix_values(profile, rows, columns, dense):
+    if profile == "random":
+        return dense
+    if profile == "diagonal":
+        return [int(row == col) for row in range(rows) for col in range(columns)]
+    if profile == "sparse":
+        return [
+            dense[row * columns + col] if col == (2 * row + 1) % columns else 0
+            for row in range(rows)
+            for col in range(columns)
+        ]
+    if profile == "repeated":
+        return [dense[row * columns] for row in range(rows) for _ in range(columns)]
+    if profile == "checkerboard":
+        return [
+            1 - 2 * ((row + col) % 2)
+            for row in range(rows)
+            for col in range(columns)
+        ]
+    if profile == "zero":
+        return [0] * (rows * columns)
+    raise ValueError(f"Unknown matrix profile: {profile}")
+
 def arrayfire_generator_diverse(seedsno: int, outputfolder: Path) -> int:
     outputfolder.mkdir(parents=True, exist_ok=True)
     functions = _selected_functions("arrayfire")
