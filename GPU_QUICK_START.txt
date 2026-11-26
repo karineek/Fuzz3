@@ -185,6 +185,16 @@ statistical ('{"data":[0.0,1.0],"dtype":"f32","shape":[2],"type":"vector"}', '{"
 >> [09:17:44] (Fuzz3) Writing to output dir fuzz3_1795709863099398314_deadend
 ```
 
+Long run:
+```
+nohup env EXEC_MODE=persistent FUZZ3_SEEDS=200 FUZZ3_MAX_CHAIN_DEPTH=2 \
+  HARNESS_TIMEOUT_SEC=30 HARNESS_MAX_TIMEOUT_SEC=30 \
+  ./SUT/fuzz-library-worker.sh \
+  /tmp/thrust-seeds /tmp/thrust-out /tmp/thrust-crashes \
+  1000000 thrust-cpu thrust all sort_generator_diverse \
+  > out.log 2>&1 &
+```
+
 ===== Other Libraries on CPU? ======
 
 TODO:
