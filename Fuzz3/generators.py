@@ -268,6 +268,15 @@ def sort_generator_diverse(seedsno: int, outputfolder: Path) -> int:
 
     return max(0, seedsno)
 
+# The first profile keeps the grammar's original random values.
+_VECTOR_PROFILES = {
+    "sort": ("random", "ascending", "descending", "duplicates", "alternating", "zero"),
+    "reduce_sum": ("random", "positive", "alternating", "cancellation", "mixed", "zero"),
+    "fft": ("random", "impulse", "constant", "periodic", "alternating", "zero"),
+    "convolve1": ("random", "impulse", "constant", "periodic", "alternating", "zero"),
+}
+_MATRIX_PROFILES = ("random", "diagonal", "sparse", "repeated", "checkerboard", "zero")
+
 def arrayfire_generator_diverse(seedsno: int, outputfolder: Path) -> int:
     outputfolder.mkdir(parents=True, exist_ok=True)
     functions = _selected_functions("arrayfire")
