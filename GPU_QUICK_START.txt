@@ -126,10 +126,64 @@ TODO: Test EXEC mode:
 
 When building harness, add: -DFUZZ3_PERSISTENT
 When running:
- 
+
+```
 EXEC_MODE=persistent FUZZ3_SEEDS=200 FUZZ3_MAX_CHAIN_DEPTH=2 HARNESS_TIMEOUT_SEC=30 HARNESS_MAX_TIMEOUT_SEC=30 \
   ./SUT/fuzz-library-worker.sh /tmp/thrust-seeds /tmp/thrust-out /tmp/thrust-crashes \
   1000 thrust-cpu thrust all
+```
+
+This works!
+```
+EXEC_MODE=persistent FUZZ3_SEEDS=200 FUZZ3_MAX_CHAIN_DEPTH=2 HARNESS_TIMEOUT_SEC=30 HARNESS_MAX_TIMEOUT_SEC=30   ./SUT/fuzz-library-worker.sh /tmp/thrust-seeds /tmp/thrust-out /tmp/thrust-crashes   1000 thrust-cpu thrust all sort_generator_diverse
+...
+>> [09:17:35] (Fuzz3) Fuzzing seed: /tmp/thrust-out/fuzz3_1795709500352246564 992
+>> (Fuzz3) Mutator library_worker_mutator OK.
+>>> ORACLE IS USED!!! <function _KS_plain at 0x7f8bb3310b80>
+>>> ORACLE IS USED!!! <function _anderson_plain at 0x7f8bb3310ca0>
+>>> ORACLE IS USED!!! <function _wilcoxon at 0x7f8bb3310940>
+>> [09:17:36] (Fuzz3) Writing to output dir fuzz3_1795709855009446039
+ 
+>> [09:17:36] (Fuzz3) Fuzzing seed: /tmp/thrust-out/fuzz3_1795709674318997344 993
+>> (Fuzz3) Mutator library_worker_mutator OK.
+>>> FAILED (last condition)
+statistical ('{"dtype":"f32","type":"scalar","value":-8.313600540161133}', '{"data":[0,-3,-3,-2,-9,-14,-20,-23,-18,-20],"dtype":"i32","shape":[10],"type":"vector"}', -1, 1) stat_-1:deadend
+>> [09:17:37] (Fuzz3) Writing to output dir fuzz3_1795709856178317837_deadend
+ 
+>> [09:17:37] (Fuzz3) Fuzzing seed: /tmp/thrust-out/fuzz3_thrust_transform_axpby_191.json 994
+>> (Fuzz3) Mutator library_worker_mutator OK.
+>> [09:17:38] (Fuzz3) Writing to output dir fuzz3_1795709857340684975
+ 
+>> [09:17:38] (Fuzz3) Fuzzing seed: /tmp/thrust-out/fuzz3_1795709245714435911_deadend 995
+>> (Fuzz3) Mutator library_worker_mutator OK.
+>>> FAILED (last condition)
+statistical ('{"data":[-9.9398,-8.4237,-3.7669,-3.422,5.59,6.3423,8.616],"dtype":"f64","shape":[7],"type":"vector"}', '{"data":[-9.9398,-9.9398,-8.4237,-3.7669,-3.422,5.59,6.3423,8.616],"dtype":"f64","shape":[8],"type":"vector"}', -1, 7) stat_-1:deadend
+>> [09:17:39] (Fuzz3) Writing to output dir fuzz3_1795709858478098762_deadend
+ 
+>> [09:17:39] (Fuzz3) Fuzzing seed: /tmp/thrust-out/fuzz3_1795709127979657990 996
+>> (Fuzz3) Mutator library_worker_mutator OK.
+>>> FAILED (last condition)
+statistical ('{"data":[-7.635300159454346,-1.8769999742507935,4.134900093078613,8.322199821472168],"dtype":"f32","shape":[4],"type":"vector"}', '{"data":[0,-6,-6,-14,-20,-24,-31],"dtype":"i32","shape":[7],"type":"vector"}', -1, 4) stat_-1:deadend
+>> [09:17:40] (Fuzz3) Writing to output dir fuzz3_1795709859628526964_deadend
+ 
+>> [09:17:40] (Fuzz3) Fuzzing seed: /tmp/thrust-out/fuzz3_1795708728127286146_interesting 997
+>> (Fuzz3) Mutator library_worker_mutator OK.
+>>> FAILED (last condition)
+statistical ('{"data":[0.0,1.401298464324817e-45,1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0,11.0,12.0,14.0,15.0],"dtype":"f32","shape":[16],"type":"vector"}', '{"data":[5,4,0,-1,-1,-3,-4,-6,-6],"dtype":"i64","shape":[9],"type":"vector"}', -1, 16) stat_-1:deadend
+>> [09:17:41] (Fuzz3) Writing to output dir fuzz3_1795709860773173390_deadend
+ 
+>> [09:17:41] (Fuzz3) Fuzzing seed: /tmp/thrust-out/fuzz3_1795709478597271386_interesting 998
+>> (Fuzz3) Mutator library_worker_mutator OK.
+>>> FAILED (last condition)
+statistical ('{"data":[-28.0,1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0,11.0,12.0,13.0,14.0,15.0,16.0,17.0,18.0,19.0,20.0,21.0,22.0,23.0,24.0,25.0,26.0,27.0,29.0,30.0,31.0,32.0],"dtype":"f32","shape":[32],"type":"vector"}', '{"data":[-28.0,1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0,11.0,12.0,13.0,14.0,15.0,16.0,17.0,18.0,19.0,20.0,21.0,22.0,23.0,24.0,25.0,26.0,27.0,29.0,30.0,31.0,31.0,32.0],"dtype":"f32","shape":[33],"type":"vector"}', -1, 32) stat_-1:deadend
+>> [09:17:43] (Fuzz3) Writing to output dir fuzz3_1795709861948541696_deadend
+ 
+>> [09:17:43] (Fuzz3) Fuzzing seed: /tmp/thrust-out/fuzz3_1795709168169855859 999
+>> (Fuzz3) Mutator library_worker_mutator OK.
+>>> FAILED (last condition)
+statistical ('{"data":[0.0,1.0],"dtype":"f32","shape":[2],"type":"vector"}', '{"data":[-8.8167,-8.7846,-7.5969,-7.2064,-7.0263,-6.1364,-6.0442,-5.2086,-4.8313,-3.777,-3.6158,-3.3042,-2.3476,-2.1795,-1.3969,-1.0778,-0.7106,-0.08,0.1827,0.3889,0.8553,2.3848,3.0742,3.4157,3.9192,4.6645,5.3833,6.9214,8.8846,8.9039,9.055],"dtype":"f64","shape":[31],"type":"vector"}', -1, 2) stat_-1:deadend
+>> [09:17:44] (Fuzz3) Writing to output dir fuzz3_1795709863099398314_deadend
+```
 
 ===== Other Libraries on CPU? ======
 
