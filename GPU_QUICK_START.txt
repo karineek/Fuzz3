@@ -121,11 +121,10 @@ statistical ('{"data":[-594.778076171875,591.4847412109375,70.0903549194336,758.
 ```
 
 
-TODO: Test EXEC mode:
-=====================
+EXEC mode:
+==========
 
-When building harness, add: -DFUZZ3_PERSISTENT
-When running:
+When building harness, add: -DFUZZ3_PERSISTENT. When running:
 
 ```
 EXEC_MODE=persistent FUZZ3_SEEDS=200 FUZZ3_MAX_CHAIN_DEPTH=2 HARNESS_TIMEOUT_SEC=30 HARNESS_MAX_TIMEOUT_SEC=30 \
@@ -195,15 +194,14 @@ nohup env EXEC_MODE=persistent FUZZ3_SEEDS=200 FUZZ3_MAX_CHAIN_DEPTH=2 \
   > out.log 2>&1 &
 ```
 
-===== Other Libraries on CPU? ======
-
-TODO:
-
-
-
-
-
-
+And:
+```
+nohup env EXEC_MODE=persistent FUZZ3_SEEDS=200 FUZZ3_MAX_CHAIN_DEPTH=2 HARNESS_TIMEOUT_SEC=30 HARNESS_MAX_TIMEOUT_SEC=30 \
+./SUT/fuzz-library-worker.sh \
+  /tmp/arrayfire-cpu-seeds /tmp/arrayfire-cpu-out /tmp/arrayfire-cpu-crashes \
+  1000 arrayfire-cpu arrayfire all arrayfire_generator_diverse \
+  > out.log 2>&1 &
+```
 
 
 GPU setup
