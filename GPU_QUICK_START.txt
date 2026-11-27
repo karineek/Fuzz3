@@ -199,7 +199,7 @@ And:
 nohup env EXEC_MODE=persistent FUZZ3_SEEDS=200 FUZZ3_MAX_CHAIN_DEPTH=2 HARNESS_TIMEOUT_SEC=30 HARNESS_MAX_TIMEOUT_SEC=30 \
 ./SUT/fuzz-library-worker.sh \
   /tmp/arrayfire-cpu-seeds /tmp/arrayfire-cpu-out /tmp/arrayfire-cpu-crashes \
-  1000 arrayfire-cpu arrayfire all arrayfire_generator_diverse \
+  1000000 arrayfire-cpu arrayfire all arrayfire_generator_diverse \
   > out.log 2>&1 &
 ```
 
